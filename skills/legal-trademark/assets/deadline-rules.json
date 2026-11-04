@@ -2,51 +2,229 @@
   "schema_version": 1,
   "note": "Navigation, not law. Every rule is 'reported' from an earlier reading or 'not-read' (secondary copy only); before a date is relied on, the article is read in the official text on the task date. Dates are raw: no shift to a working day is applied.",
   "rules": [
-    {"id": "paris.priority", "office": "*", "event": "filed_on", "months": 6, "kind": "opportunity",
-     "what": "last day to file abroad claiming the priority of this filing",
-     "basis": "Paris Convention art. 4C(1)", "status": "reported"},
-
-    {"id": "euipo.opposition", "office": "EUIPO", "event": "published_on", "months": 3, "kind": "third-party",
-     "what": "end of the window in which third parties may oppose the EU application",
-     "basis": "Reg. (EU) 2017/1001 art. 46(1)", "status": "reported"},
-    {"id": "osim.opposition", "office": "OSIM", "event": "admission_published_on", "months": 2, "kind": "third-party",
-     "what": "end of the window in which third parties may oppose the admitted application",
-     "basis": "Law 84/1998 (republished) art. 26(1)", "status": "reported"},
-    {"id": "agepi.opposition", "office": "AGEPI", "event": "published_on", "months": 3, "kind": "third-party",
-     "what": "end of the window in which third parties may oppose the application",
-     "basis": "Law 38/2008 art. 40(1); check whether a newer law applies on the task date", "status": "not-read"},
-
-    {"id": "osim.certificate-fee", "office": "OSIM", "event": "closure_notified_on", "days": 30, "kind": "critical",
-     "what": "pay the registration certificate fee; unpaid means the registration is abandoned",
-     "basis": "Law 84/1998 (republished) art. 32(1) and (3)", "status": "reported"},
-    {"id": "euipo.appeal", "office": "EUIPO", "event": "decision_notified_on", "months": 2, "kind": "critical",
-     "what": "file a notice of appeal against the decision (grounds within four months)",
-     "basis": "Reg. (EU) 2017/1001 art. 68(1)", "status": "reported"},
-
-    {"id": "euipo.term", "office": "EUIPO", "event": "filed_on", "months": 120, "kind": "expiry", "replaced_by": "expires_on",
-     "what": "end of the 10-year term", "basis": "Reg. (EU) 2017/1001 art. 52", "status": "reported"},
-    {"id": "osim.term", "office": "OSIM", "event": "filed_on", "months": 120, "kind": "expiry", "replaced_by": "expires_on",
-     "what": "end of the 10-year term", "basis": "Law 84/1998 (republished), term and renewal article", "status": "reported"},
-    {"id": "agepi.term", "office": "AGEPI", "event": "filed_on", "months": 120, "kind": "expiry", "replaced_by": "expires_on",
-     "what": "end of the 10-year term", "basis": "Law 38/2008, term article", "status": "not-read"},
-    {"id": "wipo.term", "office": "WIPO", "event": "registered_on", "months": 120, "kind": "expiry", "replaced_by": "expires_on",
-     "what": "end of the 10-year term of the international registration", "basis": "Madrid Protocol art. 6(1)", "status": "reported"},
-
-    {"id": "renewal.opens", "office": "*", "event": "expires_on", "months": -6, "kind": "renewal",
-     "what": "the renewal window opens",
-     "basis": "EUIPO: Reg. 2017/1001 art. 53(3); OSIM: Law 84/1998 art. 33(3); AGEPI and WIPO: to read", "status": "reported"},
-    {"id": "renewal.grace-ends", "office": "*", "event": "expires_on", "months": 6, "kind": "critical",
-     "what": "last day to renew with the surcharge; after it the right is lost",
-     "basis": "EUIPO: Reg. 2017/1001 art. 53(3); OSIM: Law 84/1998 art. 33(5); AGEPI and WIPO: to read", "status": "reported"},
-
-    {"id": "euipo.non-use", "office": "EUIPO", "event": "registered_on", "months": 60, "kind": "use",
-     "what": "from this day the mark can be attacked if it was not genuinely used for five years",
-     "basis": "Reg. (EU) 2017/1001 art. 18(1), 58(1)(a)", "status": "reported"},
-    {"id": "osim.non-use", "office": "OSIM", "event": "procedure_closed_on", "months": 60, "kind": "use",
-     "what": "from this day the mark can be attacked if it was not genuinely used for five years",
-     "basis": "Law 84/1998 (republished) art. 55(1)(a)", "status": "reported"},
-    {"id": "agepi.non-use", "office": "AGEPI", "event": "registered_on", "months": 60, "kind": "use",
-     "what": "from this day the mark can be attacked if it was not genuinely used for five years",
-     "basis": "Law 38/2008, non-use article", "status": "not-read"}
+    {
+      "id": "paris.priority",
+      "office": "*",
+      "event": "filed_on",
+      "months": 6,
+      "kind": "opportunity",
+      "what": "last day to file abroad claiming the priority of this filing",
+      "basis": "Paris Convention art. 4C(1)",
+      "status": "reported"
+    },
+    {
+      "id": "euipo.opposition",
+      "office": "EUIPO",
+      "event": "published_on",
+      "months": 3,
+      "kind": "third-party",
+      "what": "end of the window in which third parties may oppose the EU application",
+      "basis": "Reg. (EU) 2017/1001 art. 46(1)",
+      "status": "reported"
+    },
+    {
+      "id": "osim.opposition",
+      "office": "OSIM",
+      "event": "admission_published_on",
+      "months": 2,
+      "kind": "third-party",
+      "what": "end of the window in which third parties may oppose the admitted application",
+      "basis": "Law 84/1998 as amended by OUG 169/2022 (approved by Law 36/2025) art. 26(1)",
+      "status": "reported"
+    },
+    {
+      "id": "agepi.opposition",
+      "office": "AGEPI",
+      "event": "published_on",
+      "months": 3,
+      "kind": "third-party",
+      "what": "end of the window in which third parties may oppose the application",
+      "basis": "Law 38/2008 art. 40(1); check whether a newer law applies on the task date",
+      "status": "not-read"
+    },
+    {
+      "id": "osim.certificate-fee",
+      "office": "OSIM",
+      "event": "closure_notified_on",
+      "days": 30,
+      "kind": "critical",
+      "what": "pay the registration certificate fee; unpaid means the registration is abandoned",
+      "basis": "Law 84/1998 as amended by OUG 169/2022 (approved by Law 36/2025) art. 32(1) and (3)",
+      "status": "reported"
+    },
+    {
+      "id": "euipo.appeal",
+      "office": "EUIPO",
+      "event": "decision_notified_on",
+      "months": 2,
+      "kind": "critical",
+      "what": "file a notice of appeal against the decision (grounds within four months)",
+      "basis": "Reg. (EU) 2017/1001 art. 68(1)",
+      "status": "reported"
+    },
+    {
+      "id": "euipo.term",
+      "office": "EUIPO",
+      "event": "filed_on",
+      "months": 120,
+      "kind": "expiry",
+      "replaced_by": "expires_on",
+      "what": "end of the 10-year term",
+      "basis": "Reg. (EU) 2017/1001 art. 52",
+      "status": "reported"
+    },
+    {
+      "id": "osim.term",
+      "office": "OSIM",
+      "event": "filed_on",
+      "months": 120,
+      "kind": "expiry",
+      "replaced_by": "expires_on",
+      "what": "end of the 10-year term",
+      "basis": "Law 84/1998 as amended by OUG 169/2022 (approved by Law 36/2025), term and renewal article",
+      "status": "reported"
+    },
+    {
+      "id": "agepi.term",
+      "office": "AGEPI",
+      "event": "filed_on",
+      "months": 120,
+      "kind": "expiry",
+      "replaced_by": "expires_on",
+      "what": "end of the 10-year term",
+      "basis": "Law 38/2008, term article",
+      "status": "not-read"
+    },
+    {
+      "id": "wipo.term",
+      "office": "WIPO",
+      "event": "registered_on",
+      "months": 120,
+      "kind": "expiry",
+      "replaced_by": "expires_on",
+      "what": "end of the 10-year term of the international registration",
+      "basis": "Madrid Protocol art. 6(1)",
+      "status": "reported"
+    },
+    {
+      "id": "euipo.non-use",
+      "office": "EUIPO",
+      "event": "registered_on",
+      "months": 60,
+      "kind": "use",
+      "what": "from this day the mark can be attacked if it was not genuinely used for five years",
+      "basis": "Reg. (EU) 2017/1001 art. 18(1), 58(1)(a)",
+      "status": "reported"
+    },
+    {
+      "id": "osim.non-use",
+      "office": "OSIM",
+      "event": "procedure_closed_on",
+      "months": 60,
+      "kind": "use",
+      "what": "from this day the mark can be attacked if it was not genuinely used for five years",
+      "basis": "Law 84/1998 as amended by OUG 169/2022 (approved by Law 36/2025) art. 55(1)(a)",
+      "status": "reported"
+    },
+    {
+      "id": "agepi.non-use",
+      "office": "AGEPI",
+      "event": "registered_on",
+      "months": 60,
+      "kind": "use",
+      "what": "from this day the mark can be attacked if it was not genuinely used for five years",
+      "basis": "Law 38/2008, non-use article",
+      "status": "not-read"
+    },
+    {
+      "id": "euipo.renewal-opens",
+      "office": "EUIPO",
+      "event": "expires_on",
+      "months": -6,
+      "kind": "renewal",
+      "what": "the renewal window opens",
+      "basis": "Reg. (EU) 2017/1001 art. 53(3)",
+      "status": "reported"
+    },
+    {
+      "id": "euipo.renewal-grace-ends",
+      "office": "EUIPO",
+      "event": "expires_on",
+      "months": 6,
+      "kind": "critical",
+      "what": "last day to renew with the surcharge; after it the right is lost",
+      "basis": "Reg. (EU) 2017/1001 art. 53(3)",
+      "status": "reported"
+    },
+    {
+      "id": "osim.renewal-opens",
+      "office": "OSIM",
+      "event": "expires_on",
+      "months": -6,
+      "kind": "renewal",
+      "what": "the renewal window opens",
+      "basis": "Law 84/1998 as amended by OUG 169/2022, renewal article",
+      "status": "reported"
+    },
+    {
+      "id": "osim.renewal-grace-ends",
+      "office": "OSIM",
+      "event": "expires_on",
+      "months": 6,
+      "kind": "critical",
+      "what": "last day to renew with the surcharge; after it the right is lost",
+      "basis": "Law 84/1998 as amended by OUG 169/2022, renewal article",
+      "status": "reported"
+    },
+    {
+      "id": "agepi.renewal-opens",
+      "office": "AGEPI",
+      "event": "expires_on",
+      "months": -6,
+      "kind": "renewal",
+      "what": "the renewal window opens",
+      "basis": "Law 38/2008, renewal article; check whether a newer law applies",
+      "status": "not-read"
+    },
+    {
+      "id": "agepi.renewal-grace-ends",
+      "office": "AGEPI",
+      "event": "expires_on",
+      "months": 6,
+      "kind": "critical",
+      "what": "last day to renew with the surcharge; after it the right is lost",
+      "basis": "Law 38/2008, renewal article; check whether a newer law applies",
+      "status": "not-read"
+    },
+    {
+      "id": "wipo.renewal-opens",
+      "office": "WIPO",
+      "event": "expires_on",
+      "months": -6,
+      "kind": "renewal",
+      "what": "the renewal window opens",
+      "basis": "Madrid Protocol art. 7 and Common Regulations rule 30 (six months before as amended; date of effect to confirm)",
+      "status": "not-read"
+    },
+    {
+      "id": "wipo.renewal-grace-ends",
+      "office": "WIPO",
+      "event": "expires_on",
+      "months": 6,
+      "kind": "critical",
+      "what": "last day to renew with the surcharge; after it the right is lost",
+      "basis": "Madrid Protocol art. 7 and Common Regulations rule 30 (six months before as amended; date of effect to confirm)",
+      "status": "not-read"
+    },
+    {
+      "id": "wipo.eu-use-period",
+      "office": "WIPO",
+      "event": "eu_grant_on",
+      "months": 60,
+      "kind": "use",
+      "what": "for the EU designation: from this day non-use can be raised (five years from the grant statement, not from the international registration)",
+      "basis": "Reg. (EU) 2017/1001 art. 203 (reported)",
+      "status": "reported"
+    }
   ]
 }

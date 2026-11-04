@@ -108,20 +108,44 @@ class Portfolio(unittest.TestCase):
         rows = self.rows([mark(filed_on="2020-01-10", expires_on="2030-02-01")], horizon=99999)
         ids = {r["rule"] for r in rows}
         self.assertNotIn("euipo.term", ids)
-        self.assertIn("renewal.opens", ids)
-        self.assertEqual({r["rule"]: r["date"] for r in rows}["renewal.opens"], "2029-08-01")
+        self.assertIn("euipo.renewal-opens", ids)
+        self.assertEqual({r["rule"]: r["date"] for r in rows}["euipo.renewal-opens"], "2029-08-01")
+
+    def test_renewal_from_the_computed_term_when_no_expiry_is_recorded(self):
+        rows = {r["rule"]: r for r in self.rows([mark(filed_on="2017-03-10")], horizon=99999, past=True)}
+        self.assertEqual(rows["euipo.term"]["date"], "2027-03-10")
+        self.assertEqual(rows["euipo.renewal-opens"]["date"], "2026-09-10")
+        self.assertIn("computed term", rows["euipo.renewal-opens"]["note"])
+
+    def test_expired_mark_keeps_only_its_grace_period(self):
+        rows = self.rows([mark(status="expired", registered_on="2016-01-01", expires_on="2026-10-04")])
+        self.assertEqual([(r["rule"], r["date"]) for r in rows], [("euipo.renewal-grace-ends", "2027-04-04")])
+
+    def test_osim_non_use_counts_from_the_end_of_the_procedure(self):
+        rows = self.rows([mark(office="OSIM", procedure_closed_on="2024-02-29")], horizon=99999)
+        self.assertEqual({r["rule"]: r["date"] for r in rows}["osim.non-use"], "2029-02-28")
+
+    def test_madrid_eu_use_period_from_the_grant_statement(self):
+        rows = self.rows([mark(office="WIPO", eu_grant_on="2025-05-20")], horizon=99999)
+        self.assertEqual({r["rule"]: r["date"] for r in rows}["wipo.eu-use-period"], "2030-05-20")
 
     def test_grace_only_after_expiry(self):
         before = {r["rule"] for r in self.rows([mark(expires_on="2027-01-01")])}
         after = {r["rule"] for r in self.rows([mark(expires_on="2026-10-01")])}
-        self.assertNotIn("renewal.grace-ends", before)
-        self.assertIn("renewal.grace-ends", after)
+        self.assertNotIn("euipo.renewal-grace-ends", before)
+        self.assertIn("euipo.renewal-grace-ends", after)
 
     def test_inactive_marks_and_other_offices_give_nothing(self):
         self.assertEqual(self.rows([mark(status="refused", filed_on="2026-10-01")]), [])
         rows = self.rows([mark(office="AGEPI", status="filed", published_on="2026-10-01")])
         self.assertEqual({r["rule"] for r in rows}, {"agepi.opposition"})
         self.assertEqual(rows[0]["status"], "not-read")
+
+    def test_unread_offices_are_never_reported_as_read(self):
+        for rule in self.rules:
+            if rule["office"] in ("AGEPI",) or (rule["office"] == "WIPO" and "renewal" in rule["id"]):
+                with self.subTest(rule=rule["id"]):
+                    self.assertEqual(rule["status"], "not-read")
 
     def test_past_and_horizon_filters(self):
         marks = [mark(filed_on="2026-01-01", registered_on="2026-09-01")]

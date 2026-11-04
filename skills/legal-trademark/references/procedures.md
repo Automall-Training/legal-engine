@@ -32,6 +32,7 @@ acceptable risk (`norms.md` §2, §15), and states plainly a real conflict with 
       fee lists (dated), residual risk and verdict; the first one the cheapest that covers today's market.
 - [ ] The list of goods and services in the classification terms, limited to real use and plans.
 - [ ] Who files: the user themselves where the law allows it, or a representative where it requires one.
+- [ ] A logo: the economic rights of its designer or agency transferred in writing before filing.
 
 **Outcome:** D (the strategy table and the draft list of goods and services) · Q (the configuration) · M (the
 user or their representative files and pays; the engine never does).
@@ -47,7 +48,9 @@ user or their representative files and pays; the engine never does).
       deadline that carries money or the right (certificate fee, renewal grace) is read in the official text in
       the same matter before it is relied on.
 - [ ] Gaps: a territory or class the business uses but the portfolio does not cover; a mark nearing five years
-      without use evidence; an owner who is not the firm using the mark (no licence).
+      without use evidence (keep dated invoices and pages per territory); an owner who is not the firm using the
+      mark (no licence); a logo whose rights were never transferred by its designer.
+- [ ] An invoice or "register entry" offer after publication: pay only through the office's own channel.
 
 **Outcome:** T · Q (fill a gap or not, recommended option first) · M (pay, renew, collect use evidence).
 

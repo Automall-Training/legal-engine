@@ -33,7 +33,7 @@ check the current edition, its dates and who may apply on the task date.
 
 | ID | Act | What for |
 |---|---|---|
-| `ro.lege.84-1998` | Law 84/1998 on marks and geographical indications, republished (*reported*: 2020) | filing, examination, publication, observations, opposition after the publication of the **admission** (art. 26, *reported*), certificate fee (art. 32), renewal (art. 33), rights (art. 39 and following, art. 43 for the period before registration), non-use (art. 55), representation (art. 15) |
+| `ro.lege.84-1998` | Law 84/1998 on marks and geographical indications, republished in 2020 and amended by OUG 169/2022 (approved by Law 36/2025, *reported*) — read the consolidated text after these acts, not the 2020 republication | filing, examination, publication, observations, opposition after the publication of the **admission** (introduced by OUG 169/2022, *reported*), certificate fee, renewal, rights and the period before registration, non-use, representation; every article number *reported (after OUG 169/2022)* |
 | `ro.hg.1134-2010` | the implementing regulation of Law 84/1998, as amended (*reported*: by HG 1197/2022) | procedure details, time limits, electronic filing |
 | `ro.og.41-1998` | the act on industrial property fees, with the OSIM fee list in force (*reported*) | amounts and due dates; read the current list |
 | `ro.lege.11-1991` | Law 11/1991 on unfair competition | protection without a registration: confusion, imitation of a get-up |
@@ -70,8 +70,9 @@ text for each matter; no Romanian or EU rule is presented as Moldovan.
 - **"Available" is never a verdict.** No search proves the absence of earlier rights (unregistered marks, firm
   names, pending filings, other countries). The verdict is the scale of `norms.md` §5 with the sources and the
   date: "no conflicting right found in the sources checked on <date>".
-- **OSIM opposition counts from the publication of the admission**, not of the application (*reported*); EUIPO
-  from the publication of the application.
+- **OSIM opposition counts from the publication of the admission**, not of the application (*reported*: since
+  OUG 169/2022; the 2020 republished text still shows the older model); EUIPO from the publication of the
+  application.
 - **Representation.** Before EUIPO and OSIM a person or firm without domicile, seat or real establishment in the
   EEA must be represented (EU art. 119(2); RO art. 15(2), *reported*). A Moldovan firm filing directly in the EU
   or Romania needs a representative; the Madrid route through AGEPI may need one only on an objection — check.
@@ -79,3 +80,11 @@ text for each matter; no Romanian or EU rule is presented as Moldovan.
   summaries help to find a text; a conclusion rests on the official text.
 - **A specification too broad** invites a bad-faith attack and non-use cancellation after five years: claim what
   is used or really planned.
+- **Fake invoices.** After publication, private "registers" send official-looking invoices for fees or entries:
+  fees are paid only through the office's own channel; a letter that is not from the office is not a deadline.
+- **Who owns the logo.** A logo made by a designer or an agency is their work until the economic rights are
+  transferred in writing; transfer them before filing and enforcing (`ro.lege.8-1996`, the Moldovan copyright law).
+- **Evidence of use.** After five years the owner may have to prove genuine use: keep dated invoices, pages and
+  advertising per territory and goods, from the first use on.
+- **Madrid designation of the EU.** Its five-year use period runs from the EU grant statement, not from the
+  international registration date (`eu.reg.2017-1001` art. 203, *reported*).

@@ -18,6 +18,7 @@
       "decision_notified_on": null,
       "registered_on": "2025-01-20",
       "procedure_closed_on": null,
+      "eu_grant_on": null,
       "expires_on": null,
       "used_for": "online shop of home goods",
       "notes": "invented example; the real portfolio lives in <profile>/trademarks/portfolio.json"
@@ -39,6 +40,7 @@
       "decision_notified_on": null,
       "registered_on": null,
       "procedure_closed_on": null,
+      "eu_grant_on": null,
       "expires_on": null,
       "used_for": "online shop of home goods",
       "notes": "invented example"

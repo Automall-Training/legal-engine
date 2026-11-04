@@ -28,10 +28,12 @@ SCHEMA_VERSION = 1
 OFFICES = {"AGEPI", "OSIM", "EUIPO", "WIPO"}
 STATUSES = {"planned", "filed", "published", "admitted", "registered", "refused", "withdrawn", "expired"}
 EVENTS = ("filed_on", "published_on", "admission_published_on", "closure_notified_on", "decision_notified_on",
-          "registered_on", "procedure_closed_on", "expires_on")
+          "registered_on", "procedure_closed_on", "eu_grant_on", "expires_on")
 URGENT_DAYS = 14
-# A dead mark keeps no deadlines; a planned one has no events yet.
-INACTIVE = {"refused", "withdrawn", "expired", "planned"}
+# A dead mark keeps no deadlines; a planned one has no events yet. An expired mark is not dead: it keeps the
+# renewal grace period, the one date that decides whether the right is lost.
+INACTIVE = {"refused", "withdrawn", "planned"}
+GRACE = ".renewal-grace-ends"
 CHECK_NOTE = "raw date, not verified on the task date; no shift to a working day applied"
 
 
@@ -127,23 +129,37 @@ def mark_deadlines(mark: dict, rules: list[dict], today: dt.date) -> list[dict]:
     if mark["status"] in INACTIVE:
         return []
     events = {e: dt.date.fromisoformat(mark[e]) for e in EVENTS if mark.get(e)}
+    applicable = [r for r in rules if r["office"] in ("*", mark["office"])]
+    # Without the office's expiry date the renewal window still matters: start it from the computed 10-year term
+    # and say so in the note, so a portfolio with only a filing date still shows its renewal dates.
+    computed_expiry = False
+    if "expires_on" not in events:
+        term = next((r for r in applicable if r.get("replaced_by") == "expires_on" and r["event"] in events), None)
+        if term is not None:
+            events["expires_on"] = apply_rule(term, events[term["event"]])
+            computed_expiry = True
     found = []
-    for rule in rules:
-        if rule["office"] not in ("*", mark["office"]) or rule["event"] not in events:
+    for rule in applicable:
+        if rule["event"] not in events:
             continue
         # A recorded expiry from the office beats our 10-year computation.
-        if rule.get("replaced_by") in events:
+        if rule.get("replaced_by") in events and not computed_expiry:
+            continue
+        if mark["status"] == "expired" and not rule["id"].endswith(GRACE):
             continue
         end = apply_rule(rule, events[rule["event"]])
         days_left = (end - today).days
+        note = CHECK_NOTE
+        if computed_expiry and rule["event"] == "expires_on":
+            note += "; counted from the computed term, not from an expiry date of the office"
         found.append({
             "mark": mark["id"], "name": mark["name"], "office": mark["office"], "rule": rule["id"],
             "what": rule["what"], "date": end.isoformat(), "days_left": days_left,
             "urgent": 0 <= days_left < URGENT_DAYS, "kind": rule["kind"], "basis": rule["basis"],
-            "status": rule["status"], "note": CHECK_NOTE,
+            "status": rule["status"], "note": note,
         })
     # The renewal grace period matters only once the term has ended.
-    return [d for d in found if not (d["rule"] == "renewal.grace-ends" and events.get("expires_on", today) > today)]
+    return [d for d in found if not (d["rule"].endswith(GRACE) and events.get("expires_on", today) > today)]
 
 
 def portfolio_deadlines(path: Path, today: dt.date, horizon_days: int | None, include_past: bool,
