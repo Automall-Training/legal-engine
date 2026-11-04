@@ -93,6 +93,32 @@ class LawMap(unittest.TestCase):
                 self.assertIn(f".{number}-{year}`", LAW_MAP)
 
 
+class LawDiscipline(unittest.TestCase):
+    """The module's core promises: articles are pointers to confirm, amounts never written, every act mapped."""
+
+    FILES = {p.name: p.read_text(encoding="utf-8") for p in [SKILL / "SKILL.md", *REFS.glob("*.md")]}
+
+    def test_every_article_row_is_marked_reported(self):
+        for name in ("documents.md", "law-map.md"):
+            for line in self.FILES[name].splitlines():
+                if re.search(r"\bart\. \d", line) and line.startswith("|"):
+                    with self.subTest(file=name, line=line[:60]):
+                        self.assertIn("*reported*", line)
+
+    def test_no_amounts_in_the_module(self):
+        for name, text in self.FILES.items():
+            with self.subTest(file=name):
+                self.assertNotRegex(text, r"\d[\d ]*\s*(lei|MDL|RON|EUR|%)")
+
+    def test_every_cited_act_is_in_the_law_map(self):
+        cited = set()
+        for name in ("documents.md", "procedures.md", "configuration.md"):
+            cited |= set(re.findall(r"\b(Law|HG) (\d+)/(\d{4})", self.FILES[name]))
+        for kind, number, year in cited:
+            with self.subTest(act=f"{kind} {number}/{year}"):
+                self.assertIn(f"{kind} {number}/{year}", LAW_MAP)
+
+
 class Privacy(unittest.TestCase):
     def test_staff_data_handed_to_privacy(self):
         self.assertIn("`legal-privacy`", TEXT)

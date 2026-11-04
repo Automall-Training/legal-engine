@@ -14,7 +14,7 @@ in force on the task date; this file holds the levers, not numbers.
 | Remote or telework | the person can work away from the office | the telework clauses of the code or law; safety rules adapted | the place of work decides which law applies if it is in another country |
 | Civil contract with a self-employed person (RO: PFA or similar; MD: an individual entrepreneur or another lawful form) | an independent result or service: own schedule, own tools, several clients, the person bears the risk | a service contract (`legal-contracts`), invoices | requalification as employment, with back taxes and fines, when the work looks like a job |
 | A firm or agency that supplies the person (temporary work agency, employer of record, outsourcing) | a short need, another country, no wish to run payroll | the provider's contract; check the provider is authorised where the law requires it | the provider's compliance becomes the user's problem if it is a disguise |
-| Day labourer (RO only) | occasional unskilled work in the activities of Law 52/2011 | the register of the act | outside the listed activities it is undeclared work |
+| Day labourer (RO: Law 52/2011; MD: Law 22/2018) | occasional unskilled work in the activities each law allows | the register of the act | outside the listed activities it is undeclared work |
 
 ## Levers inside a contract
 

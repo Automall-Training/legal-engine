@@ -14,9 +14,11 @@ in the code in force on the task date before a document is issued.
 | Telework clauses | the code's telework chapter (*reported*) | Law 81/2018 | where and when the person works, equipment and costs, how work is checked, safety |
 | Addendum | the code's amendment rules | art. 41 (*reported*), information before the change | only the changed clauses and the date they apply |
 | Hiring order | art. 65 (*reported*): optional | not required by the code | when the user wants one: it repeats the contract and does not add terms |
+| Medical certificate (Romania) | — (only listed categories) | art. 27 (*reported*) | obtained before the contract; the employer keeps it |
+| Record of hours worked | the code's rule (*reported*) | art. 119 (*reported*) | start and end of each day's work, kept as the code says |
 | Safety training record | Law 186/2008, HG 95/2009 | Law 319/2006, HG 1425/2006 | induction at hiring, periodic training, the record signed |
 | Job description | where the code or a collective agreement requires it; otherwise optional | annex often used to show the duties; required content per the code | duties that match the role; no promises the employer cannot keep |
-| Agreement to end the contract | art. 82 (*reported*) | art. 55(b) (*reported*) | the date of ending, any payment agreed, the handover |
+| Agreement to end the contract | the agreement ground of art. 81 (*reported*: art. 82¹ or 85(3¹); art. 82 lists endings beyond the parties' will) | art. 55(b) (*reported*) | the date of ending, any payment agreed, the handover |
 | Resignation | art. 85 (*reported*) | art. 81 (*reported*) | written by the person; the notice and its waiver |
 | Dismissal decision or order | art. 86 and the procedure (*reported*) | art. 61–76 (*reported*), the decision's content | the ground with its article, the reasons, the notice, the term and court to challenge it (Romania), the payments |
 | Internal regulation | the code's rules (*reported*) | art. 241–246 (*reported*) | only the topics the code requires plus recorded user decisions |

@@ -74,4 +74,4 @@ contract tools.
 - **Never** sign, register an employee, file with an authority, pay, or send a document to the person: the
   engine prepares; the user acts (`<legal-workflow>/SKILL.md`, approval boundaries).
 
-Resources: [examples](examples/requests.md), [behaviour scenarios](tests/scenarios.md) (test inputs, not law).
+Resources: [sources](references/sources.md), [examples](examples/requests.md), [behaviour scenarios](tests/scenarios.md) (test inputs, not law).

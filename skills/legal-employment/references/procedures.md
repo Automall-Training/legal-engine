@@ -16,8 +16,15 @@ conclusion. Each procedure looks for the lawful route with the least cost first 
       information to give before signing (Romania), the safety induction and its record, the employee privacy
       notice (`legal-privacy`). Optional ones (an application, a hiring order where the code makes it optional, a
       job description where not required) are offered as optional.
+- [ ] Romania: a medical certificate before hiring (art. 27, *reported*: a contract without it is void until it is
+      obtained). Moldova: a medical exam only for the categories the code or a special law lists.
 - [ ] Registration before work starts and its deadline (Romania: REVISAL; Moldova: the duties of the social
       insurance law); payroll set up by the user's accountant.
+
+- [ ] Ongoing duties from day one, each per the code in force: the contract signed before the start and a copy
+      handed to the person; a record of hours worked with start and end (Romania: art. 119, *reported*); the
+      personnel file where the code requires it. A pay slip is listed only if the rule read on the task date
+      requires it.
 
 **Outcome:** D (contract, required annexes, a checklist of the steps in order) · M (sign before the start,
 register, induct) · Q (fixed or indefinite, probation length, when unclear).
@@ -66,7 +73,9 @@ documents) · M (hand over, pay, register) · Q (route, when the user's facts al
 - [ ] The facts: who sets the schedule and place, whose tools, instructions or results, exclusivity, payment by
       time or by result, who bears the risk, how long, whether the person has other clients, integration in the
       team.
-- [ ] Each fact weighed against the employment marks of the law and the inspectorate's practice in that country.
+- [ ] Each fact weighed against the criteria of independent activity of the Fiscal Code (Romania: art. 7 pt. 3,
+      *reported*; Moldova: its definition, *reported*) and the inspectorate's practice; the same criteria show how to
+      design a genuinely independent service.
 - [ ] Verdict on the norms scale; the risk names the sanction (back contributions, fines, requalification).
 - [ ] The cheapest lawful option: change the facts to a real independent service, or an employment contract with
       the flexible levers (part time, remote, flexible hours), or an agency.

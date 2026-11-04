@@ -15,9 +15,9 @@ and are never given from memory.
 | `eu.dir.1999-70` | Directive 1999/70/EC, fixed-term work | limits on successive fixed-term contracts |
 | `eu.dir.97-81` | Directive 97/81/EC, part-time work | equal treatment pro rata |
 | `eu.dir.96-71` | Directive 96/71/EC on posting of workers (as amended by 2018/957) | a worker sent to work in another EU country |
-| `eu.reg.593-2008` | Rome I, art. 8 | the law protecting an employee before EU courts |
+| `eu.reg.593-2008` | Rome I, art. 8 (*reported*) | the law protecting an employee before EU courts |
 | `eu.reg.883-2004` | Regulation (EC) No 883/2004 | which EU country's social security applies |
-| `eu.reg.2016-679` | GDPR, art. 88 | data at work; the module hands it to `legal-privacy` |
+| `eu.reg.2016-679` | GDPR, art. 88 (*reported*) | data at work; the module hands it to `legal-privacy` |
 
 Directives work through national law: cite the national act for the duty and the directive for its meaning.
 
@@ -30,11 +30,11 @@ Directives work through national law: cite the national act for the duty and the
 | `ro.lege.81-2018` | Law 81/2018 on telework | the telework clauses and the employer's duties |
 | `ro.lege.319-2006` | Law 319/2006 on safety and health at work, with HG 1425/2006 | risk assessment, induction training, medical checks; an external service is an allowed option |
 | `ro.lege.283-2022` | Law 283/2022 | transposition of Directive 2019/1152 into the Labour Code |
-| `ro.lege.227-2015` | Fiscal Code, Law 227/2015 | income tax and contributions on salaries; sector facilities as in force |
+| `ro.lege.227-2015` | Fiscal Code, Law 227/2015 | income tax and contributions on salaries; the criteria of independent activity (art. 7 pt. 3, *reported*) — the practical contractor-or-employee test; sector facilities as in force |
 | `ro.lege.52-2011` | Law 52/2011 on day labourers | occasional unskilled work in the listed activities only |
 | `ro.lege.367-2022` | Law 367/2022 on social dialogue | collective agreements and employee representatives |
 | RO minimum wage | the government decision in force | the gross minimum wage on the task date |
-| `ro.lege.190-2018` | Law 190/2018, art. 5 | monitoring employees by video or electronic means (to `legal-privacy`) |
+| `ro.lege.190-2018` | Law 190/2018, art. 5 (*reported*) | monitoring employees by video or electronic means (to `legal-privacy`) |
 
 Authority: the labour inspectorate (ITM, under the Labour Inspection). Disputes: the tribunal, with the terms of
 the Labour Code and Law 367/2022 (*reported*).
@@ -43,12 +43,13 @@ the Labour Code and Law 367/2022 (*reported*).
 
 | ID | Act | What for |
 |---|---|---|
-| `md.cod.muncii` | Labour Code, Law 154/2003, with later amendments | content of the individual contract (art. 49, *reported*), fixed term (art. 54–55, *reported*), probation, hiring order optional (art. 65, *reported*: the employer *may* issue one), amendment, telework, ending: by law (art. 81), agreement (art. 82), resignation (art. 85), dismissal (art. 86, with protected periods), notice and severance (art. 184–186, *reported*), discipline, internal rules, harassment rules (*reported*) |
+| `md.cod.muncii` | Labour Code, Law 154/2003, with later amendments | content of the individual contract (art. 49, *reported*), fixed term (art. 54–55, *reported*), probation, hiring order optional (art. 65, *reported*: the employer *may* issue one), amendment, telework, ending: by agreement and by law (art. 81–82, *reported*: the agreement ground may be art. 82¹ or 85(3¹)), resignation (art. 85), dismissal (art. 86, with protected periods), notice and severance (art. 184–186, *reported*), discipline, internal rules, harassment rules (*reported*) |
 | `md.lege.186-2008` | Law 186/2008 on safety and health at work, with HG 95/2009 | training at hiring and periodically, the personal training record, risk assessment |
 | `md.lege.77-2016` | Law 77/2016 on IT parks | the single tax and the insured income of employees of a resident (*reported*); a residency changes the payroll, not the Labour Code |
-| `md.cod.fiscal` | Fiscal Code, Law 1163/1997 | income tax on salaries |
+| `md.cod.fiscal` | Fiscal Code, Law 1163/1997 | income tax on salaries; the definition of independent activity (*reported*) |
 | `md.lege.489-1999` | Law 489/1999 on public social insurance, with the yearly budget law | contributions and the registration of employees |
 | `md.lege.1585-1998` | Law 1585/1998 on mandatory health insurance | health insurance contributions |
+| `md.lege.22-2018` | Law 22/2018 on occasional unskilled work by day labourers (*reported*: amendments pending in 2026) | a day labourer outside the Labour Code, in the activities and limits of the act, with its register |
 | `md.lege.200-2010` | Law 200/2010 on the regime of foreigners | the right of a foreigner to work in Moldova |
 | `md.lege.195-2024` | Law 195/2024 on personal data | data at work (to `legal-privacy`) |
 | MD minimum wage | the government decision in force | the minimum wage on the task date |
@@ -76,8 +77,8 @@ Romanian rule is presented as Moldovan and no Moldovan rule as Romanian, even wh
   leaves and union mandates in both codes: read the list before any dismissal.
 - **Disciplinary dismissal** needs the procedure of the code (a written investigation, the term counted from when
   the employer learnt of the act); a missing step voids the dismissal regardless of the fault.
-- **Notice periods differ by role** and by who ends the contract; a fixed "14 days" or "20 days" copied from
-  another case is wrong more often than right.
+- **Notice depends on the country, the role and who ends the contract**: read it each time, never copy it from
+  another case.
 - **Non-compete in Romania** binds only with a monthly indemnity of the code during the restriction (*reported*);
   a non-compete without it is a clause that costs the user credibility and gives nothing.
 - **Works made by employees.** Economic rights in works created in the job follow the copyright law of each
