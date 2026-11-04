@@ -51,7 +51,9 @@ The wizard keeps one table row per step; a missing row means `pending`.
 | audience | skipped | 2026-11-04 | |
 ```
 
-Status is `done`, `skipped` or `pending`. Step ids and wizard questions:
+Status is `done`, `skipped` or `pending`. The wizard and the update skill write rows **only through the script**
+(`legal_profile.py step set <step> --status <status> [--note …]`), never by hand. The step ids and the file each
+step writes are listed once, in `assets/modules.json` (`steps`); the table below explains them:
 
 | Step id | Wizard question | File it writes |
 |---|---|---|
@@ -67,5 +69,19 @@ Status is `done`, `skipped` or `pending`. Step ids and wizard questions:
 | first-run | 10. first download and trial monitoring | `laws/runs/` |
 
 Every module needs `firms`, `modules`, `language`, `side-risk` (`base_needs`); a module may need more
-(`legal-watch`: `niches`, `laws`). `skipped` counts as satisfied. A step marked `done` whose file is missing
-counts as `pending`. `legal_profile.py status --module <id>` returns exactly the missing steps.
+(`legal-watch`: `niches`, `laws`). A step marked `done` whose file is missing counts as `pending`.
+`legal_profile.py status --module <id>` returns exactly the missing steps.
+
+`skipped` counts as satisfied; then the modules use these defaults:
+
+| Skipped step | Default |
+|---|---|
+| firms | ask for the party in each matter; unknown details go in as `[DE COMPLETAT: …]` |
+| modules | all optional modules off |
+| language | the language of the user's message; legal text in the language of the governing law |
+| side-risk | the user's firm is the represented party; threshold of `norms.md` §6 |
+
+## Versions
+
+`modules.json` and `intake.json` carry `schema_version`. A file of another version is an error that names the
+file; `legal-workflow-update` migrates it. The script never rewrites a user file to a new version on its own.

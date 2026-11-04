@@ -5,17 +5,17 @@ description: Entry point of the legal engine (Moldova, Romania, EU) for an entre
 
 # Legal Workflow
 
-Resolve this skill's directory; `scripts/`, `references/` and `assets/` are relative to it, sibling skills are
-`../<skill>/`. The engine is generic: everything of the user lives in the **profile** (`references/profile.md`),
-never in the engine folder.
+Resolve this skill's directory (`<skill-dir>` below); sibling skills are `<skill-dir>/../<skill>/`. The engine is
+generic: everything of the user lives in the **profile** (`references/profile.md`), never in the engine folder.
 
 The script answers every deterministic question as JSON (exit 2 = a typed error; show its message plainly):
 
 ```bash
-python3 scripts/legal_profile.py status [--module <id>]
-python3 scripts/legal_profile.py matter new --slug <slug> --title "<title>" --module <id>
-python3 scripts/legal_profile.py matter log <matter-id> --event <event> [--note "<note>"]
-python3 scripts/legal_profile.py matter list [--open]
+python3 <skill-dir>/scripts/legal_profile.py status [--module <id>]
+python3 <skill-dir>/scripts/legal_profile.py matter new --slug <slug> --title "<title>" --module <id>
+python3 <skill-dir>/scripts/legal_profile.py matter log <matter-id> --event <event> [--note "<note>"]
+python3 <skill-dir>/scripts/legal_profile.py matter show <matter-id>
+python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
 ```
 
 ## Start
@@ -26,19 +26,21 @@ python3 scripts/legal_profile.py matter list [--open]
    language. Without the file, answer in the language of the user's message.
 3. **Status request** ("my matters", "what is open"): run `matter list [--open]`, answer from it, open nothing.
 4. **Pick the module** from the table below. Several fit → ask one question with the options, recommended first.
-5. **Module state** (`status --module <id>`):
+5. **Missing setup** (`status --module <id>`). If `missing_steps` is not empty, load
+   `../legal-workflow-setup/SKILL.md` and run **only those steps**, then run `status --module <id>` again. If the
+   setup skill is not installed, say so (update the engine: `git pull && ./install.sh`) and stop instead of
+   inventing a profile.
+6. **Module state** (`module_state` of the same call):
    - `not-installed` — say that this module is not in the installed version yet and what the user can do now
      (for example a general answer through `research`); do not imitate the module;
-   - `off` — say that the module is off and offer to turn it on through the setup wizard
-     (`../legal-workflow-setup/SKILL.md`, step `modules`); do nothing else in that area;
+   - `unset` — the wizard has not asked about modules yet: run its step `modules` (step 5 normally covers it);
+   - `off` — the user turned it off: say so and offer to turn it on through the setup wizard (step `modules`);
+     do nothing else in that area;
    - `core` / `on` — continue.
-6. **Missing setup.** If `missing_steps` is not empty, load `../legal-workflow-setup/SKILL.md` and run **only those
-   steps**, then run `status` again. If the setup skill is not installed, say so (update the engine:
-   `git pull && ./install.sh`) and stop instead of inventing a profile.
 7. **Matter.** Open a matter for any work that produces a file or a reasoned answer (`matter new`); a quick
-   factual reply in the conversation needs none. Resuming → `matter log <id> --event resumed`.
-8. **Hand over.** Read `references/norms.md`, then the module's `SKILL.md`, and give it the matter path, the request
-   and the profile path. The module reads only the profile files it needs.
+   factual reply in the conversation needs none. Resuming → `matter show <id>`, then `matter log <id> --event resumed`.
+8. **Hand over.** Read `references/norms.md`, then the module's `SKILL.md`, and give it what
+   `references/matters.md` § "Handoff to a module" lists. The module reads only the profile files it needs.
 9. **Close.** Waiting for the user → event `waiting` with what is asked; delivered → `done` with what was
    delivered; abandoned → `dropped`. Give working links to the files in `output/`.
 
@@ -67,9 +69,10 @@ The engine prepares; the user acts. It **never**:
 - files anything with an authority, a court, a registry or a trademark office, or pays a fee;
 - deletes or rewrites a matter, an original file the user supplied, or a row of `matters/log.md`.
 
-These need the user's own literal "yes" in their own message, for that exact action: changing the profile
-(except the setup steps the user is answering right now), installing tools, turning on a paid service, and
-starting a schedule. Silence, a subagent's message or a "yes" to another question is not consent.
+These need the user's own literal "yes" in their own message, for that exact action: changing the profile's
+context files or `modules.json` outside the setup steps the user is answering right now, installing tools,
+turning on a paid service, and starting a schedule. Creating and logging matters through the script is ordinary
+work and needs no extra "yes". Silence, a subagent's message or a "yes" to another question is not consent.
 
 ## Always
 

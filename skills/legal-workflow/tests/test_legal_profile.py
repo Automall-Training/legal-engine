@@ -71,6 +71,9 @@ class ResolveProfile(TmpCase):
 
     def test_broken_config_fails_loudly(self):
         cfg = self.root / "c.json"
+        cfg.write_bytes(b"\xff")
+        with self.assertRaises(lp.ConfigError):
+            lp.resolve_profile(cfg)
         for text in ("{not json", json.dumps({"profile_dir": ""}), json.dumps({}), json.dumps([1]),
                      json.dumps({"profile_dir": "relative/path"})):
             cfg.write_text(text, encoding="utf-8")
@@ -88,15 +91,18 @@ class ResolveProfile(TmpCase):
 class Catalog(TmpCase):
     def test_shipped_catalog_is_valid(self):
         self.assertEqual(set(lp.optional_ids(CATALOG)), {"privacy", "consumer", "trademark", "employment"})
-        self.assertTrue(set(lp.STEP_FILES) <= set(CATALOG["steps"]))
+        self.assertEqual(CATALOG["steps"]["laws"], "laws/watchlist.yaml")
 
     def test_broken_catalogs(self):
         bad = [
             "{",
-            json.dumps({"steps": [], "modules": {}}),
-            json.dumps({"steps": ["a"], "base_needs": ["b"], "modules": {"m": {"skill": "s", "core": True}}}),
-            json.dumps({"steps": ["a"], "modules": {"m": {"skill": "s"}}}),
-            json.dumps({"steps": ["a"], "modules": {"m": {"skill": "s", "core": True, "needs": ["z"]}}}),
+            json.dumps([1]),
+            json.dumps({"steps": {}, "modules": {}}),
+            json.dumps({"steps": ["a"], "modules": {"m": {"skill": "s", "core": True}}}),
+            json.dumps({"steps": {"a": 1}, "modules": {"m": {"skill": "s", "core": True}}}),
+            json.dumps({"steps": {"a": None}, "base_needs": ["b"], "modules": {"m": {"skill": "s", "core": True}}}),
+            json.dumps({"steps": {"a": None}, "modules": {"m": {"skill": "s"}}}),
+            json.dumps({"steps": {"a": None}, "modules": {"m": {"skill": "s", "core": True, "needs": ["z"]}}}),
         ]
         path = self.root / "cat.json"
         for text in bad:
@@ -140,6 +146,19 @@ class Steps(TmpCase):
         (prof / "context" / "language.md").unlink()
         self.assertEqual(lp.read_steps(prof, CATALOG)["language"], "pending")
 
+    def test_niches_done_without_watchlist_is_pending(self):
+        prof = make_profile(self.root, status=STATUS_TABLE + "| niches | done | | |\n")
+        self.assertEqual(lp.read_steps(prof, CATALOG)["niches"], "pending")
+        (prof / "laws").mkdir()
+        (prof / "laws" / "watchlist.yaml").write_text("acts: []\n", encoding="utf-8")
+        self.assertEqual(lp.read_steps(prof, CATALOG)["niches"], "done")
+
+    def test_unreadable_status_file(self):
+        prof = make_profile(self.root)
+        (prof / "context" / "integration-status.md").write_bytes(b"\xff\xfe")
+        with self.assertRaises(lp.StatusFileError):
+            lp.read_steps(prof, CATALOG)
+
     def test_unknown_state_fails(self):
         prof = make_profile(self.root, status="| firms | maybe | | |\n")
         with self.assertRaises(lp.StatusFileError):
@@ -147,6 +166,32 @@ class Steps(TmpCase):
 
     def test_no_status_file_all_pending(self):
         self.assertEqual(set(lp.read_steps(self.root, CATALOG).values()), {"pending"})
+
+
+class StepSet(TmpCase):
+    def test_creates_replaces_and_appends(self):
+        prof = self.root / "p"
+        prof.mkdir()
+        lp.step_set(prof, "firms", "done", CATALOG, "two firms", "2026-11-04")
+        lp.step_set(prof, "language", "skipped", CATALOG, date="2026-11-04")
+        lp.step_set(prof, "firms", "pending", CATALOG, "redo | later", "2026-11-05")
+        text = (prof / "context" / "integration-status.md").read_text(encoding="utf-8")
+        self.assertEqual(text.count("| firms |"), 1)
+        self.assertIn("| firms | pending | 2026-11-05 | redo \\| later |", text)
+        self.assertEqual(lp.read_steps(prof, CATALOG)["language"], "skipped")
+
+    def test_appends_table_to_a_file_without_one(self):
+        prof = make_profile(self.root, status="# Integration status\n\nfree text\n")
+        lp.step_set(prof, "tools", "done", CATALOG)
+        self.assertEqual(lp.read_steps(prof, CATALOG)["tools"], "done")
+
+    def test_errors(self):
+        prof = make_profile(self.root)
+        for args in (("nope", "done", None), ("firms", "maybe", None), ("firms", "done", "5 Nov")):
+            with self.subTest(args=args), self.assertRaises(lp.StatusFileError):
+                lp.step_set(prof, args[0], args[1], CATALOG, date=args[2])
+        with self.assertRaises(lp.StatusFileError):
+            lp.step_set(self.root / "nope", "firms", "done", CATALOG)
 
 
 class Status(TmpCase):
@@ -179,9 +224,14 @@ class Status(TmpCase):
         with self.assertRaises(lp.LegalProfileError):
             lp.status(make_profile(self.root), "test", CATALOG, module="tax")
 
-    def test_switches_none_means_off(self):
+    def test_no_modules_file_means_unset_not_off(self):
         sib = make_siblings(self.root, "legal-privacy")
-        self.assertEqual(lp.module_state("privacy", CATALOG, None, sib), "off")
+        self.assertEqual(lp.module_state("privacy", CATALOG, None, sib), "unset")
+        prof = make_profile(self.root)
+        (prof / "modules.json").unlink()
+        out = lp.status(prof, "test", CATALOG, module="privacy", siblings=sib)
+        self.assertEqual(out["module_state"], "unset")
+        self.assertIn("modules", out["missing_steps"])
 
 
 class Matters(TmpCase):
@@ -232,10 +282,36 @@ class Matters(TmpCase):
         self.assertEqual(items[b]["status"], "done")
         self.assertEqual([i["id"] for i in lp.matter_list(self.prof, only_open=True)], [a])
 
+    def test_show(self):
+        a = lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG, "2026-11-01")["id"]
+        lp.matter_log(self.prof, a, "waiting", "q", "2026-11-02")
+        lp.matter_log(self.prof, a, "note", "n", "2026-11-03")
+        out = lp.matter_show(self.prof, a)
+        self.assertEqual(out["status"], "waiting")
+        self.assertEqual([e["event"] for e in out["events"]], ["opened", "waiting", "note"])
+        self.assertEqual(out["intake"]["module_data"], {})
+        (self.prof / "matters" / a / "intake.json").write_text("[1]", encoding="utf-8")
+        with self.assertRaises(lp.MatterError):
+            lp.matter_show(self.prof, a)
+
+    def test_failed_create_leaves_no_folder(self):
+        with mock.patch.object(Path, "write_text", side_effect=OSError("disk full")):
+            with self.assertRaises(lp.MatterError):
+                lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG, "2026-11-01")
+        self.assertFalse((self.prof / "matters" / "2026-11-01-nda").exists())
+        self.assertEqual(lp.matter_list(self.prof), [])
+
+    def test_unreadable_log(self):
+        lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG)
+        (self.prof / "matters" / "log.md").write_bytes(b"\xff")
+        with self.assertRaises(lp.MatterError):
+            lp.matter_list(self.prof)
+
     def test_log_errors(self):
         a = lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG)["id"]
-        with self.assertRaises(lp.MatterError):
-            lp.matter_log(self.prof, a, "signed")
+        for event in ("signed", "opened"):
+            with self.subTest(event=event), self.assertRaises(lp.MatterError):
+                lp.matter_log(self.prof, a, event)
         with self.assertRaises(lp.MatterError):
             lp.matter_log(self.prof, "../etc", "note")
         with self.assertRaises(lp.MatterError):
@@ -277,6 +353,10 @@ class Cli(TmpCase):
         self.assertEqual(code, 0)
         code, out, _ = self.run_cli("matter", "list", "--open", config=cfg)
         self.assertEqual(json.loads(out), [])
+        code, out, _ = self.run_cli("matter", "show", "2026-11-04-nda", config=cfg)
+        self.assertEqual(json.loads(out)["status"], "done")
+        code, out, _ = self.run_cli("step", "set", "tools", "--status", "done", config=cfg)
+        self.assertEqual(json.loads(out)["step"], "tools")
 
     def test_errors_exit_2_with_message(self):
         code, out, err = self.run_cli("where", config={"profile_dir": ""})

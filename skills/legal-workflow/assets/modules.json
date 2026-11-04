@@ -1,6 +1,17 @@
 {
   "schema_version": 1,
-  "steps": ["firms", "audience", "modules", "language", "side-risk", "niches", "laws", "documents", "tools", "first-run"],
+  "steps": {
+    "firms": "context/company.md",
+    "audience": "context/company.md",
+    "modules": "modules.json",
+    "language": "context/language.md",
+    "side-risk": "context/side-and-risk.md",
+    "niches": "laws/watchlist.yaml",
+    "laws": "laws/watchlist.yaml",
+    "documents": null,
+    "tools": null,
+    "first-run": null
+  },
   "base_needs": ["firms", "modules", "language", "side-risk"],
   "modules": {
     "contracts": {"skill": "legal-contracts", "core": true, "needs": [], "label": "contracts: draft, audit, redline"},

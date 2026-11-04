@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "skills" / "legal-workflow" / "scripts"))
 import legal_profile  # noqa: E402
 SKILLS_DIR = Path(os.environ.get("SKILLS_DIR", Path.home() / ".claude" / "skills"))
-CONFIG = Path(os.environ.get("LEGAL_ENGINE_CONFIG", Path.home() / ".config" / "legal-engine" / "config.json"))
+CONFIG = legal_profile.CONFIG
 DEFAULT_PROFILE = legal_profile.DEFAULT_PROFILE
 VENV_PY = ROOT / ".venv" / "bin" / "python"
 # why: import names differ from package names (python-docx → docx, PyYAML → yaml).

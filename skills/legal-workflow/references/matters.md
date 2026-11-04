@@ -19,10 +19,14 @@ matter stays in its folder inside the profile, never inside the engine.
 
 ## intake.json
 
-The intake fields of the contract module (`action`, `document_type`, `commercial_goal`, `represented_party`,
-`parties`, `confirmed_facts`, `assumptions`, `unknowns`, `governing_law`, `forum`, `cross_border_factors`,
-dates, `agreed_constraints`, `communication_language`, `document_language`, `input_files`) plus
-`schema_version`, `task_id` (= matter id), `module`, `title`, `created`. Modules fill it; nobody deletes fields.
+Two owners, so a module never breaks another:
+
+- **generic core**, written by `matter new`: `schema_version`, `task_id` (= matter id), `module`, `title`,
+  `created`, `represented_party`, `communication_language`, `document_language`, `input_files`, `unknowns`;
+- **`module_data`**: an object owned by the matter's module (for contracts: action, document type, parties,
+  governing law, forum, dates, agreed constraints, …). Other modules read it, never write it.
+
+Nobody deletes core fields.
 
 ## log.md
 
@@ -36,14 +40,26 @@ status of the matter.
 | 2026-11-04 | 2026-11-04-nda-supplier | contracts | waiting | asked for the supplier's legal form |
 ```
 
-Events: `opened`, `waiting` (needs the user), `resumed`, `done`, `dropped`, `note`.
-Write them only through the script:
+Events: `opened` (written only by `matter new`), `waiting` (needs the user), `resumed`, `done`, `dropped`,
+`note`. Write and read them only through the script; modules never parse `log.md` themselves:
 
 ```bash
 python3 <skill>/scripts/legal_profile.py matter new --slug nda-supplier --title "NDA with a supplier" --module contracts
 python3 <skill>/scripts/legal_profile.py matter log 2026-11-04-nda-supplier --event done --note "clean and tracked DOCX delivered"
+python3 <skill>/scripts/legal_profile.py matter show 2026-11-04-nda-supplier
 python3 <skill>/scripts/legal_profile.py matter list --open
 ```
 
 Notes carry no personal data beyond what the user already put into the matter; never IDs, bank accounts or
 health data.
+
+## Handoff to a module
+
+`legal-workflow` gives the module: the matter id and path, the user's request word for word, the profile path,
+the module id, and the language pair from `context/language.md`. The module then:
+
+- keeps the user's files in `input/` unchanged and writes everything it produces to `output/`;
+- fills its part of `intake.json` (`module_data`) and the core fields it learns;
+- keeps law it cites in `source-register.json` in the matter folder (one shared format, introduced with `legal-contracts`);
+- logs `waiting` / `done` / `dropped` through the script and reports working links to `output/` files;
+- follows `norms.md` by reference and the approval boundaries of `SKILL.md`; it never copies them.

@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 python3 "$ROOT/tools/check.py" --quiet
 python3 -m unittest discover -s "$ROOT/tools/tests" -q
+shopt -s nullglob  # why: no skill tests yet must not fail the hook
 for tests in "$ROOT"/skills/*/tests; do
   [ -d "$tests" ] && python3 -m unittest discover -s "$tests" -q
 done

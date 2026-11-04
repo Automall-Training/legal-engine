@@ -3,13 +3,15 @@
 
     legal_profile.py where                                  # profile folder and where the path came from
     legal_profile.py status [--module M]                    # setup steps, missing steps, module states
-    legal_profile.py module M                               # core | on | off | not-installed
+    legal_profile.py module M                               # core | on | off | unset | not-installed
+    legal_profile.py step set STEP --status S [--note N] [--date YYYY-MM-DD]   # the wizard records a step
     legal_profile.py matter new --slug S --title T --module M [--date YYYY-MM-DD]
     legal_profile.py matter log ID --event E [--note N] [--date YYYY-MM-DD]
+    legal_profile.py matter show ID
     legal_profile.py matter list [--open]
 
-The contract (folders, config.json, modules.json, integration-status.md) is in references/profile.md and
-references/matters.md. Exit code 0 = done, 2 = a typed error with a message on stderr.
+The contract (folders, config.json, modules.json, integration-status.md, matters) is in
+references/profile.md and references/matters.md. Exit code 0 = done, 2 = a typed error on stderr.
 """
 
 from __future__ import annotations
@@ -19,6 +21,7 @@ import datetime as dt
 import json
 import os
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -34,16 +37,11 @@ DEFAULT_PROFILE = Path.home() / "legal-profile"
 SCHEMA_VERSION = 1
 STEP_STATES = ("done", "skipped", "pending")
 SATISFIED = ("done", "skipped")
-# why: a step marked done whose file is gone is not done; the router must not trust the table blindly.
-STEP_FILES = {
-    "firms": "context/company.md",
-    "modules": "modules.json",
-    "language": "context/language.md",
-    "side-risk": "context/side-and-risk.md",
-    "laws": "laws/watchlist.yaml",
-}
+STATUS_FILE = Path("context") / "integration-status.md"
+STATUS_HEADER = "| Step | Status | Updated | Note |\n|---|---|---|---|\n"
 SLUG = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-EVENTS = ("opened", "waiting", "resumed", "done", "dropped", "note")
+# why: "opened" is written only by `matter new`; a second one would silently retitle the matter.
+EVENTS = ("waiting", "resumed", "done", "dropped", "note")
 OPEN_STATES = ("opened", "waiting", "resumed")
 LOG_HEADER = (
     "# Matters log\n\n"
@@ -52,6 +50,7 @@ LOG_HEADER = (
     "|---|---|---|---|---|\n"
 )
 LOG_ROW = re.compile(r"^\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*([^|\s]+)\s*\|\s*([^|\s]+)\s*\|\s*([a-z]+)\s*\|(.*)\|\s*$")
+READ_ERRORS = (OSError, UnicodeDecodeError, json.JSONDecodeError)
 
 
 class LegalProfileError(Exception):
@@ -75,11 +74,18 @@ class ModulesFileError(LegalProfileError):
 
 
 class StatusFileError(LegalProfileError):
-    """The profile's context/integration-status.md has an unknown step state."""
+    """The profile's context/integration-status.md cannot be read or has an unknown step state."""
 
 
 class MatterError(LegalProfileError):
     """A matter cannot be created, logged or read."""
+
+
+def _read_json(path: Path, error: type[LegalProfileError]) -> object:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except READ_ERRORS as exc:
+        raise error(f"{path} unreadable or not valid UTF-8 JSON: {exc}") from exc
 
 
 # ---------- profile ----------
@@ -89,10 +95,7 @@ def resolve_profile(config: Path = CONFIG) -> tuple[Path, str]:
     if not config.is_file():
         path, source = DEFAULT_PROFILE, "default (no config yet)"
     else:
-        try:
-            data = json.loads(config.read_text(encoding="utf-8"))
-        except json.JSONDecodeError as exc:
-            raise ConfigError(f"config {config} is not valid JSON: {exc}") from exc
+        data = _read_json(config, ConfigError)
         raw = data.get("profile_dir") if isinstance(data, dict) else None
         if not isinstance(raw, str) or not raw.strip():
             raise ConfigError(f"config {config} has no string field profile_dir")
@@ -109,14 +112,14 @@ def resolve_profile(config: Path = CONFIG) -> tuple[Path, str]:
 
 
 def load_catalog(path: Path = CATALOG) -> dict:
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise CatalogError(f"module catalog {path} unreadable: {exc}") from exc
-    steps = data.get("steps")
-    mods = data.get("modules")
-    if not isinstance(steps, list) or not isinstance(mods, dict) or not mods:
-        raise CatalogError(f"module catalog {path}: needs a list 'steps' and a dict 'modules'")
+    data = _read_json(path, CatalogError)
+    steps = data.get("steps") if isinstance(data, dict) else None
+    mods = data.get("modules") if isinstance(data, dict) else None
+    if not isinstance(steps, dict) or not steps or not isinstance(mods, dict) or not mods:
+        raise CatalogError(f"module catalog {path}: needs a dict 'steps' (id → file or null) and a dict 'modules'")
+    for step, rel in steps.items():
+        if rel is not None and not isinstance(rel, str):
+            raise CatalogError(f"module catalog: step {step!r} file must be a string or null")
     for need in data.get("base_needs", []):
         if need not in steps:
             raise CatalogError(f"module catalog: base need {need!r} is not a setup step")
@@ -138,12 +141,10 @@ def read_modules(profile: Path, catalog: dict) -> dict[str, bool] | None:
     path = profile / "modules.json"
     if not path.is_file():
         return None
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ModulesFileError(f"{path} is not valid JSON: {exc}") from exc
+    data = _read_json(path, ModulesFileError)
     if not isinstance(data, dict) or data.get("schema_version") != SCHEMA_VERSION:
-        raise ModulesFileError(f"{path}: expected an object with \"schema_version\": {SCHEMA_VERSION}")
+        raise ModulesFileError(f"{path}: expected an object with \"schema_version\": {SCHEMA_VERSION} "
+                               "(another version → run legal-workflow-update)")
     allowed = optional_ids(catalog)
     out = {}
     for key, value in data.items():
@@ -158,24 +159,64 @@ def read_modules(profile: Path, catalog: dict) -> dict[str, bool] | None:
     return {mid: out.get(mid, False) for mid in allowed}
 
 
+def _status_lines(profile: Path) -> list[str]:
+    path = profile / STATUS_FILE
+    if not path.is_file():
+        return []
+    try:
+        return path.read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError) as exc:
+        raise StatusFileError(f"{path} unreadable: {exc}") from exc
+
+
+def _row_cells(line: str) -> list[str]:
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
 def read_steps(profile: Path, catalog: dict) -> dict[str, str]:
     """State of every setup step from the table in context/integration-status.md (missing row = pending)."""
     steps = {s: "pending" for s in catalog["steps"]}
-    path = profile / "context" / "integration-status.md"
-    if path.is_file():
-        for n, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-            cells = [c.strip() for c in raw.strip().strip("|").split("|")]
-            if len(cells) < 2 or cells[0] not in steps:
-                continue
-            state = cells[1].lower()
-            if state not in STEP_STATES:
-                raise StatusFileError(f"{path}:{n}: step {cells[0]} has state {cells[1]!r}; "
-                                      f"allowed: {', '.join(STEP_STATES)}")
-            steps[cells[0]] = state
-    for step, rel in STEP_FILES.items():
-        if steps.get(step) == "done" and not (profile / rel).is_file():
+    for n, raw in enumerate(_status_lines(profile), 1):
+        cells = _row_cells(raw)
+        if len(cells) < 2 or cells[0] not in steps:
+            continue
+        state = cells[1].lower()
+        if state not in STEP_STATES:
+            raise StatusFileError(f"{profile / STATUS_FILE}:{n}: step {cells[0]} has state {cells[1]!r}; "
+                                  f"allowed: {', '.join(STEP_STATES)}")
+        steps[cells[0]] = state
+    # why: a step marked done whose file is gone is not done; the router must not trust the table blindly.
+    for step, rel in catalog["steps"].items():
+        if rel and steps[step] == "done" and not (profile / rel).is_file():
             steps[step] = "pending"
     return steps
+
+
+def step_set(profile: Path, step: str, state: str, catalog: dict, note: str = "", date: str | None = None) -> dict:
+    """Write one step row (replace it if present). Only the wizard and the update skill call this."""
+    if step not in catalog["steps"]:
+        raise StatusFileError(f"unknown step {step!r}; steps: {', '.join(catalog['steps'])}")
+    if state not in STEP_STATES:
+        raise StatusFileError(f"status must be one of {', '.join(STEP_STATES)}, got {state!r}")
+    if not profile.is_dir():
+        raise StatusFileError(f"profile {profile} does not exist; create it first (setup wizard)")
+    day = _date(date, StatusFileError)
+    row = f"| {step} | {state} | {day} | {_cell(note)} |"
+    lines = _status_lines(profile) or ["# Integration status", ""]
+    for i, raw in enumerate(lines):
+        if _row_cells(raw)[0] == step and raw.lstrip().startswith("|"):
+            lines[i] = row
+            break
+    else:
+        if not any(raw.lstrip().startswith("| Step |") for raw in lines):
+            lines += STATUS_HEADER.rstrip("\n").split("\n")
+        lines.append(row)
+    path = profile / STATUS_FILE
+    path.parent.mkdir(exist_ok=True)
+    tmp = path.with_suffix(".md.tmp")
+    tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    tmp.replace(path)  # why: atomic, a crash never leaves a half-written status table
+    return {"step": step, "status": state, "date": day}
 
 
 def module_state(mid: str, catalog: dict, switches: dict[str, bool] | None, siblings: Path = SIBLINGS) -> str:
@@ -186,7 +227,9 @@ def module_state(mid: str, catalog: dict, switches: dict[str, bool] | None, sibl
         return "not-installed"
     if mods[mid]["core"]:
         return "core"
-    return "on" if switches and switches.get(mid) else "off"
+    if switches is None:
+        return "unset"  # why: no modules.json yet = the wizard has not asked, which is not the user saying "off"
+    return "on" if switches.get(mid) else "off"
 
 
 def status(profile: Path, source: str, catalog: dict, module: str | None = None,
@@ -225,13 +268,13 @@ def _cell(text: str) -> str:
     return _oneline(text).replace("|", "\\|")
 
 
-def _date(value: str | None) -> str:
+def _date(value: str | None, error: type[LegalProfileError] = MatterError) -> str:
     if value is None:
         return dt.date.today().isoformat()
     try:
         return dt.date.fromisoformat(value).isoformat()
     except ValueError as exc:
-        raise MatterError(f"date must be YYYY-MM-DD, got {value!r}") from exc
+        raise error(f"date must be YYYY-MM-DD, got {value!r}") from exc
 
 
 def _matters_dir(profile: Path) -> Path:
@@ -242,8 +285,11 @@ def _matters_dir(profile: Path) -> Path:
 
 def _append_log(matters: Path, date: str, matter_id: str, module: str, event: str, note: str) -> None:
     log = matters / "log.md"
-    if not log.is_file():
-        log.write_text(LOG_HEADER, encoding="utf-8")
+    try:
+        with log.open("x", encoding="utf-8") as fh:  # why: exclusive create, two writers never both write a header
+            fh.write(LOG_HEADER)
+    except FileExistsError:
+        pass
     with log.open("a", encoding="utf-8") as fh:
         fh.write(f"| {date} | {matter_id} | {module} | {event} | {_cell(note)} |\n")
 
@@ -270,58 +316,85 @@ def matter_new(profile: Path, slug: str, title: str, module: str, catalog: dict,
             continue
     else:
         raise MatterError(f"99 matters named {base} already exist; choose another slug")
-    for sub in ("input", "output"):
-        (folder / sub).mkdir()
+    # why: the generic core is owned here; each module keeps its own fields under module_data.
     intake = {
-        "schema_version": SCHEMA_VERSION, "task_id": matter_id, "module": module, "title": title,
-        "created": day, "action": None, "document_type": None, "commercial_goal": None,
-        "represented_party": None, "parties": [], "confirmed_facts": [], "assumptions": [], "unknowns": [],
-        "governing_law": None, "forum": None, "cross_border_factors": [], "execution_date": None,
-        "performance_period": None, "analysis_date": None, "checked_at": None, "agreed_constraints": [],
-        "communication_language": None, "document_language": None, "language_reason": None, "input_files": [],
+        "schema_version": SCHEMA_VERSION, "task_id": matter_id, "module": module, "title": title, "created": day,
+        "represented_party": None, "communication_language": None, "document_language": None,
+        "input_files": [], "unknowns": [], "module_data": {},
     }
-    (folder / "intake.json").write_text(json.dumps(intake, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        for sub in ("input", "output"):
+            (folder / sub).mkdir()
+        (folder / "intake.json").write_text(json.dumps(intake, ensure_ascii=False, indent=2) + "\n",
+                                            encoding="utf-8")
+    except OSError as exc:
+        shutil.rmtree(folder, ignore_errors=True)  # why: no half-made matter without a log row
+        raise MatterError(f"cannot create matter {matter_id}: {exc}") from exc
     _append_log(matters, day, matter_id, module, "opened", title)
     return {"id": matter_id, "path": str(folder), "module": module}
 
 
+def _matter_folder(profile: Path, matter_id: str) -> Path:
+    matters = _matters_dir(profile)
+    if not SLUG.match(matter_id) or not (matters / matter_id).is_dir():
+        raise MatterError(f"no matter {matter_id!r} in {matters}")
+    return matters / matter_id
+
+
 def _read_intake(folder: Path) -> dict:
-    try:
-        return json.loads((folder / "intake.json").read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise MatterError(f"{folder.name}: intake.json unreadable: {exc}") from exc
+    data = _read_json(folder / "intake.json", MatterError)
+    if not isinstance(data, dict):
+        raise MatterError(f"{folder.name}: intake.json must be an object")
+    return data
 
 
 def matter_log(profile: Path, matter_id: str, event: str, note: str = "", date: str | None = None) -> dict:
     if event not in EVENTS:
         raise MatterError(f"event must be one of {', '.join(EVENTS)}, got {event!r}")
-    matters = _matters_dir(profile)
-    if not SLUG.match(matter_id) or not (matters / matter_id).is_dir():
-        raise MatterError(f"no matter {matter_id!r} in {matters}")
-    module = _read_intake(matters / matter_id).get("module") or "unknown"
+    folder = _matter_folder(profile, matter_id)
+    module = _read_intake(folder).get("module") or "unknown"
     day = _date(date)
-    _append_log(matters, day, matter_id, module, event, note)
+    _append_log(folder.parent, day, matter_id, module, event, note)
     return {"id": matter_id, "event": event, "date": day}
 
 
-def matter_list(profile: Path, only_open: bool = False) -> list[dict]:
+def _log_rows(profile: Path) -> list[tuple[str, str, str, str, str]]:
     log = _matters_dir(profile) / "log.md"
     if not log.is_file():
         return []
-    seen: dict[str, dict] = {}
-    for raw in log.read_text(encoding="utf-8").splitlines():
+    try:
+        text = log.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        raise MatterError(f"{log} unreadable: {exc}") from exc
+    rows = []
+    for raw in text.splitlines():
         m = LOG_ROW.match(raw)
-        if not m or m.group(4) not in EVENTS:
-            continue
-        date, mid, module, event, note = m.groups()
+        if m and (m.group(4) in EVENTS or m.group(4) == "opened"):
+            date, mid, module, event, note = m.groups()
+            rows.append((date, mid, module, event, note.strip().replace("\\|", "|")))
+    return rows
+
+
+def matter_list(profile: Path, only_open: bool = False) -> list[dict]:
+    seen: dict[str, dict] = {}
+    for date, mid, module, event, note in _log_rows(profile):
         item = seen.setdefault(mid, {"id": mid, "module": module, "status": None, "updated": date, "title": ""})
         item["updated"] = date
-        if event == "opened":
-            item["title"] = note.strip().replace("\\|", "|")
+        if event == "opened" and not item["title"]:
+            item["title"] = note
         if event != "note":
             item["status"] = event
     items = list(seen.values())
     return [i for i in items if i["status"] in OPEN_STATES] if only_open else items
+
+
+def matter_show(profile: Path, matter_id: str) -> dict:
+    """Intake and full event history of one matter, so modules never parse log.md themselves."""
+    folder = _matter_folder(profile, matter_id)
+    events = [{"date": d, "event": e, "note": n} for d, mid, _m, e, n in _log_rows(profile) if mid == matter_id]
+    current = [e["event"] for e in events if e["event"] != "note"]
+    return {"id": matter_id, "path": str(folder), "status": current[-1] if current else None,
+            "intake": _read_intake(folder), "events": events}
 
 
 # ---------- CLI ----------
@@ -334,6 +407,13 @@ def main(argv: list[str] | None = None) -> int:
     st.add_argument("--module")
     mo = sub.add_parser("module")
     mo.add_argument("module")
+    sp = sub.add_parser("step")
+    ssub = sp.add_subparsers(dest="action", required=True)
+    ss = ssub.add_parser("set")
+    ss.add_argument("step")
+    ss.add_argument("--status", required=True)
+    ss.add_argument("--note", default="")
+    ss.add_argument("--date")
     ma = sub.add_parser("matter")
     msub = ma.add_subparsers(dest="action", required=True)
     mn = msub.add_parser("new")
@@ -346,6 +426,8 @@ def main(argv: list[str] | None = None) -> int:
     ml.add_argument("--event", required=True)
     ml.add_argument("--note", default="")
     ml.add_argument("--date")
+    msh = msub.add_parser("show")
+    msh.add_argument("id")
     mls = msub.add_parser("list")
     mls.add_argument("--open", action="store_true")
     a = ap.parse_args(argv)
@@ -362,10 +444,14 @@ def main(argv: list[str] | None = None) -> int:
                 switches = read_modules(profile, catalog) if profile.is_dir() else None
                 out = {"module": a.module, "state": module_state(a.module, catalog, switches, SIBLINGS),
                        "skill": catalog["modules"][a.module]["skill"]}
+            elif a.cmd == "step":
+                out = step_set(profile, a.step, a.status, catalog, a.note, a.date)
             elif a.action == "new":
                 out = matter_new(profile, a.slug, a.title, a.module, catalog, a.date)
             elif a.action == "log":
                 out = matter_log(profile, a.id, a.event, a.note, a.date)
+            elif a.action == "show":
+                out = matter_show(profile, a.id)
             else:
                 out = matter_list(profile, a.open)
     except LegalProfileError as exc:
