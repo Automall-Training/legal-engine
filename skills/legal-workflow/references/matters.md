@@ -26,7 +26,14 @@ Two owners, so a module never breaks another:
 - **`module_data`**: an object owned by the matter's module (for contracts: action, document type, parties,
   governing law, forum, dates, agreed constraints, …). Other modules read it, never write it.
 
-Nobody deletes core fields.
+Nobody deletes core fields. A module writes its answers only through the script, which keeps the identity fields
+(`schema_version`, `task_id`, `module`, `title`, `created`), replaces the editable core fields it is given and
+merges the keys of `module_data`:
+
+```bash
+python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data '{"represented_party": "…", "module_data": {"action": "audit"}}'
+python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data @<matter>/output/intake-update.json
+```
 
 ## log.md
 
@@ -59,7 +66,7 @@ health data.
 the module id, and the language pair from `context/language.md`. The module then:
 
 - keeps the user's files in `input/` unchanged and writes everything it produces to `output/`;
-- fills its part of `intake.json` (`module_data`) and the core fields it learns;
+- fills its part of `intake.json` (`module_data`) and the core fields it learns, through `matter update`;
 - keeps law it cites in `source-register.json` in the matter folder, in the one shared format of
   `law-check.md` (template `assets/source-register.json`, checked by `scripts/check_register.py`);
 - logs `waiting` / `done` / `dropped` through the script and reports working links to `output/` files;

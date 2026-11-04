@@ -327,6 +327,38 @@ class Matters(TmpCase):
     def test_list_without_log(self):
         self.assertEqual(lp.matter_list(self.prof), [])
 
+    def test_update_merges_core_and_module_data(self):
+        a = lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG, "2026-11-01")["id"]
+        lp.matter_update(self.prof, a, {"represented_party": "Example SRL", "module_data": {"action": "draft"}})
+        out = lp.matter_update(self.prof, a, {"module_data": {"document_type": "NDA"}, "unknowns": ["forum"]})
+        self.assertEqual(out["updated"], ["module_data", "unknowns"])
+        intake = lp.matter_show(self.prof, a)["intake"]
+        self.assertEqual(intake["represented_party"], "Example SRL")
+        self.assertEqual(intake["module_data"], {"action": "draft", "document_type": "NDA"})
+        self.assertEqual(intake["unknowns"], ["forum"])
+        self.assertEqual(intake["task_id"], a)
+        self.assertFalse((self.prof / "matters" / a / "intake.json.tmp").exists())
+
+    def test_update_refusals(self):
+        a = lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG, "2026-11-01")["id"]
+        for data in ({}, [], {"task_id": "x"}, {"module": "privacy"}, {"parties": []}, {"module_data": []}):
+            with self.subTest(data=data), self.assertRaises(lp.MatterError):
+                lp.matter_update(self.prof, a, data)
+        with self.assertRaises(lp.MatterError):
+            lp.matter_update(self.prof, "2026-01-01-none", {"unknowns": []})
+        intake = self.prof / "matters" / a / "intake.json"
+        intake.write_text(json.dumps({"schema_version": 2}), encoding="utf-8")
+        with self.assertRaisesRegex(lp.MatterError, "legal-workflow-update"):
+            lp.matter_update(self.prof, a, {"unknowns": []})
+
+    def test_update_write_failure_keeps_old_intake(self):
+        a = lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG, "2026-11-01")["id"]
+        before = (self.prof / "matters" / a / "intake.json").read_text(encoding="utf-8")
+        with mock.patch.object(Path, "replace", side_effect=OSError("disk full")), self.assertRaises(lp.MatterError):
+            lp.matter_update(self.prof, a, {"unknowns": ["x"]})
+        self.assertEqual((self.prof / "matters" / a / "intake.json").read_text(encoding="utf-8"), before)
+        self.assertFalse((self.prof / "matters" / a / "intake.json.tmp").exists())
+
 
 class Cli(TmpCase):
     def run_cli(self, *args: str, config: dict | None = None, siblings: Path | None = None) -> tuple[int, str, str]:
@@ -359,6 +391,17 @@ class Cli(TmpCase):
         self.assertEqual(json.loads(out), [])
         code, out, _ = self.run_cli("matter", "show", "2026-11-04-nda", config=cfg)
         self.assertEqual(json.loads(out)["status"], "done")
+        code, out, _ = self.run_cli("matter", "update", "2026-11-04-nda", "--data",
+                                    '{"module_data": {"action": "audit"}}', config=cfg)
+        self.assertEqual(code, 0)
+        data = self.root / "data.json"
+        data.write_text(json.dumps({"document_language": "ro"}), encoding="utf-8")
+        code, out, _ = self.run_cli("matter", "update", "2026-11-04-nda", "--data", f"@{data}", config=cfg)
+        intake = json.loads(self.run_cli("matter", "show", "2026-11-04-nda", config=cfg)[1])["intake"]
+        self.assertEqual((intake["module_data"], intake["document_language"]), ({"action": "audit"}, "ro"))
+        code, _, err = self.run_cli("matter", "update", "2026-11-04-nda", "--data", "{bad", config=cfg)
+        self.assertEqual(code, 2)
+        self.assertIn("not readable JSON", err)
         code, out, _ = self.run_cli("step", "set", "tools", "--status", "done", config=cfg)
         self.assertEqual(json.loads(out)["step"], "tools")
 

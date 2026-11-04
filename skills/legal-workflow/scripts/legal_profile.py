@@ -7,6 +7,7 @@
     legal_profile.py step set STEP --status S [--note N] [--date YYYY-MM-DD]   # the wizard records a step
     legal_profile.py matter new --slug S --title T --module M [--date YYYY-MM-DD]
     legal_profile.py matter log ID --event E [--note N] [--date YYYY-MM-DD]
+    legal_profile.py matter update ID --data JSON|@file     # a module fills intake.json (core fields, module_data)
     legal_profile.py matter show ID
     legal_profile.py matter list [--open]
 
@@ -363,6 +364,55 @@ def matter_log(profile: Path, matter_id: str, event: str, note: str = "", date: 
     return {"id": matter_id, "event": event, "date": day}
 
 
+# why: the core fields a module may fill in later; identity fields stay as `matter new` wrote them.
+INTAKE_EDITABLE = ("represented_party", "communication_language", "document_language", "input_files", "unknowns")
+INTAKE_FIXED = ("schema_version", "task_id", "module", "title", "created")
+
+
+def matter_update(profile: Path, matter_id: str, data: object) -> dict:
+    """Merge a module's answers into intake.json: editable core fields are replaced, module_data keys merged."""
+    if not isinstance(data, dict) or not data:
+        raise MatterError("update data must be a non-empty JSON object")
+    fixed = sorted(set(data) & set(INTAKE_FIXED))
+    if fixed:
+        raise MatterError(f"fields set by 'matter new' cannot change: {', '.join(fixed)}")
+    unknown = sorted(set(data) - set(INTAKE_EDITABLE) - {"module_data"})
+    if unknown:
+        raise MatterError(f"unknown intake fields: {', '.join(unknown)}; core: {', '.join(INTAKE_EDITABLE)}, "
+                          f"module fields go under module_data")
+    if "module_data" in data and not isinstance(data["module_data"], dict):
+        raise MatterError("module_data must be a JSON object")
+    folder = _matter_folder(profile, matter_id)
+    intake = _read_intake(folder)
+    if intake.get("schema_version") != SCHEMA_VERSION:
+        raise MatterError(f"{folder / 'intake.json'}: schema_version {intake.get('schema_version')!r} is not "
+                          f"{SCHEMA_VERSION}; migrate it with legal-workflow-update")
+    for key in INTAKE_EDITABLE:
+        if key in data:
+            intake[key] = data[key]
+    if "module_data" in data:
+        current = intake.get("module_data") if isinstance(intake.get("module_data"), dict) else {}
+        intake["module_data"] = {**current, **data["module_data"]}
+    target = folder / "intake.json"
+    tmp = target.with_suffix(".json.tmp")
+    try:
+        tmp.write_text(json.dumps(intake, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        tmp.replace(target)  # why: a crash mid-write must not leave a broken intake.json
+    except OSError as exc:
+        tmp.unlink(missing_ok=True)
+        raise MatterError(f"cannot write {target}: {exc}") from exc
+    return {"id": matter_id, "updated": sorted(data)}
+
+
+def _update_data(raw: str) -> object:
+    """`--data` is JSON text, or @path to a JSON file (long texts in any language without shell quoting)."""
+    try:
+        text = Path(raw[1:]).expanduser().read_text(encoding="utf-8") if raw.startswith("@") else raw
+        return json.loads(text)
+    except READ_ERRORS as exc:
+        raise MatterError(f"--data is not readable JSON: {exc}") from exc
+
+
 def _log_rows(profile: Path) -> list[tuple[str, str, str, str, str]]:
     log = _matters_dir(profile) / "log.md"
     if not log.is_file():
@@ -431,6 +481,9 @@ def main(argv: list[str] | None = None) -> int:
     ml.add_argument("--event", required=True)
     ml.add_argument("--note", default="")
     ml.add_argument("--date")
+    mu = msub.add_parser("update")
+    mu.add_argument("id")
+    mu.add_argument("--data", required=True)
     msh = msub.add_parser("show")
     msh.add_argument("id")
     mls = msub.add_parser("list")
@@ -455,6 +508,8 @@ def main(argv: list[str] | None = None) -> int:
                 out = matter_new(profile, a.slug, a.title, a.module, catalog, a.date)
             elif a.action == "log":
                 out = matter_log(profile, a.id, a.event, a.note, a.date)
+            elif a.action == "update":
+                out = matter_update(profile, a.id, _update_data(a.data))
             elif a.action == "show":
                 out = matter_show(profile, a.id)
             else:

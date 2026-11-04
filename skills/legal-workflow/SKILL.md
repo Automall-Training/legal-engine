@@ -14,6 +14,7 @@ The script answers every deterministic question as JSON (exit 2 = a typed error;
 python3 <skill-dir>/scripts/legal_profile.py status [--module <id>]
 python3 <skill-dir>/scripts/legal_profile.py matter new --slug <slug> --title "<title>" --module <id>
 python3 <skill-dir>/scripts/legal_profile.py matter log <matter-id> --event <event> [--note "<note>"]
+python3 <skill-dir>/scripts/legal_profile.py matter update <matter-id> --data '<json>'|@<file>
 python3 <skill-dir>/scripts/legal_profile.py matter show <matter-id>
 python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
 ```
