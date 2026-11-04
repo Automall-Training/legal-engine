@@ -8,6 +8,7 @@ htmlcov/
 
 # owner-only notes and the local leak denylist (names of real firms and people): never published
 docs/owner/
+.agent/
 tools/denylist.local.txt
 
 # a user's profile must never be inside the engine

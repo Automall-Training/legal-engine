@@ -45,7 +45,7 @@ PRIVATE_MARK = "<!-" + "- private:"  # split: this file must not match itself
 ALLOW = "leak-ok"
 
 SKIP_PARTS = {".git", ".venv", "__pycache__", ".pytest_cache", "node_modules", "htmlcov"}
-SKIP_PREFIXES = ("docs/owner/",)
+SKIP_PREFIXES = ("docs/owner/", ".agent/")  # why: both are git-ignored working notes
 SKIP_FILES = {"tools/denylist.local.txt"}
 TEXT_SUFFIXES = {".py", ".sh", ".md", ".txt", ".yaml", ".yml", ".json", ".toml", ".html", ".css", ".js", ".xml",
                  ".cfg", ".ini", ""}
