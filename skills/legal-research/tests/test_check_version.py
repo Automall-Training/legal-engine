@@ -118,31 +118,57 @@ class Points(unittest.TestCase):
              "quote": "x" * 301}]
         errs = check(card)["errors"]
         for msg in ("evidence without a URL", "evidence opened after checked_at", "longer than 300",
-                    "neither official nor an archived"):
+                    "not an official text"):
             self.assertTrue(any(msg in e for e in errs), msg)
 
     def test_empty_quote(self):
         card = good_card()
         card["points"]["consolidation"]["evidence"] = [evidence(quote="  ")]
-        self.assertTrue(any("without a verbatim quote" in e for e in check(card)["errors"]))
+        self.assertTrue(any("quote missing or shorter" in e for e in check(card)["errors"]))
+
+    def test_one_letter_quote_proves_nothing(self):
+        card = good_card()
+        card["points"]["consolidation"]["evidence"] = [evidence(quote="a")]
+        self.assertTrue(any("shorter than 15" in e for e in check(card)["errors"]))
+
+    def test_evidence_from_another_day(self):
+        card = good_card()
+        card["points"]["amendments"]["evidence"] = [evidence(opened_at="2020-01-01T00:00:00+00:00")]
+        self.assertIn("amendments: evidence 1: evidence not opened today", check(card)["errors"])
+
+    def test_unofficial_archived_copy(self):
+        card = good_card()
+        card["points"]["case_law"]["evidence"] = [evidence(official=False, archived_on=day(-1))]
+        self.assertTrue(any("not an official text" in e for e in check(card)["errors"]))
+
+    def test_hash_without_file(self):
+        card = good_card()
+        card["points"]["repeal"]["evidence"] = [evidence(text_sha256="ab")]
+        self.assertIn("repeal: evidence 1: text_sha256 without text_file", check(card)["errors"])
 
 
 class Archive(unittest.TestCase):
-    def test_fresh_archive_copy_is_enough(self):
+    def test_fresh_archive_copy_confirms_wording(self):
         card = good_card()
-        card["points"]["consolidation"]["evidence"] = [evidence(official=False, archived_on=day(-3))]
+        card["points"]["case_law"]["evidence"] = [evidence(archived_on=day(-3))]
         self.assertEqual(check(card)["errors"], [])
+
+    def test_archive_never_shows_the_latest_version(self):
+        card = good_card()
+        card["points"]["consolidation"]["evidence"] = [evidence(archived_on=day(-1))]
+        res = check(card)
+        self.assertTrue(any("archived copies only: consolidation" in e for e in res["errors"]))
 
     def test_old_archive_copy_cannot_prove_current(self):
         card = good_card()
-        card["points"]["consolidation"]["evidence"] = [evidence(official=False, archived_on=day(-40))]
+        card["points"]["case_law"]["evidence"] = [evidence(archived_on=day(-40))]
         res = check(card)
-        self.assertTrue(any("old archived copies" in e for e in res["errors"]))
+        self.assertTrue(any("archived copies only" in e for e in res["errors"]))
         self.assertTrue(any("40 days old" in g for g in res["gaps"]))
 
     def test_old_archive_copy_with_not_verified_passes(self):
         card = good_card()
-        card["points"]["consolidation"]["evidence"] = [evidence(official=False, archived_on=day(-40))]
+        card["points"]["case_law"]["evidence"] = [evidence(archived_on=day(-40))]
         card["result"] = "not_verified"
         card["working_conclusion"] = "archived text of v3 from 40 days ago; later changes unknown"
         self.assertEqual(check(card)["errors"], [])
@@ -163,7 +189,7 @@ class Versions(unittest.TestCase):
         card = good_card()
         card["latest_in_force"]["version_from"] = day(-10)
         errs = check(card)["errors"]
-        self.assertIn("the held version is older than the latest in force: result is outdated", errs)
+        self.assertTrue(any(e.startswith("the held version is not the latest in force") for e in errs))
         self.assertIn("the held version is behind the law in force: result must be outdated", errs)
 
     def test_change_in_journal_not_in_consolidation(self):
@@ -171,6 +197,36 @@ class Versions(unittest.TestCase):
         card["changes"].append({"act": "Lege 3/2026", "published": "MO 3", "status": "in_force",
                                 "applies_from": day(-2)})
         self.assertIn("a change in force after the held version: result is outdated", check(card)["errors"])
+
+    def test_future_held_version_is_not_current(self):
+        card = good_card()
+        card["held_version"]["version_from"] = day(20)
+        self.assertIn("the held version is behind the law in force: result must be outdated", check(card)["errors"])
+
+    def test_repealed_act_is_not_current(self):
+        card = good_card()
+        card["repealed"] = {"by": "Lege 5/2026", "from": day(-5)}
+        self.assertIn("the held version is behind the law in force: result must be outdated", check(card)["errors"])
+        card["repealed"] = {"by": "Lege 5/2026"}
+        self.assertIn("repealed needs by and from", check(card)["errors"])
+
+    def test_in_force_change_in_the_future(self):
+        card = good_card()
+        card["changes"][0]["applies_from"] = day(40)
+        self.assertIn("change 1: 'in_force' but applies only after the analysis date", check(card)["errors"])
+
+    def test_change_without_dates_and_fallback(self):
+        card = good_card()
+        card["changes"].append({"act": "Lege 4/2026", "published": "MO 4", "status": "published_not_in_force"})
+        self.assertIn("change 4: needs applies_from (or in_force_from)", check(card)["errors"])
+        card["changes"][3] = {"act": "Lege 4/2026", "published": "MO 4", "status": "in_force",
+                              "in_force_from": day(-2)}
+        self.assertIn("a change in force after the held version: result is outdated", check(card)["errors"])
+
+    def test_future_analysis_date(self):
+        card = good_card()
+        card["analysis_date"] = day(60)
+        self.assertIn("analysis_date after the check date", check(card)["errors"])
 
     def test_outdated_needs_reason(self):
         card = good_card()
@@ -279,6 +335,14 @@ class Quotes(unittest.TestCase):
         res = check(self.card(), self.root)
         self.assertEqual(res["errors"], [])
         self.assertEqual(res["quotes"], {"checked": 1, "unchecked": 6})
+
+    def test_html_entities_tags_and_soft_hyphens(self):
+        page = self.root / "work" / "sources" / "act.html"
+        page.write_text("<p>Prezenta lege <b>intr&#259; &icirc;n</b> vi\u00adgoare la data public&#259;rii.</p>"
+                        "<script>var x = 1;</script>", encoding="utf-8")
+        card = good_card()
+        card["points"]["consolidation"]["evidence"] = [evidence(text_file="work/sources/act.html")]
+        self.assertEqual(check(card, self.root)["errors"], [])
 
     def test_quote_not_in_text(self):
         res = check(self.card(quote="Prezenta lege se abrogă."), self.root)

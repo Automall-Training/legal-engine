@@ -36,12 +36,48 @@
       "reason": "[why it could not be checked]",
       "depends": "[which conclusion depends on it]"
     },
-    "amendments": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
-    "deferred_entry": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
-    "secondary_acts": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
-    "case_law": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
-    "repeal": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
-    "status_of_changes": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null}
+    "amendments": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [],
+      "reason": null,
+      "depends": null
+    },
+    "deferred_entry": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [],
+      "reason": null,
+      "depends": null
+    },
+    "secondary_acts": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [],
+      "reason": null,
+      "depends": null
+    },
+    "case_law": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [],
+      "reason": null,
+      "depends": null
+    },
+    "repeal": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [],
+      "reason": null,
+      "depends": null
+    },
+    "status_of_changes": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [],
+      "reason": null,
+      "depends": null
+    }
   },
   "latest_in_force": {
     "label": null,
@@ -73,6 +109,10 @@
       "url": null
     }
   ],
+  "repealed": {
+    "by": null,
+    "from": null
+  },
   "result": "not_verified",
   "outdated_reason": null,
   "working_conclusion": "[last known text, its date, what stays open]"

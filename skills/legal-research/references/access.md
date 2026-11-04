@@ -17,7 +17,7 @@ text. A paid scraping service is an option the user connects themselves; this sk
 | Consolidated texts, list of versions | [legis.md](https://www.legis.md/) — `cautare/getResults?doc_id=<id>&lang=ro` | Often refuses scripts (HTTP 403); a real browser usually works. Each `doc_id` is **one version**, not the act: a saved link keeps returning the old text. Versions are listed by date; the newest may be future |
 | Official journal | [monitorul.gov.md](https://monitorul.gov.md/ro) — issue `/ro/monitor/<id>` | Plain HTTP usually works. The issue contents list amending laws (Part I), government decisions (II), authorities' acts (III). Scan the issues "held version → today" |
 | Constitutional Court | [constcourt.md](https://www.constcourt.md/) | Decisions on constitutionality; also published in the journal |
-| Supreme Court of Justice | [csj.md](https://csj.md/) | Explanatory decisions and advisory opinions: guidance, mark as not binding |
+| Supreme Court of Justice | [csj.md](https://csj.md/) | Explanatory decisions, advisory opinions, appeals in the interest of the law: check the binding force of each instrument in the procedure codes |
 | Data protection authority | [datepersonale.md](https://datepersonale.md/) | Its normative decisions are also in the journal |
 | Tax service, IT Park, consumer agency | [sfs.md](https://www.sfs.md/), [mitp.md](https://mitp.md/), [apc.gov.md](https://apc.gov.md/) | Orders and guides; a guide is not a normative act |
 
@@ -69,6 +69,6 @@ A correction (`…R(01)`) may concern one language only: check that it touches t
 | `order` | ministries, tax service, agencies | ministries, ANAF, ANPC | — |
 | `authority_decision` | data protection, consumer, central bank, IT Park | ANSPDCP, ANPC, BNR, ANCOM | Commission decisions (adequacy, standard clauses), implementing and delegated acts |
 | `constitutional_court` | constcourt.md, journal | ccr.ro, journal Part I | — |
-| `supreme_court` | CSJ explanatory decisions (not binding) | ÎCCJ RIL and HP (binding from publication) | — |
+| `supreme_court` | CSJ: binding force per instrument (check the procedure codes) | ÎCCJ RIL and HP (binding from publication) | — |
 | `cjeu` | guidance only (Moldova is not an EU member) | interpretation of transposed rules | interpretation of directives and regulations |
 | `guidance` | guides, recommendations (`binding: false`) | the same | EDPB guidelines (`binding: false`) |

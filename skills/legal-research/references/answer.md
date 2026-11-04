@@ -10,7 +10,7 @@ this file only arranges them. Shell: [`../templates/answer.md`](../templates/ans
 1. **The question as asked**, then the question as it must be answered: who acts, what, where (which
    jurisdiction's rules apply — `<legal-workflow>/references/jurisdiction.md`), on what date. A question about a
    past event has its own analysis date; a question about future conduct is answered as of today, with changes
-   already adopted listed separately.
+   already adopted listed separately (never with a future analysis date).
 2. **Facts.** Confirmed facts, assumptions and unknowns kept apart. An unknown that decides the answer gives
    conditional answers ("if your buyers are consumers… / if they are firms…") and names the fact that picks one;
    ask it only if it is material and cannot be answered by both branches.

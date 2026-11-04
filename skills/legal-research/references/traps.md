@@ -10,7 +10,8 @@ Typical ways a current-version check goes wrong. Read before the first check of 
 - **A consolidation dated in the future.** An EUR-Lex consolidation `0…-YYYYMMDD` can appear before that date:
   the date is when the text applies, not when it was published.
 - **"Intră în vigoare" is not "se aplică".** An act may enter into force on publication and apply in parts on
-  later dates; an EU directive applies through the national act that transposes it, from the date set there.
+  later dates. An EU directive applies through the national act that transposes it; after the transposition
+  deadline check also direct effect against the state and the duty to read national law in line with it.
 - **"N months after publication"** counts from publication, not adoption; read the act's own rule on how terms
   are counted.
 
@@ -35,8 +36,10 @@ Typical ways a current-version check goes wrong. Read before the first check of 
 - A Commission proposal, a European Parliament resolution, a bill passed by one chamber, a law sent for
   promulgation, a draft government decision in public consultation: not law, even when databases link them to
   the act.
-- A Romanian emergency ordinance (OUG) applies from publication, but its approval law may change it; while that
-  law is pending, check its status on senat.ro / cdep.ro and say so.
+- A Romanian emergency ordinance (OUG) enters into force only after it is submitted to Parliament and published,
+  unless it sets a later date (Constitution of Romania, art. 115; read the OUG's own entry clause). Its approval
+  law may change it, and a law rejecting it ends its effects; while that law is pending, check its status on
+  senat.ro / cdep.ro and say so.
 
 ## Missed layers
 
@@ -45,7 +48,8 @@ Typical ways a current-version check goes wrong. Read before the first check of 
   a harmonised notice.
 - **A constitutional court decision.** When a provision found unconstitutional stops applying differs between
   systems: read it in the decision and the constitution, never assume.
-- **A CJEU ruling** changes how a rule is read from its entry into force, not from the date of the ruling.
+- **A CJEU ruling** changes how a rule is read from its entry into force, not from the date of the ruling,
+  unless the judgment itself limits its effects in time.
 - **Corrections** (corrigendum, rectificare) change the text without a new consolidation; check their language.
 - **A repealed act still cited** in a contract or an earlier answer: find its new address or say none was found.
 

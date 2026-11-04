@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import json
 import re
 import sys
@@ -31,8 +32,13 @@ RELATED_KINDS = {"government_decision", "order", "authority_decision", "constitu
                  "cjeu", "guidance"}
 RELATED_EFFECTS = {"amends", "details", "suspends", "declares_unconstitutional", "interprets"}
 MAX_QUOTE = 300
+# why: a one-word quote matches almost any text and proves nothing.
+MIN_QUOTE = 15
 # why: an archived copy proves the text on the copy date only; older than this it cannot confirm currency.
 ARCHIVE_MAX_DAYS = 14
+# why: whether a newer version or change exists can only be seen on the live official page, never in a copy.
+LIVE_ONLY = {"consolidation", "amendments", "status_of_changes"}
+INVISIBLE = dict.fromkeys(map(ord, "\u00ad\u200b\u200c\u200d\u2060\ufeff"))
 
 
 class CardError(ValueError):
@@ -47,13 +53,21 @@ def moment(value: str) -> datetime:
     return stamp
 
 
+def plain(text: str, name: str) -> str:
+    """Saved HTML is compared as the text a reader sees: tags dropped, entities decoded."""
+    if name.lower().endswith((".html", ".htm")):
+        text = re.sub(r"<(script|style)\b.*?</\1\s*>", " ", text, flags=re.S | re.I)
+        text = html.unescape(re.sub(r"<[^>]+>", "", text))
+    return text
+
+
 def normalise(text: str) -> str:
     """Compare quotes loosely enough for layout, strictly enough for words.
 
     why: official HTML and PDF differ in spaces, line breaks, typographic quotes and the old Romanian cedilla
     letters (ş ţ vs ș ț); none of that changes the rule, every other character does.
     """
-    text = unicodedata.normalize("NFC", text)
+    text = unicodedata.normalize("NFC", text).translate(INVISIBLE)  # soft hyphens and zero-width from PDFs
     text = text.translate(str.maketrans({"ş": "ș", "Ş": "Ș", "ţ": "ț", "Ţ": "Ț", "„": '"', "”": '"', "“": '"',
                                          "«": '"', "»": '"', "’": "'", "‘": "'", " ": " ", "–": "-",
                                          "—": "-"}))
@@ -77,23 +91,29 @@ def validate(card: dict, now: datetime, root: Path | None = None) -> dict:
         if not ok:
             errors.append(msg)
 
-    def evidence_ok(label: str, ev: dict, checked: datetime) -> bool:
+    def evidence_ok(point: str, label: str, ev: dict, checked: datetime) -> bool:
         """Validate one piece of evidence; return True when it can confirm currency today."""
         require(str(ev.get("url", "")).startswith(("https://", "http://")), label + "evidence without a URL")
         opened = moment(ev["opened_at"])
         require(opened <= checked, label + "evidence opened after checked_at")
+        # why: law is never cached as truth; evidence read on another day is a past check, not this one.
+        require(opened.astimezone(now.tzinfo).date() == now.date(), label + "evidence not opened today")
         quote = ev.get("quote") or ""
-        require(bool(quote.strip()), label + "evidence without a verbatim quote")
+        require(len(quote.strip()) >= MIN_QUOTE, label + f"verbatim quote missing or shorter than {MIN_QUOTE} characters")
         require(len(quote) <= MAX_QUOTE, label + f"quote longer than {MAX_QUOTE} characters")
-        archived = ev.get("archived_on")
-        require(ev.get("official") is True or bool(archived),
-                label + "evidence neither official nor an archived official copy")
+        # why: an archived copy is still evidence only of an official text; an unofficial site never is.
+        require(ev.get("official") is True, label + "evidence is not an official text (an archived copy of one: official true + archived_on)")
         if ev.get("text_file"):
             check_quote(label, ev, quote)
         else:
+            require(not ev.get("text_sha256"), label + "text_sha256 without text_file")
             quotes["unchecked"] += 1
+        archived = ev.get("archived_on")
         if archived:
             age = (checked.date() - date.fromisoformat(archived)).days
+            if point in LIVE_ONLY:
+                gaps.append(label + "archived copy: shows the text on its date, not whether a newer version exists")
+                return False
             if age > ARCHIVE_MAX_DAYS:
                 gaps.append(label + f"archived copy is {age} days old: it confirms the text, not the current version")
                 return False
@@ -114,7 +134,7 @@ def validate(card: dict, now: datetime, root: Path | None = None) -> dict:
             return
         if ev.get("text_sha256"):
             require(hashlib.sha256(data).hexdigest() == ev["text_sha256"], label + "saved text changed (sha256)")
-        text = data.decode("utf-8", errors="replace")
+        text = plain(data.decode("utf-8", errors="replace"), path.name)
         found = normalise(quote) in normalise(text)
         require(found, label + "quote not found in the saved text")
         quotes["checked"] += 1
@@ -126,6 +146,8 @@ def validate(card: dict, now: datetime, root: Path | None = None) -> dict:
         checked = moment(card["checked_at"])
         analysis = date.fromisoformat(card["analysis_date"])
         require(checked <= now, "checked_at is in the future")
+        # why: future conduct is answered as of today; adopted future changes go to next_versions / changes.
+        require(analysis <= checked.astimezone(now.tzinfo).date(), "analysis_date after the check date")
         require(checked.astimezone(now.tzinfo).date() == now.date(), "card is not from today: re-check required")
         scope = card.get("scope", "full")
         require(scope in REQUIRED, "scope must be 'full' or 'text'")
@@ -149,7 +171,7 @@ def validate(card: dict, now: datetime, root: Path | None = None) -> dict:
                 # why: "no amendments" is a claim too; it needs the page that shows the list and its last entry.
                 require(bool(evidence), label + "done without evidence")
                 require(bool(point.get("note")), label + "done without a note of what was found")
-                fresh = [evidence_ok(f"{label}evidence {i + 1}: ", ev, checked) for i, ev in enumerate(evidence)]
+                fresh = [evidence_ok(name, f"{label}evidence {i + 1}: ", ev, checked) for i, ev in enumerate(evidence)]
                 if evidence and not any(fresh):
                     stale.append(name)
             else:
@@ -173,17 +195,23 @@ def validate(card: dict, now: datetime, root: Path | None = None) -> dict:
         newer_change = False
         for i, ch in enumerate(card.get("changes", [])):
             label = f"change {i + 1}: "
-            require(ch.get("status") in CHANGE_STATUSES, label + "unknown status")
+            status = ch.get("status")
+            require(status in CHANGE_STATUSES, label + "unknown status")
             require(bool(ch.get("act")) and bool(ch.get("published")), label + "needs the amending act and publication")
-            if ch.get("status") == "draft":
+            if status == "draft":
                 # why: a bill or a proposal is not law; it may be mentioned for information only.
                 require(not ch.get("affects_conclusion"), label + "a draft cannot change the conclusion")
-            if ch.get("status") == "published_not_in_force" and ch.get("applies_from"):
-                require(date.fromisoformat(ch["applies_from"]) > analysis,
-                        label + "'published_not_in_force' but applies on the analysis date")
-            if ch.get("status") == "in_force" and ch.get("applies_from") and held_from:
-                applies = date.fromisoformat(ch["applies_from"])
-                newer_change = newer_change or held_from < applies <= analysis
+                continue
+            when = ch.get("applies_from") or ch.get("in_force_from")
+            if not when:
+                errors.append(label + "needs applies_from (or in_force_from)")
+                continue
+            applies = date.fromisoformat(when)
+            if status == "published_not_in_force":
+                require(applies > analysis, label + "'published_not_in_force' but applies on the analysis date")
+            if status == "in_force":
+                require(applies <= analysis, label + "'in_force' but applies only after the analysis date")
+                newer_change = newer_change or bool(held_from and held_from < applies <= analysis)
 
         for i, rel in enumerate(card.get("related", [])):
             label = f"related {i + 1}: "
@@ -196,13 +224,19 @@ def validate(card: dict, now: datetime, root: Path | None = None) -> dict:
 
         result = card.get("result")
         require(result in RESULTS, "result must be current, outdated or not_verified")
-        behind = bool(held_from and latest_from and held_from < latest_from)
+        repealed = card.get("repealed") or {}
+        gone = bool(repealed.get("from") and date.fromisoformat(repealed["from"]) <= analysis)
+        if any(repealed.values()):  # why: the template keeps the keys with nulls for an act not repealed
+            require(bool(repealed.get("by")) and bool(repealed.get("from")), "repealed needs by and from")
+        # why: the held version must be the one in force, not merely not older; a future held text is wrong too.
+        behind = bool(held_from and latest_from and held_from != latest_from) or gone
+        behind = behind or bool(held_from and held_from > analysis)
         if result == "current":
             require(not open_required, "current needs every required point done: " + ", ".join(open_required))
             require(not [p for p in stale if p in required],
-                    "current cannot rest on old archived copies only: " + ", ".join(p for p in stale if p in required))
+                    "current cannot rest on archived copies only: " + ", ".join(p for p in stale if p in required))
             require(latest_from is not None, "current needs latest_in_force.version_from")
-            require(not behind, "the held version is older than the latest in force: result is outdated")
+            require(not behind, "the held version is not the latest in force (or the act is repealed): result is outdated")
             require(not newer_change, "a change in force after the held version: result is outdated")
         if result == "outdated":
             require(bool(card.get("outdated_reason")), "outdated needs outdated_reason")

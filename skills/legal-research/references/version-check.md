@@ -47,11 +47,13 @@ blocks it; other changes are information.
 5. **`case_law` — decisions that change application.** Constitutional courts (a provision declared
    unconstitutional stops applying; when, depends on the system and is read in the decision and the
    constitution, never assumed), binding unification decisions of the supreme courts, CJEU rulings on the cited
-   articles (an interpretation applies from the entry into force of the rule). Record court, number or ECLI,
-   date, operative part and binding force; a recommendation of a court is marked as such.
+   articles (an interpretation applies from the entry into force of the rule unless the judgment itself limits
+   its effects in time). Record court, number or ECLI, date, operative part and binding force; check the binding
+   force of each instrument in its own procedural rules, and mark a recommendation as such.
 6. **`repeal` — repeal or replacement and the fate of references.** If the act was repealed, replaced or
    absorbed: the repealing act, the date, the transitional rules and, where it exists, the correlation table.
-   Every reference of ours to a repealed rule is a finding: its new address or "no address found".
+   Every reference of ours to a repealed rule is a finding: its new address or "no address found". Record it in
+   the card's `repealed` (`by`, `from`).
 7. **`status_of_changes` — in force / published, not in force / draft.** Each change mentioned gets one status:
    `in_force` (applies on the analysis date), `published_not_in_force` (in the official journal, later date),
    `draft` (a bill, a draft decision, a Commission proposal, a law passed but not promulgated or published). A
@@ -63,15 +65,20 @@ jurisdiction is in [access.md](access.md).
 
 ## Evidence
 
-For each closed point: the URL of the official source (not an aggregator), the time it was opened and a verbatim
-quote of at most 300 characters in the language of the act: the line the conclusion stands on (the consolidation
+For each closed point: the URL of the official source (not an aggregator), the time it was opened **today** and a
+verbatim quote of 15 to 300 characters in the language of the act: the line the conclusion stands on (the consolidation
 label, "intră în vigoare", the operative part). Save the text you read when you can
 (`<matter>/work/sources/<act>-<date>.txt` or `.html`) and give `text_file` and `text_sha256`: the checker then
-confirms that each quote is really in it. A quote that was not machine-checked is reported as such.
+confirms that each quote is really in it (saved HTML is compared without tags and entities). A quote that was
+not machine-checked is reported as such.
 
-An archived copy (for example the Wayback Machine) confirms the text on its own date, not the current version.
-Give `archived_on`; a copy older than 14 days cannot close a point for "current". A copy from an unofficial site
-is never evidence of a version (`traps.md`).
+An archived copy (for example the Wayback Machine) of an official page confirms the text on its own date, not the
+current version: give `official: true` and `archived_on`. It never closes `consolidation`, `amendments` or
+`status_of_changes` for "current" (only the live page shows whether something newer exists), and older than 14
+days it closes no point for "current". A copy from an unofficial site is never evidence (`traps.md`).
+
+The analysis date is never after the check date: a question about future conduct is answered as of today, with
+adopted future changes in `next_versions` and `changes`.
 
 ## The card
 
@@ -80,8 +87,8 @@ Results:
 
 - `current` — the required points are closed today, the held version (if any) equals the latest in force, no
   change in force after it, future versions recorded in `next_versions`;
-- `outdated` — a newer version in force, a change in the journal missing from the held version, or the held
-  version is future or repealed; `outdated_reason` says which;
+- `outdated` — the held version is not the latest in force (older or future), a change in force is missing from
+  it, or the act is repealed (`repealed.from` on or before the analysis date); `outdated_reason` says which;
 - `not_verified` — a required point stays open; `working_conclusion` says what the answer may still rely on.
 
 ```bash
@@ -96,7 +103,14 @@ reading; a green card still needs the agent's own reading.
 Each rule the answer cites from this act is a source in `<matter>/source-register.json` (`law-check.md`). The
 card fills its checks: `full_text` from reading the provision, `amendments` (point 2), `repeal` (6),
 `renumbering` (the cited provision's address now), `entry_into_force`, `application_date` and `transitional` (3).
-Each note names the card (`work/versions/<act-id>.json`). A card `current` allows the source `verified`;
-`not_verified` makes it `partial` with `unverified_impact`; `outdated` means the conclusion is drawn from the
-version in force instead, or the finding stays open. An `outdated` cited provision that changes the conclusion,
+Each note names the card (`work/versions/<act-id>.json`). Card → register source status:
+
+| Card | Source in the register |
+| --- | --- |
+| `current` | `verified` (the provision itself read in that version) |
+| `not_verified` | `partial`, with `unverified_impact`; never `verified` |
+| `outdated` | the held text is `superseded`; the conclusion is drawn from the version in force (a new source) or the finding stays open |
+| a version in `next_versions` | `future`, only for a notice about the future |
+
+No script checks this link yet: reconcile it yourself before delivery. An `outdated` cited provision that changes the conclusion,
 or a repealed act, blocks any "yes".

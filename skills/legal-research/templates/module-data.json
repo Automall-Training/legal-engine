@@ -1,4 +1,5 @@
 {
+  "unknowns": [],
   "module_data": {
     "action": "answer | version_check",
     "question": "[the user's question as asked]",
