@@ -1,0 +1,17 @@
+{
+  "represented_party": "[the employer from context/company.md]",
+  "unknowns": [],
+  "module_data": {
+    "procedure": "hiring | amendment | ending | internal-rules | contractor-or-employee | inspection-or-claim | cross-border",
+    "employer_country": "MD | RO",
+    "work_country": "MD | RO | other",
+    "role": null,
+    "engagement": "indefinite | fixed-term | part-time | telework | civil-contract | agency | day-labourer",
+    "start_date": null,
+    "ending_route": "agreement | resignation | end-of-term | dismissal-personal | dismissal-not-personal | by-law | none",
+    "options": [{"option": null, "needs": null, "cost": null, "risk": null, "verdict": "se poate | se poate cu condiție | risc | interzis"}],
+    "deadlines": [{"what": null, "date": null, "rule": null, "status": "reported | verified"}],
+    "confirmed_facts": [],
+    "assumptions": []
+  }
+}
