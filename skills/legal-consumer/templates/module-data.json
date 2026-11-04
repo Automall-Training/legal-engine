@@ -1,0 +1,16 @@
+{
+  "represented_party": "[the firm from context/company.md]",
+  "unknowns": [],
+  "module_data": {
+    "action": "terms | audit | withdrawal | complaint | question",
+    "products": ["goods | service | digital-content | digital-service | course-live | course-recorded | subscription"],
+    "channels": ["website | app | marketplace | social | phone"],
+    "buyer_countries": ["MD", "RO"],
+    "access_starts": "[on payment | on a date | on delivery]",
+    "checkpoints": [
+      {"id": "C1", "status": "met | missing | not-applicable | not-verified", "rule": null, "fix": null}
+    ],
+    "confirmed_facts": [],
+    "assumptions": []
+  }
+}
