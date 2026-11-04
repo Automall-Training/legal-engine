@@ -270,6 +270,8 @@ def matter_new(profile: Path, slug: str, title: str, module: str, catalog: dict,
             continue
     else:
         raise MatterError(f"99 matters named {base} already exist; choose another slug")
+    for sub in ("input", "output"):
+        (folder / sub).mkdir()
     intake = {
         "schema_version": SCHEMA_VERSION, "task_id": matter_id, "module": module, "title": title,
         "created": day, "action": None, "document_type": None, "commercial_goal": None,

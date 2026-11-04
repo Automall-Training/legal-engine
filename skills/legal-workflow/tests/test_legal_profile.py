@@ -196,6 +196,8 @@ class Matters(TmpCase):
         self.assertEqual(intake["task_id"], out["id"])
         self.assertEqual(intake["module"], "contracts")
         self.assertEqual(intake["title"], "NDA | with Acme SRL")
+        self.assertTrue((self.prof / "matters" / out["id"] / "input").is_dir())
+        self.assertTrue((self.prof / "matters" / out["id"] / "output").is_dir())
         self.assertEqual(lp.matter_list(self.prof)[0]["title"], "NDA | with Acme SRL")
         log = (self.prof / "matters" / "log.md").read_text(encoding="utf-8")
         self.assertTrue(log.startswith("# Matters log"))
