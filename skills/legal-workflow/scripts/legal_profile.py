@@ -2,6 +2,8 @@
 """Profile, modules and matters of the legal engine (stdlib only). Prints JSON for the agent.
 
     legal_profile.py where                                  # profile folder and where the path came from
+    legal_profile.py profile init [--dir D] [--switch]      # the wizard creates the profile folders and config.json
+    legal_profile.py modules set ID=on|off [ID=on|off …]    # the wizard switches optional modules
     legal_profile.py status [--module M]                    # setup steps, missing steps, module states
     legal_profile.py module M                               # core | on | off | unset | not-installed
     legal_profile.py step set STEP --status S [--note N] [--date YYYY-MM-DD]   # the wizard records a step
@@ -83,6 +85,23 @@ class MatterError(LegalProfileError):
     """A matter cannot be created, logged or read."""
 
 
+class SetupError(LegalProfileError):
+    """`profile init` or `modules set` cannot do what was asked."""
+
+
+def _write_atomic(path: Path, text: str, error: type[LegalProfileError]) -> None:
+    """Write via a unique temp file and an atomic replace: a crash never leaves a half-written user file."""
+    fd, name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}-", suffix=".tmp")
+    tmp = Path(name)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(text)
+        tmp.replace(path)
+    except OSError as exc:
+        tmp.unlink(missing_ok=True)
+        raise error(f"cannot write {path}: {exc}") from exc
+
+
 def _read_json(path: Path, error: type[LegalProfileError]) -> object:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -105,12 +124,71 @@ def resolve_profile(config: Path = CONFIG) -> tuple[Path, str]:
         if not path.is_absolute():
             raise ConfigError(f"config {config}: profile_dir must be an absolute path or start with ~, got {raw!r}")
         source = f"config {config}"
+    _check_location(path)
+    return path, source
+
+
+def _check_location(path: Path) -> None:
     engine = ENGINE_ROOT.resolve()
     if path.resolve() == engine or engine in path.resolve().parents:
         raise ProfileLocationError(
             f"profile {path} is inside the engine folder {engine}; a profile holds private data and must live "
             "outside it (default ~/legal-profile)")
-    return path, source
+
+
+PROFILE_DIRS = ("context", "templates", "matters", "laws", "contracts")
+
+
+def profile_init(raw: str | None, config: Path = CONFIG, switch: bool = False) -> dict:
+    """Create the profile folders and point config.json at them. Idempotent; never deletes or moves anything."""
+    current, _source = resolve_profile(config)
+    if raw is None:
+        target = current
+    else:
+        target = Path(os.path.expanduser(raw.strip()))
+        if not raw.strip() or not target.is_absolute():
+            raise SetupError(f"--dir must be an absolute path or start with ~, got {raw!r}")
+    target = Path(os.path.normpath(target))
+    # why: the profile gets five folders of its own; at the home folder or the root they would mix with
+    # unrelated files and a later backup or clean-up of "the profile" would take everything.
+    if target in (Path.home(), Path(target.anchor)):
+        raise SetupError(f"{target} cannot be the profile itself; use a folder of its own, e.g. ~/legal-profile")
+    _check_location(target)
+    if config.is_file() and target != Path(os.path.normpath(current)) and not switch:
+        raise SetupError(f"config {config} already points to {current}; to use {target} instead run again with "
+                         "--switch (nothing is moved: copy the old profile's files yourself if you want them)")
+    if target.exists() and not target.is_dir():
+        raise SetupError(f"{target} exists and is not a folder")
+    existed = target.is_dir()
+    created = []
+    try:
+        for sub in ("", *PROFILE_DIRS):
+            folder = target / sub
+            if not folder.is_dir():
+                folder.mkdir(parents=True)
+                created.append(sub or ".")
+        status_file = target / STATUS_FILE
+        if not status_file.exists():
+            status_file.write_text("# Integration status\n\n" + STATUS_HEADER, encoding="utf-8")
+            created.append(str(STATUS_FILE))
+        written = False
+        stored = _config_target(config)
+        if stored != target:
+            config.parent.mkdir(parents=True, exist_ok=True)
+            _write_atomic(config, json.dumps({"profile_dir": str(target)}, indent=2) + "\n", SetupError)
+            written = True
+    except OSError as exc:
+        raise SetupError(f"cannot create the profile in {target}: {exc}") from exc
+    return {"profile": str(target), "config": str(config), "config_written": written, "existed": existed,
+            "created": created}
+
+
+def _config_target(config: Path) -> Path | None:
+    """The folder config.json names (None without a config): init writes it even for the default folder,
+    so the path the engine uses is always visible in one file."""
+    if not config.is_file():
+        return None
+    return Path(os.path.normpath(resolve_profile(config)[0]))
 
 
 def load_catalog(path: Path = CATALOG) -> dict:
@@ -159,6 +237,38 @@ def read_modules(profile: Path, catalog: dict) -> dict[str, bool] | None:
         out[key] = value
     # why: a module the wizard did not ask about yet stays off until the user turns it on.
     return {mid: out.get(mid, False) for mid in allowed}
+
+
+SWITCH_WORDS = {"on": True, "off": False}
+
+
+def modules_set(profile: Path, catalog: dict, changes: list[str]) -> dict:
+    """Switch optional modules in modules.json; untouched modules keep their value (off in a new file)."""
+    if not profile.is_dir():
+        raise SetupError(f"profile {profile} does not exist; run `profile init` first")
+    if not changes:
+        raise SetupError("give at least one ID=on|off")
+    allowed = optional_ids(catalog)
+    wanted: dict[str, bool] = {}
+    for item in changes:
+        mid, _, word = item.partition("=")
+        mid, word = mid.strip(), word.strip().lower()
+        if mid in catalog["modules"] and catalog["modules"][mid]["core"]:
+            raise SetupError(f"{mid} is a core module: always on, not listed in modules.json")
+        if mid not in allowed:
+            raise SetupError(f"unknown module {mid!r}; optional modules are {', '.join(allowed)}")
+        if word not in SWITCH_WORDS:
+            raise SetupError(f"{item!r}: write {mid}=on or {mid}=off")
+        if mid in wanted and wanted[mid] != SWITCH_WORDS[word]:
+            raise SetupError(f"{mid} is given both on and off")
+        wanted[mid] = SWITCH_WORDS[word]
+    # why: a broken or old-version file is reported (update migrates it), never silently replaced.
+    current = read_modules(profile, catalog) or {mid: False for mid in allowed}
+    changed = sorted(mid for mid, value in wanted.items() if current[mid] != value)
+    switches = {**current, **wanted}
+    _write_atomic(profile / "modules.json",
+                  json.dumps({"schema_version": SCHEMA_VERSION, **switches}, indent=2) + "\n", SetupError)
+    return {"modules": switches, "changed": changed}
 
 
 def _status_lines(profile: Path) -> list[str]:
@@ -220,9 +330,7 @@ def step_set(profile: Path, step: str, state: str, catalog: dict, note: str = ""
         lines.append(row)
     path = profile / STATUS_FILE
     path.parent.mkdir(exist_ok=True)
-    tmp = path.with_suffix(".md.tmp")
-    tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    tmp.replace(path)  # why: atomic, a crash never leaves a half-written status table
+    _write_atomic(path, "\n".join(lines) + "\n", StatusFileError)
     return {"step": step, "status": state, "date": day}
 
 
@@ -400,18 +508,8 @@ def matter_update(profile: Path, matter_id: str, data: object) -> dict:
     if "module_data" in data:
         current = intake.get("module_data") if isinstance(intake.get("module_data"), dict) else {}
         intake["module_data"] = {**current, **data["module_data"]}
-    target = folder / "intake.json"
-    # why: a unique temp name per writer, then an atomic replace: a crash never leaves a broken intake.json.
-    # Two writers at once still end with one whole file (last wins); modules update a matter one at a time.
-    fd, name = tempfile.mkstemp(dir=folder, prefix=".intake-", suffix=".tmp")
-    tmp = Path(name)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            handle.write(json.dumps(intake, ensure_ascii=False, indent=2) + "\n")
-        tmp.replace(target)
-    except OSError as exc:
-        tmp.unlink(missing_ok=True)
-        raise MatterError(f"cannot write {target}: {exc}") from exc
+    # why: two writers at once still end with one whole file (last wins); modules update a matter one at a time.
+    _write_atomic(folder / "intake.json", json.dumps(intake, ensure_ascii=False, indent=2) + "\n", MatterError)
     return {"id": matter_id, "updated": sorted(data)}
 
 
@@ -469,6 +567,15 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("where")
+    pr = sub.add_parser("profile")
+    psub = pr.add_subparsers(dest="action", required=True)
+    pi = psub.add_parser("init")
+    pi.add_argument("--dir")
+    pi.add_argument("--switch", action="store_true")
+    md = sub.add_parser("modules")
+    mdsub = md.add_subparsers(dest="action", required=True)
+    mds = mdsub.add_parser("set")
+    mds.add_argument("changes", nargs="+")
     st = sub.add_parser("status")
     st.add_argument("--module")
     mo = sub.add_parser("module")
@@ -501,6 +608,9 @@ def main(argv: list[str] | None = None) -> int:
     mls.add_argument("--open", action="store_true")
     a = ap.parse_args(argv)
     try:
+        if a.cmd == "profile":  # why: before resolve_profile, so init can also run where no profile exists yet
+            print(json.dumps(profile_init(a.dir, CONFIG, a.switch), ensure_ascii=False, indent=2))
+            return 0
         # why: globals are read at call time so tests (and LEGAL_ENGINE_CONFIG) can point elsewhere.
         profile, source = resolve_profile(CONFIG)
         if a.cmd == "where":
@@ -515,6 +625,8 @@ def main(argv: list[str] | None = None) -> int:
                        "skill": catalog["modules"][a.module]["skill"]}
             elif a.cmd == "step":
                 out = step_set(profile, a.step, a.status, catalog, a.note, a.date)
+            elif a.cmd == "modules":
+                out = modules_set(profile, catalog, a.changes)
             elif a.action == "new":
                 out = matter_new(profile, a.slug, a.title, a.module, catalog, a.date)
             elif a.action == "log":

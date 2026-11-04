@@ -361,6 +361,100 @@ class Matters(TmpCase):
         self.assertEqual(list((self.prof / "matters" / a).glob("*.tmp")), [])
 
 
+class ProfileInit(TmpCase):
+    def test_creates_folders_status_and_config_then_is_idempotent(self):
+        cfg = self.root / "cfg" / "config.json"
+        target = self.root / "prof"
+        out = lp.profile_init(str(target), cfg)
+        self.assertEqual(out["profile"], str(target))
+        self.assertTrue(out["config_written"])
+        self.assertFalse(out["existed"])
+        for sub in lp.PROFILE_DIRS:
+            self.assertTrue((target / sub).is_dir())
+        self.assertIn("| Step | Status |", (target / lp.STATUS_FILE).read_text(encoding="utf-8"))
+        self.assertEqual(json.loads(cfg.read_text(encoding="utf-8")), {"profile_dir": str(target)})
+        (target / "context" / "company.md").write_text("mine\n", encoding="utf-8")
+        again = lp.profile_init(None, cfg)
+        self.assertEqual((again["created"], again["config_written"], again["existed"]), ([], False, True))
+        self.assertEqual((target / "context" / "company.md").read_text(encoding="utf-8"), "mine\n")
+
+    def test_default_folder_without_config(self):
+        cfg = self.root / "config.json"
+        with mock.patch.object(lp, "DEFAULT_PROFILE", self.root / "legal-profile"):
+            out = lp.profile_init(None, cfg)
+        self.assertEqual(out["profile"], str(self.root / "legal-profile"))
+        self.assertTrue(cfg.is_file())
+
+    def test_switch_is_required_to_repoint(self):
+        cfg = self.root / "config.json"
+        lp.profile_init(str(self.root / "a"), cfg)
+        with self.assertRaises(lp.SetupError) as ctx:
+            lp.profile_init(str(self.root / "b"), cfg)
+        self.assertIn("--switch", str(ctx.exception))
+        out = lp.profile_init(str(self.root / "b"), cfg, switch=True)
+        self.assertTrue(out["config_written"])
+        self.assertTrue((self.root / "a" / "context").is_dir())  # the old profile is left alone
+
+    def test_refusals(self):
+        cfg = self.root / "config.json"
+        for raw in ("relative/path", "  "):
+            with self.assertRaises(lp.SetupError):
+                lp.profile_init(raw, cfg)
+        with self.assertRaises(lp.SetupError):
+            lp.profile_init(str(Path.home()), cfg)
+        with self.assertRaises(lp.SetupError):
+            lp.profile_init("/", cfg)
+        with self.assertRaises(lp.ProfileLocationError):
+            lp.profile_init(str(lp.ENGINE_ROOT / "profile"), cfg)
+        (self.root / "file").write_text("x", encoding="utf-8")
+        with self.assertRaises(lp.SetupError):
+            lp.profile_init(str(self.root / "file"), cfg)
+        cfg.write_text("{broken", encoding="utf-8")
+        with self.assertRaises(lp.ConfigError):
+            lp.profile_init(str(self.root / "p"), cfg)
+
+    def test_os_errors_are_typed(self):
+        cfg = self.root / "config.json"
+        with mock.patch.object(Path, "mkdir", side_effect=OSError("read-only")), self.assertRaises(lp.SetupError):
+            lp.profile_init(str(self.root / "p"), cfg)
+        with mock.patch.object(Path, "replace", side_effect=OSError("disk full")), \
+                self.assertRaises(lp.SetupError):
+            lp.profile_init(str(self.root / "q"), cfg)
+        self.assertFalse(cfg.exists())
+        self.assertEqual([p.name for p in self.root.iterdir() if p.name.endswith(".tmp")], [])
+
+
+class ModulesSet(TmpCase):
+    def test_new_file_lists_every_optional_module(self):
+        prof = self.root / "p"
+        prof.mkdir()
+        out = lp.modules_set(prof, CATALOG, ["privacy=on", "consumer=OFF"])
+        self.assertEqual(out["changed"], ["privacy"])
+        data = json.loads((prof / "modules.json").read_text(encoding="utf-8"))
+        self.assertEqual(data["schema_version"], 1)
+        self.assertEqual(set(data) - {"schema_version"}, set(lp.optional_ids(CATALOG)))
+        self.assertEqual(lp.read_modules(prof, CATALOG)["privacy"], True)
+
+    def test_keeps_untouched_values(self):
+        prof = make_profile(self.root)
+        out = lp.modules_set(prof, CATALOG, ["employment=on"])
+        self.assertEqual((out["modules"]["privacy"], out["modules"]["employment"]), (True, True))
+        self.assertEqual(lp.modules_set(prof, CATALOG, ["employment=on"])["changed"], [])
+
+    def test_refusals(self):
+        prof = make_profile(self.root)
+        cases = ([], ["contracts=on"], ["tax=on"], ["privacy"], ["privacy=yes"], ["privacy=on", "privacy=off"])
+        for changes in cases:
+            with self.subTest(changes=changes), self.assertRaises(lp.SetupError):
+                lp.modules_set(prof, CATALOG, changes)
+        with self.assertRaises(lp.SetupError):
+            lp.modules_set(self.root / "none", CATALOG, ["privacy=on"])
+        (prof / "modules.json").write_text('{"schema_version": 0}', encoding="utf-8")
+        with self.assertRaises(lp.ModulesFileError):
+            lp.modules_set(prof, CATALOG, ["privacy=on"])
+        self.assertEqual(json.loads((prof / "modules.json").read_text(encoding="utf-8")), {"schema_version": 0})
+
+
 class Cli(TmpCase):
     def run_cli(self, *args: str, config: dict | None = None, siblings: Path | None = None) -> tuple[int, str, str]:
         cfg = self.root / "config.json"
@@ -405,6 +499,20 @@ class Cli(TmpCase):
         self.assertIn("not readable JSON", err)
         code, out, _ = self.run_cli("step", "set", "tools", "--status", "done", config=cfg)
         self.assertEqual(json.loads(out)["step"], "tools")
+        code, out, _ = self.run_cli("modules", "set", "trademark=on", config=cfg)
+        self.assertEqual((code, json.loads(out)["changed"]), (0, ["trademark"]))
+
+    def test_profile_init_cli(self):
+        target = self.root / "fresh"
+        code, out, _ = self.run_cli("profile", "init", "--dir", str(target))
+        self.assertEqual((code, json.loads(out)["profile"]), (0, str(target)))
+        code, out, _ = self.run_cli("where")
+        self.assertEqual(json.loads(out)["profile"], str(target))
+        code, _, err = self.run_cli("profile", "init", "--dir", str(self.root / "other"))
+        self.assertEqual(code, 2)
+        self.assertIn("SetupError", err)
+        code, out, _ = self.run_cli("profile", "init", "--dir", str(self.root / "other"), "--switch")
+        self.assertEqual(code, 0)
 
     def test_errors_exit_2_with_message(self):
         code, out, err = self.run_cli("where", config={"profile_dir": ""})
