@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `legal-employment` module (MD and RO labour codes): ways to engage a person compared by cost and risk
+  (employment variants, civil contract, agency, day labourer), seven procedures (hiring, amendment, ending from
+  the agreement down, internal rules, contractor or employee, inspection or claim, work across borders), the
+  required content of each document, optional documents offered as optional.
 - `legal-trademark` module: name check with a verdict on the norms scale (never "available") and ways around a
   conflict, filing strategy by cost and risk (territory, route, priority, sign, classes, owner, representation),
   portfolio deadlines from the profile with `tm_deadlines.py` (raw dates, rule and article, check on the task

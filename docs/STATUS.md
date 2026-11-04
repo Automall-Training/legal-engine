@@ -11,8 +11,8 @@ Version: v0 (in development). Updated: 2026-11-04.
 | 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | done (branch `phase-1/legal-workflow-setup` on top of step 4; merge to `main` only after the owner's «да») |
 | 6 | modules `legal-privacy`, `legal-consumer` | done (branch `phase-1/legal-privacy-consumer` on top of step 5; merge only after «да») |
 | 7 | module `legal-trademark`; norms §15 (cost against risk); `legal-consumer` made generic | done (branch `phase-1/legal-trademark` on top of step 6; merge only after «да») |
-| 8 | module `legal-employment` | next |
-| 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | — |
+| 8 | module `legal-employment` | done (branch `phase-1/legal-employment` on top of step 7; merge only after «да») |
+| 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | next |
 | 10 | end-to-end check, cross-model review, v1.0.0 | — |
 | 11 | public GitHub repository and first push (owner's «да» first) | — |
 
@@ -52,3 +52,7 @@ apps and subscriptions, marketplaces, shop sales; courses are one block of `term
 dates, every rule `reported` or `not-read`. Open, live run (step 10): which Moldovan trademark law applies on the
 task date (Law 38/2008 or Law 25/2024), the AGEPI terms and the representation rule; current fees of the three
 offices; no trademark licence model in the library (M05 is a structure for licences in general).
+`legal-employment` has no model card in the contract library: its documents follow the module's own structure
+(`references/documents.md`), a contract with a self-employed person uses M01. Open, live run (step 10): the
+current article numbers of both labour codes, REVISAL deadlines, the MD-RO social security agreement, current
+minimum wages and contribution rates.
