@@ -24,6 +24,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 # why: the unresolved path keeps the installed skills folder (install.sh links each skill), so sibling
@@ -329,7 +330,7 @@ def matter_new(profile: Path, slug: str, title: str, module: str, catalog: dict,
         "input_files": [], "unknowns": [], "module_data": {},
     }
     try:
-        for sub in ("input", "output"):
+        for sub in ("input", "output", "work"):
             (folder / sub).mkdir()
         (folder / "intake.json").write_text(json.dumps(intake, ensure_ascii=False, indent=2) + "\n",
                                             encoding="utf-8")
@@ -380,8 +381,14 @@ def matter_update(profile: Path, matter_id: str, data: object) -> dict:
     if unknown:
         raise MatterError(f"unknown intake fields: {', '.join(unknown)}; core: {', '.join(INTAKE_EDITABLE)}, "
                           f"module fields go under module_data")
-    if "module_data" in data and not isinstance(data["module_data"], dict):
-        raise MatterError("module_data must be a JSON object")
+    if "module_data" in data and (not isinstance(data["module_data"], dict) or not data["module_data"]):
+        raise MatterError("module_data must be a non-empty JSON object")
+    for key in ("input_files", "unknowns"):
+        if key in data and not isinstance(data[key], list):
+            raise MatterError(f"{key} must be a list")
+    for key in ("represented_party", "communication_language", "document_language"):
+        if key in data and not (data[key] is None or isinstance(data[key], str)):
+            raise MatterError(f"{key} must be a string or null")
     folder = _matter_folder(profile, matter_id)
     intake = _read_intake(folder)
     if intake.get("schema_version") != SCHEMA_VERSION:
@@ -394,10 +401,14 @@ def matter_update(profile: Path, matter_id: str, data: object) -> dict:
         current = intake.get("module_data") if isinstance(intake.get("module_data"), dict) else {}
         intake["module_data"] = {**current, **data["module_data"]}
     target = folder / "intake.json"
-    tmp = target.with_suffix(".json.tmp")
+    # why: a unique temp name per writer, then an atomic replace: a crash never leaves a broken intake.json.
+    # Two writers at once still end with one whole file (last wins); modules update a matter one at a time.
+    fd, name = tempfile.mkstemp(dir=folder, prefix=".intake-", suffix=".tmp")
+    tmp = Path(name)
     try:
-        tmp.write_text(json.dumps(intake, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-        tmp.replace(target)  # why: a crash mid-write must not leave a broken intake.json
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            handle.write(json.dumps(intake, ensure_ascii=False, indent=2) + "\n")
+        tmp.replace(target)
     except OSError as exc:
         tmp.unlink(missing_ok=True)
         raise MatterError(f"cannot write {target}: {exc}") from exc

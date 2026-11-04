@@ -337,11 +337,12 @@ class Matters(TmpCase):
         self.assertEqual(intake["module_data"], {"action": "draft", "document_type": "NDA"})
         self.assertEqual(intake["unknowns"], ["forum"])
         self.assertEqual(intake["task_id"], a)
-        self.assertFalse((self.prof / "matters" / a / "intake.json.tmp").exists())
+        self.assertEqual(list((self.prof / "matters" / a).glob("*.tmp")), [])
 
     def test_update_refusals(self):
         a = lp.matter_new(self.prof, "nda", "NDA", "contracts", CATALOG, "2026-11-01")["id"]
-        for data in ({}, [], {"task_id": "x"}, {"module": "privacy"}, {"parties": []}, {"module_data": []}):
+        for data in ({}, [], {"task_id": "x"}, {"module": "privacy"}, {"parties": []}, {"module_data": []},
+                     {"module_data": {}}, {"input_files": "x"}, {"unknowns": None}, {"represented_party": 5}):
             with self.subTest(data=data), self.assertRaises(lp.MatterError):
                 lp.matter_update(self.prof, a, data)
         with self.assertRaises(lp.MatterError):
@@ -357,7 +358,7 @@ class Matters(TmpCase):
         with mock.patch.object(Path, "replace", side_effect=OSError("disk full")), self.assertRaises(lp.MatterError):
             lp.matter_update(self.prof, a, {"unknowns": ["x"]})
         self.assertEqual((self.prof / "matters" / a / "intake.json").read_text(encoding="utf-8"), before)
-        self.assertFalse((self.prof / "matters" / a / "intake.json.tmp").exists())
+        self.assertEqual(list((self.prof / "matters" / a).glob("*.tmp")), [])
 
 
 class Cli(TmpCase):

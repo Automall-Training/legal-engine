@@ -46,6 +46,14 @@ class EngineGuardTests(Base):
         with self.assertRaises(R.RedlineError):
             ENV.refuse_inside_engine(ENV.ENGINE_ROOT, R.RedlineError)
 
+    def test_case_changed_path_refused(self):
+        # why: on a case-insensitive disk another spelling reaches the same folder.
+        other = Path(str(ENV.ENGINE_ROOT).swapcase())
+        if not other.exists():
+            self.skipTest("case-sensitive file system")
+        with self.assertRaisesRegex(ValueError, "engine folder"):
+            ENV.refuse_inside_engine(other / "new" / "out.docx")
+
     def test_outside_engine_allowed(self):
         self.assertEqual(ENV.refuse_inside_engine(self.dir / "out.docx"), (self.dir / "out.docx").resolve())
 
@@ -102,6 +110,8 @@ class BuildCliTests(Base):
 
     def test_bad_specs(self):
         bad = self.dir / "bad.json"
+        bad.write_text("[]", encoding="utf-8")
+        self.assertEqual(run(B.main, str(bad), str(self.dir / "c.docx"))[0], 2)
         bad.write_text("{", encoding="utf-8")
         self.assertEqual(run(B.main, str(bad), str(self.dir / "a.docx"))[0], 2)
         for blocks in ([{"type": "image"}], [{"type": "table", "rows": [["a", "b"], ["c"]]}]):
@@ -139,6 +149,32 @@ class RedlineCliTests(Base):
         code, out = run(R.main, "verify", str(ROOT / "assets" / "original.docx"), str(ex / "tracked.docx"),
                         str(ex / "clean.docx"))
         self.assertEqual(code, 0, out)
+
+    def test_malformed_plans_exit_2(self):
+        plan = self.dir / "plan.json"
+        for bad in ([], {"changes": ["a"]}, {"author": "x", "changes": [{"paragraph": True, "old": "a", "new": "b",
+                                                                          "expected_paragraph": "a"}]},
+                    {"author": "x", "changes": [{"paragraph": 2, "old": 1, "new": "b", "expected_paragraph": "a"}]},
+                    {"author": 5, "changes": []}, {"changes": [{"paragraph": 0, "part": 3}]}):
+            plan.write_text(json.dumps(bad), encoding="utf-8")
+            with self.subTest(plan=bad):
+                code, out = run(R.main, "apply", str(ROOT / "assets" / "original.docx"), str(plan), str(self.dir / "o"))
+                self.assertEqual(code, 2, out)
+                self.assertFalse((self.dir / "o").exists())
+
+    def test_failed_verification_leaves_no_output(self):
+        with mock.patch.object(R, "verify", side_effect=R.RedlineError("boom")):
+            with self.assertRaises(R.RedlineError):
+                R.apply(ROOT / "assets" / "original.docx", json.loads((ROOT / "assets" / "changes.json").read_text(
+                    encoding="utf-8")), self.dir / "out")
+        self.assertEqual(list(self.dir.iterdir()), [])
+
+    def test_text_box_paragraph_is_not_a_target(self):
+        from lxml import etree
+        xml = (f'<w:p xmlns:w="{R.W}"><w:r><w:pict><w:txbxContent><w:p><w:r><w:t>x</w:t></w:r></w:p>'
+               '</w:txbxContent></w:pict></w:r></w:p>')
+        inner = etree.fromstring(xml).find(f".//{{{R.W}}}txbxContent/{{{R.W}}}p")
+        self.assertFalse(R.simple(inner))
 
     def test_errors_exit_2(self):
         missing = self.dir / "missing.docx"

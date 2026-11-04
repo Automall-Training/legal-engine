@@ -79,7 +79,7 @@ def main(argv=None):
     p=argparse.ArgumentParser(description=__doc__); p.add_argument('spec'); p.add_argument('output'); a=p.parse_args(argv)
     try:
         build(json.loads(Path(a.spec).read_text(encoding='utf-8')),a.output)
-    except (BuildError,KeyError,TypeError,OSError,json.JSONDecodeError) as e:
+    except (BuildError,KeyError,TypeError,AttributeError,OSError,json.JSONDecodeError) as e:
         print(json.dumps({'error':f'{type(e).__name__}: {e}'},ensure_ascii=False)); return 2
     print(json.dumps({'status':'created','output':str(Path(a.output).resolve())},ensure_ascii=False)); return 0
 

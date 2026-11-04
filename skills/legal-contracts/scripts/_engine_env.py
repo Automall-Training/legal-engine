@@ -32,6 +32,19 @@ def refuse_inside_engine(path: str | Path, error: type[Exception] = ValueError, 
     """why: a user's documents and reports belong in the matter folder of their profile, never in the engine
     repository, where a commit could publish them."""
     target = Path(path).expanduser().resolve()
-    if target == root or root in target.parents:
+    # why: compare by file identity, not by text — macOS folders ignore letter case, so a path typed in
+    # another case would slip past a string comparison. The target may not exist yet: check its existing parents.
+    probe = target
+    while not probe.exists() and probe != probe.parent:
+        probe = probe.parent
+    inside = any(_same(p, root) for p in (probe, *probe.parents))
+    if inside:
         raise error(f"refusing to write inside the engine folder ({root}): write to the matter's output/ instead")
     return target
+
+
+def _same(a: Path, b: Path) -> bool:
+    try:
+        return os.path.samefile(a, b)
+    except OSError:
+        return False

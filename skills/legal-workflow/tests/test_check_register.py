@@ -15,9 +15,12 @@ import check_register as L  # noqa: E402
 ASSET = Path(__file__).resolve().parents[1] / "assets" / "source-register.json"
 
 
+TASK = f"2026-01-01-synthetic@{datetime.now().astimezone().date().isoformat()}"
+
+
 def register():
     now = datetime.now(timezone.utc).isoformat()
-    return {"schema_version": 1, "task_id": "synthetic-test", "started_at": now, "checked_at": now,
+    return {"schema_version": 1, "task_id": TASK, "started_at": now, "checked_at": now,
             "analysis_date": "2026-01-01", "completion": "verified_scope",
             "sources": [{"id": "S1", "title": "SYNTHETIC ACT — NOT LAW", "number": "TEST", "jurisdiction": "TEST",
                          "authority_type": "synthetic", "legal_force": "test fixture only", "provision": "art. 1",
@@ -32,7 +35,7 @@ def register():
 
 class RegisterTests(unittest.TestCase):
     def check(self, r):
-        return L.validate(r, "synthetic-test", datetime.now(timezone.utc))
+        return L.validate(r, TASK, datetime.now().astimezone())
 
     def test_complete_synthetic_record(self):
         result = self.check(register())
@@ -78,6 +81,12 @@ class RegisterTests(unittest.TestCase):
         r = register()
         r["task_id"] = "old-task"
         self.assertTrue(self.check(r)["errors"])
+
+    def test_task_id_must_carry_the_check_date(self):
+        r = register()
+        r["task_id"] = "2026-01-01-synthetic@2026-01-01"
+        errors = L.validate(r, r["task_id"], datetime.now().astimezone())["errors"]
+        self.assertTrue(any("check date" in e for e in errors))
 
     def test_yesterday_check_rejected(self):
         r = register()
@@ -131,7 +140,7 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             good = Path(tmp) / "source-register.json"
             good.write_text(json.dumps(register()), encoding="utf-8")
-            self.assertEqual(self.run_cli(str(good), "--task-id", "synthetic-test")[0], 0)
+            self.assertEqual(self.run_cli(str(good), "--task-id", TASK)[0], 0)
             self.assertEqual(self.run_cli(str(good), "--task-id", "other")[0], 1)
             bad = Path(tmp) / "bad.json"
             bad.write_text("{not json", encoding="utf-8")

@@ -9,7 +9,9 @@ import copy
 import hashlib
 import json
 import re
+import shutil
 import sys
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from zipfile import ZipFile
@@ -70,7 +72,12 @@ def preflight(data):
 
 def text(p): return ''.join(p.xpath('.//w:t/text()', namespaces=NS))
 
+HIDDEN = {q('txbxContent'), '{http://schemas.openxmlformats.org/markup-compatibility/2006}AlternateContent',
+          '{urn:schemas-microsoft-com:vml}textbox'}
+
 def simple(p):
+    # why: a paragraph in a text box or an AlternateContent fallback may be a copy Word never shows.
+    if any(a.tag in HIDDEN for a in p.iterancestors()): return False
     if any(c.tag not in {q('pPr'), q('r')} for c in p): return False
     return all(all(c.tag in {q('rPr'), q('t')} for c in r) for r in p.findall('w:r', NS))
 
@@ -92,9 +99,22 @@ def take(runs, begin, end, deleted=False):
         pos += length
     return out
 
+def check_plan(plan):
+    """why: a malformed plan must give the typed error and exit 2, never a traceback mid-edit."""
+    if not isinstance(plan, dict) or not isinstance(plan.get('changes'), list):
+        raise RedlineError('Plan must be an object with a "changes" list')
+    if not isinstance(plan.get('author', ''), str): raise RedlineError('Author must be a string')
+    for i, ch in enumerate(plan['changes']):
+        if not isinstance(ch, dict): raise RedlineError(f'changes[{i}] must be an object')
+        if type(ch.get('paragraph')) is not int: raise RedlineError(f'changes[{i}].paragraph must be an integer')
+        if not isinstance(ch.get('part', 'word/document.xml'), str): raise RedlineError(f'changes[{i}].part must be a string')
+        for key in ('expected_paragraph', 'old', 'new'):
+            if not isinstance(ch.get(key), str): raise RedlineError(f'changes[{i}].{key} must be a string')
+
 def apply(input_path, plan, output_dir):
     infos, data = read_package(input_path); preflight(data)
     if 'word/settings.xml' not in data: raise RedlineError('Missing settings.xml; use a full editor')
+    check_plan(plan)
     author = plan.get('author', '')
     if not author.strip(): raise RedlineError('Non-empty revision author required')
     changes = plan.get('changes', [])
@@ -155,11 +175,18 @@ def apply(input_path, plan, output_dir):
     clean=project(tracked,True)
     dest=refuse_inside_engine(output_dir,RedlineError)
     if dest.exists(): raise RedlineError('Output directory must be new; no overwrite')
-    dest.mkdir(parents=True)
-    write_package(dest/'tracked.docx',infos,tracked); write_package(dest/'clean.docx',infos,clean)
-    result=verify(input_path,dest/'tracked.docx',dest/'clean.docx')
+    dest.parent.mkdir(parents=True,exist_ok=True)
+    # why: unverified files must never sit in output/ looking like a deliverable; publish the folder only
+    # after verification passes.
+    work=Path(tempfile.mkdtemp(prefix='.redline-',dir=dest.parent))
+    try:
+        write_package(work/'tracked.docx',infos,tracked); write_package(work/'clean.docx',infos,clean)
+        result=verify(input_path,work/'tracked.docx',work/'clean.docx')
+    except Exception:
+        shutil.rmtree(work,ignore_errors=True); raise
     result.update({'source_sha256':sha(input_path),'author':author,'created_at':stamp,'changes':changes})
-    (dest/'verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    (work/'verification.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    work.rename(dest)
     return result
 
 def project(data, accept):

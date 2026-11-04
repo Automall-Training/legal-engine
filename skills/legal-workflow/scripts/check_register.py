@@ -56,6 +56,10 @@ def validate(reg: dict, task_id: str, now: datetime) -> dict:
         analysis = date.fromisoformat(reg["analysis_date"])
         require(start <= checked <= now, "invalid task/check timestamps")
         require(checked.astimezone(now.tzinfo).date() == now.date(), "check is not from today: re-check required")
+        # why: the id carries the check date (<matter-id>@<YYYY-MM-DD>); a past analysis date there is a mistake.
+        _, sep, day = str(reg["task_id"]).rpartition("@")
+        require(bool(sep) and day == checked.astimezone(now.tzinfo).date().isoformat(),
+                "task_id must be <matter-id>@<check date> (the date of checked_at, not the analysis date)")
         sources = {s["id"]: s for s in reg["sources"]}
         require(len(sources) == len(reg["sources"]), "duplicate source ids")
         findings = {f["id"]: f for f in reg["findings"]}
