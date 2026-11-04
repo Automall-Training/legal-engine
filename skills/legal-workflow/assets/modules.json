@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "steps": ["firms", "audience", "modules", "language", "side-risk", "niches", "laws", "documents", "tools", "first-run"],
+  "base_needs": ["firms", "modules", "language", "side-risk"],
+  "modules": {
+    "contracts": {"skill": "legal-contracts", "core": true, "needs": [], "label": "contracts: draft, audit, redline"},
+    "research": {"skill": "legal-research", "core": true, "needs": [], "label": "legal question with official sources"},
+    "watch": {"skill": "legal-watch", "core": true, "needs": ["niches", "laws"], "label": "law library, monitoring, contract re-review"},
+    "privacy": {"skill": "legal-privacy", "core": false, "needs": [], "label": "personal data: GDPR, MD, RO"},
+    "consumer": {"skill": "legal-consumer", "core": false, "needs": [], "label": "online sales to consumers"},
+    "trademark": {"skill": "legal-trademark", "core": false, "needs": [], "label": "trademarks: AGEPI, OSIM, EUIPO"},
+    "employment": {"skill": "legal-employment", "core": false, "needs": [], "label": "employment: hire, amend, dismiss"}
+  }
+}

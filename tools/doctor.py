@@ -10,7 +10,6 @@ The user's profile is reported, not required: the setup wizard creates it.
 
 from __future__ import annotations
 
-import json
 import os
 import shutil
 import subprocess
@@ -18,9 +17,12 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# why: the profile contract belongs to the legal-workflow skill; doctor reuses its lookup instead of a copy.
+sys.path.insert(0, str(ROOT / "skills" / "legal-workflow" / "scripts"))
+import legal_profile  # noqa: E402
 SKILLS_DIR = Path(os.environ.get("SKILLS_DIR", Path.home() / ".claude" / "skills"))
 CONFIG = Path(os.environ.get("LEGAL_ENGINE_CONFIG", Path.home() / ".config" / "legal-engine" / "config.json"))
-DEFAULT_PROFILE = Path.home() / "legal-profile"
+DEFAULT_PROFILE = legal_profile.DEFAULT_PROFILE
 VENV_PY = ROOT / ".venv" / "bin" / "python"
 # why: import names differ from package names (python-docx → docx, PyYAML → yaml).
 VENV_IMPORTS = ("docx", "lxml", "pypdf", "pdfplumber", "yaml")
@@ -40,16 +42,10 @@ def engine_skills(root: Path = ROOT) -> list[str]:
 
 def profile_dir(config: Path = CONFIG) -> tuple[Path, str]:
     """(profile folder, where the path came from). A broken config is reported, never guessed around."""
-    if not config.is_file():
-        return DEFAULT_PROFILE, "default (no config yet)"
     try:
-        data = json.loads(config.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise SystemExit(f"config {config} is not valid JSON: {exc}") from exc
-    raw = data.get("profile_dir")
-    if not isinstance(raw, str) or not raw.strip():
-        raise SystemExit(f"config {config} has no string field profile_dir")
-    return Path(os.path.expanduser(raw)), f"config {config}"
+        return legal_profile.resolve_profile(config)
+    except legal_profile.LegalProfileError as exc:
+        raise SystemExit(str(exc)) from exc
 
 
 def line(ok: bool | None, what: str, note: str = "") -> None:

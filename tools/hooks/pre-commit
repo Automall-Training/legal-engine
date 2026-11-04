@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
-# Blocks a commit when the leak check fails or the tool tests are red.
+# Blocks a commit when the leak check fails or the tool or skill tests are red.
 # Enable once per clone: git config core.hooksPath tools/hooks
 set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 python3 "$ROOT/tools/check.py" --quiet
 python3 -m unittest discover -s "$ROOT/tools/tests" -q
+for tests in "$ROOT"/skills/*/tests; do
+  [ -d "$tests" ] && python3 -m unittest discover -s "$tests" -q
+done
