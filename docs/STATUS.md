@@ -12,8 +12,8 @@ Version: v0 (in development). Updated: 2026-11-04.
 | 6 | modules `legal-privacy`, `legal-consumer` | done (branch `phase-1/legal-privacy-consumer` on top of step 5; merge only after «да») |
 | 7 | module `legal-trademark`; norms §15 (cost against risk); `legal-consumer` made generic | done (branch `phase-1/legal-trademark` on top of step 6; merge only after «да») |
 | 8 | module `legal-employment` | done (branch `phase-1/legal-employment` on top of step 7; merge only after «да») |
-| 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | next |
-| 10 | end-to-end check, cross-model review, v1.0.0 | — |
+| 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | done (branch `phase-1/legal-watch` on top of step 8; merge only after «да») |
+| 10 | end-to-end check, cross-model review, v1.0.0 | next |
 | 11 | public GitHub repository and first push (owner's «да» first) | — |
 
 Checks: `python3 tools/check.py` · `python3 -m unittest discover -s tools/tests` ·
@@ -36,9 +36,16 @@ would list all errors at once.
 Minor, later: no script yet checks that a register source's status matches its version card (the table in
 `version-check.md` is applied by hand). Live run against real official sites: step 10 (`legal-research/tests/scenarios.md`).
 Rollout: do not install the engine next to a personal contracts skill with overlapping trigger phrases.
-Open for step 9: the wizard steps `niches`, `laws`, `first-run` are run by `legal-watch/references/setup.md` (to be
-written with the module, including the `laws/watchlist.yaml` format); until then they stay `pending` with a note, and
-the step `documents` only copies contracts into `contracts/` (the clause index comes with `legal-watch`).
+`legal-watch` (step 9): the wizard steps `niches`, `laws`, `first-run` follow `legal-watch/references/setup.md`;
+the profile holds `laws/watchlist.yaml` (choices), `laws/state.json` (versions held, scripts only), `laws/texts/`,
+`laws/runs/<date>/`, and `contracts/index/`. Scripts need `.venv` (PyYAML, python-docx). Readers calibrated on live
+pages: legis.md markdown (via a command engine), EUR-Lex / Cellar, the MD Gazette table of contents, Wayback; not
+calibrated: legis.md HTML, both just.ro readers (their readings are "not verified" until confirmed by hand). On
+2026-11-04 plain requests were refused by legis.md (403), legislatie.just.ro (connection dropped) and EUR-Lex
+(empty 202): expect checks by hand. Open, live run (step 10): calibrate the just.ro reader on a live page; just.ro
+code pages known only for the fiscal and labour codes; 37 catalog acts lack a document id (found on first run);
+Moldovan document ids are all `reported`; PDF scan of omnibus laws in the MD Gazette not ported; trademark bulletin
+watch (BOPI) not ported (later option).
 Optional modules (from step 6) check `legal_profile.py module <id>` first, decide the content of a document and
 hand the drafting to the contract tools by path; `tools/tests/test_skills.py` checks every skill (frontmatter, links,
 JSON, module templates against `matter update`, the switch check). A data breach skips the module switch (router).

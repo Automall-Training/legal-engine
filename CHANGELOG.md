@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- `legal-watch` module (core): a catalog of 10 niches, 21 law categories and 116 MD / RO / EU acts with official
+  ids, each dated and `verified` or `reported`; the wizard steps `niches`, `laws`, `first-run`; a watchlist in the
+  profile, monitoring of each act (baseline, unchanged, new in force, future, repealed) where any failure or an
+  uncalibrated reader is "not verified", never "no changes"; text snapshots, a digest in ru / ro / en, a check by
+  hand through a `legal-research` version card; an index "contract clause → law" whose clauses are flagged for
+  re-review when a law changes; fetch engines urllib, local browser, the user's own command (no key seen) and by
+  hand; a weekly local job installed only after the user's yes. Adapters for legis.md, legislatie.just.ro (with an
+  archived copy marked as such), EUR-Lex / Cellar and the Moldovan Official Gazette.
 - `legal-employment` module (MD and RO labour codes): ways to engage a person compared by cost and risk
   (employment variants, civil contract, agency, day labourer), seven procedures (hiring, amendment, ending from
   the agreement down, internal rules, contractor or employee, inspection or claim, work across borders), the
