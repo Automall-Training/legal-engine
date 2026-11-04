@@ -18,7 +18,8 @@ re-runs itself in the engine's environment (missing → it says to run `./instal
 2. **Scope.** Contracts and commercial documents are here, including a data-protection clause inside them. A
    privacy policy, cookie notice, processing agreement (DPA), transfer clauses or record of processing belongs to
    the `privacy` module: send the user back to the router (`legal_profile.py module privacy` tells whether it is
-   on); do not draft it here unless `legal-privacy` hands that document over to this skill.
+   on); do not draft it here unless `legal-privacy` hands that document over to this skill. Terms of sale to
+   consumers (a shop, a course site, withdrawal and refunds) belong to the `consumer` module in the same way.
 3. **Norms.** Read `<legal-workflow>/references/norms.md` once per session.
 
 ## Route of every task
