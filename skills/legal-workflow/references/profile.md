@@ -34,6 +34,7 @@ a disk that is not connected, is recreated only with `--create`; nothing is ever
   matters/                see matters.md
   laws/                   watchlist.yaml, texts/, runs/ (legal-watch)
   contracts/              the user's contracts in force + index/ (legal-watch)
+  trademarks/             portfolio.json: own marks and their dates (legal-trademark; created on first use)
 ```
 
 ## modules.json

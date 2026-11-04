@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "marks": [
+    {
+      "id": "examplo-agepi",
+      "name": "EXAMPLO",
+      "kind": "word",
+      "owner": "Example Shop SRL",
+      "office": "AGEPI",
+      "number": null,
+      "classes": [35, 41],
+      "designations": [],
+      "status": "registered",
+      "filed_on": "2024-03-15",
+      "published_on": null,
+      "admission_published_on": null,
+      "closure_notified_on": null,
+      "decision_notified_on": null,
+      "registered_on": "2025-01-20",
+      "procedure_closed_on": null,
+      "expires_on": null,
+      "used_for": "online shop of home goods",
+      "notes": "invented example; the real portfolio lives in <profile>/trademarks/portfolio.json"
+    },
+    {
+      "id": "examplo-osim",
+      "name": "EXAMPLO",
+      "kind": "word",
+      "owner": "Example Shop SRL",
+      "office": "OSIM",
+      "number": null,
+      "classes": [35],
+      "designations": [],
+      "status": "admitted",
+      "filed_on": "2026-06-02",
+      "published_on": null,
+      "admission_published_on": "2026-10-01",
+      "closure_notified_on": null,
+      "decision_notified_on": null,
+      "registered_on": null,
+      "procedure_closed_on": null,
+      "expires_on": null,
+      "used_for": "online shop of home goods",
+      "notes": "invented example"
+    }
+  ]
+}

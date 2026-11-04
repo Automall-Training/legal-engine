@@ -1,0 +1,18 @@
+{
+  "represented_party": "[the firm or person from context/company.md that owns or will own the mark]",
+  "unknowns": [],
+  "module_data": {
+    "procedure": "clearance | filing | portfolio | office-letter | opposition | infringement | claim-received | licence",
+    "signs": [{"name": null, "kind": "word | figurative | combined | other"}],
+    "goods_services": [],
+    "classes": [],
+    "territories": ["MD", "RO", "EU"],
+    "owner": null,
+    "earlier_rights": [{"office": null, "number": null, "classes": [], "status": null, "source": null, "checked_on": null}],
+    "options": [{"option": null, "needs": null, "cost": null, "risk": null, "verdict": "se poate | se poate cu condiție | risc | interzis"}],
+    "deadlines": [{"rule": null, "date": null, "status": "reported | not-read | verified"}],
+    "rung": "0 | 1 | 2 | 3 | 4",
+    "confirmed_facts": [],
+    "assumptions": []
+  }
+}
