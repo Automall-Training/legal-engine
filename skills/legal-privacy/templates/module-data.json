@@ -1,0 +1,22 @@
+{
+  "represented_party": "[the firm from context/company.md]",
+  "unknowns": [],
+  "module_data": {
+    "procedure": "channel | processor | transfer | dpia | request | breach | document",
+    "documents": ["privacy-notice | cookie-notice | consent | dpa | scc | record | joint-controllers | letter"],
+    "regimes": ["GDPR", "MD-L195"],
+    "role": "controller | processor | joint-controller | independent-controller",
+    "data_categories": [],
+    "data_subjects": ["clients | visitors | employees | children"],
+    "special_data": false,
+    "recipients": [
+      {"service": "[category or provider, from the user]", "role": null, "country": null, "dpa": null}
+    ],
+    "transfers": [
+      {"from": null, "to": null, "basis": "adequacy | scc | derogation | none-needed | unknown"}
+    ],
+    "deadline": {"event": "aware | request-received", "at": null, "due": null},
+    "confirmed_facts": [],
+    "assumptions": []
+  }
+}
