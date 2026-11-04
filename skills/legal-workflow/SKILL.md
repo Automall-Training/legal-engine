@@ -28,16 +28,15 @@ python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
    language. Without the file, answer in the language of the user's message.
 3. **Status request** ("my matters", "what is open"): run `matter list [--open]`, answer from it, open nothing.
 4. **Pick the module** from the table below. Several fit → ask one question with the options, recommended first.
-5. **Missing setup** (`status --module <id>`). If `missing_steps` is not empty, load
-   `../legal-workflow-setup/SKILL.md` and run **only those steps**, then run `status --module <id>` again. If the
-   setup skill is not installed, say so (update the engine: `git pull && ./install.sh`) and stop instead of
-   inventing a profile.
-6. **Module state** (`module_state` of the same call):
-   - `not-installed` — say that this module is not in the installed version yet and what the user can do now
-     (for example a general answer through `research`); do not imitate the module;
-   - `unset` — the wizard has not asked about modules yet: run its step `modules` (step 5 normally covers it);
-   - `off` — the user turned it off: say so and offer to turn it on through the setup wizard (step `modules`);
-     do nothing else in that area;
+5. **Module installed?** (`status --module <id>` → `module_state`). `not-installed` — say that this module is not
+   in the installed version yet and what the user can do now (for example a general answer through `research`); do
+   not imitate the module and do not run the wizard for it.
+6. **Missing setup** (`missing_steps` of the same call). If not empty, load `../legal-workflow-setup/SKILL.md` and
+   run **only those steps**, then run `status --module <id>` again. If the setup skill is not installed, say so
+   (update the engine: `git pull && ./install.sh`) and stop instead of inventing a profile. Then by `module_state`:
+   - `unset` — the wizard has not asked about modules yet: run its step `modules`;
+   - `off` — the user turned it off: say so and offer to turn it on through the setup wizard (step `modules`) or
+     `legal-workflow-update`; do nothing else in that area;
    - `core` / `on` — continue.
 7. **Matter.** Open a matter for any work that produces a file or a reasoned answer (`matter new`); a quick
    factual reply in the conversation needs none. Resuming → `matter show <id>`, then `matter log <id> --event resumed`.

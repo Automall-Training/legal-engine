@@ -14,6 +14,10 @@ refuses a profile inside it). The engine never commits, uploads or shares it.
 `profile_dir` is absolute or starts with `~`. No config means the default `~/legal-profile`.
 A broken config is an error to show the user, never a reason to guess another folder.
 
+The setup wizard creates the folders and writes the config with `legal_profile.py profile init [--dir <folder>]`
+(idempotent; refuses the home folder itself, a path inside the engine and, without `--switch`, a second folder
+when the config already names one; nothing is ever moved or deleted). `where` also reports the engine folder.
+
 ## Layout
 
 ```text
@@ -37,8 +41,9 @@ A broken config is an error to show the user, never a reason to guess another fo
 {"schema_version": 1, "privacy": true, "consumer": false, "trademark": false, "employment": true}
 ```
 
-Only the optional modules from `assets/modules.json` are allowed; a missing key means off. Core modules
-(contracts, research, watch) are always on and are not listed.
+Written only by `legal_profile.py modules set <id>=on|off …` (a new file lists every optional module). Only the
+optional modules from `assets/modules.json` are allowed; a missing key means off. Core modules (contracts,
+research, watch) are always on and are not listed.
 
 ## Setup steps (`context/integration-status.md`)
 

@@ -473,6 +473,7 @@ class Cli(TmpCase):
         code, out, _ = self.run_cli("where", config=cfg)
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(out)["profile"], str(prof))
+        self.assertTrue((Path(json.loads(out)["engine"]) / "install.sh").is_file())
         code, out, _ = self.run_cli("status", "--module", "contracts", config=cfg, siblings=sib)
         self.assertTrue(json.loads(out)["ready"])
         code, out, _ = self.run_cli("module", "privacy", config=cfg, siblings=sib)

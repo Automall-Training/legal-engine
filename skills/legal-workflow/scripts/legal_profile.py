@@ -614,7 +614,9 @@ def main(argv: list[str] | None = None) -> int:
         # why: globals are read at call time so tests (and LEGAL_ENGINE_CONFIG) can point elsewhere.
         profile, source = resolve_profile(CONFIG)
         if a.cmd == "where":
-            out: object = {"profile": str(profile), "source": source, "exists": profile.is_dir()}
+            # why: the wizard needs the engine folder (install.sh, doctor.py) and the skills folder only links to it.
+            out: object = {"profile": str(profile), "source": source, "exists": profile.is_dir(),
+                           "engine": str(ENGINE_ROOT)}
         else:
             catalog = load_catalog()
             if a.cmd == "status":
