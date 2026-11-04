@@ -9,8 +9,8 @@ Version: v0 (in development). Updated: 2026-11-04.
 | 3 | `legal-contracts` (draft / audit / redline, MD-RO-EU) | done (branch `phase-1/legal-contracts` on top of step 2) |
 | 4 | `legal-research` (question with citations, current-version check) | done (branch `phase-1/legal-research` on top of step 3) |
 | 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | done (branch `phase-1/legal-workflow-setup` on top of step 4; merge to `main` only after the owner's «да») |
-| 6 | modules `legal-privacy`, `legal-consumer` | next |
-| 7 | module `legal-trademark` | — |
+| 6 | modules `legal-privacy`, `legal-consumer` | done (branch `phase-1/legal-privacy-consumer` on top of step 5; merge only after «да») |
+| 7 | module `legal-trademark` | next |
 | 8 | module `legal-employment` | — |
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | — |
 | 10 | end-to-end check, cross-model review, v1.0.0 | — |
@@ -39,5 +39,9 @@ Rollout: do not install the engine next to a personal contracts skill with overl
 Open for step 9: the wizard steps `niches`, `laws`, `first-run` are run by `legal-watch/references/setup.md` (to be
 written with the module, including the `laws/watchlist.yaml` format); until then they stay `pending` with a note, and
 the step `documents` only copies contracts into `contracts/` (the clause index comes with `legal-watch`).
-Open for step 6: privacy substance (checklist for notices, DPA, cookies, transfers; Romanian privacy templates)
-comes with `legal-privacy`; it reuses the contract tools and model cards M06–M10.
+Optional modules (from step 6) check `legal_profile.py module <id>` first, decide the content of a document and
+hand the drafting to the contract tools by path; `tools/tests/test_skills.py` checks every skill (frontmatter, links,
+JSON, module templates against `matter update`, the switch check). A data breach skips the module switch (router).
+Open, live run (step 10): the Moldovan consumer part (withdrawal period and its exceptions in the Civil Code, which
+e-commerce law is in force) and the cookie rule in Moldova are found per matter; the library has no cookie-notice
+model yet.

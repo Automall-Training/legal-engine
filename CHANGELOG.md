@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `legal-privacy` module: GDPR, Moldovan Law 195/2024, Romanian Law 190/2018. Six procedures (website or form,
+  processor or DPA, transfer abroad incl. a non-EU controller, DPIA screening, data request, breach with the
+  72-hour deadline first), the minimum content of each document with model cards M06–M10, law map as navigation.
+  The router sends a data breach to it whatever the module state.
+- `legal-consumer` module: sales to consumers online, checkpoints C1–C14 for RO / EU (information, order button,
+  withdrawal and its digital-content exceptions, online withdrawal function, conformity, price reductions, unfair
+  terms, complaints and ADR) and the Moldovan part, never filled from the Romanian column.
+- `tools/tests/test_skills.py`: consistency of every skill (frontmatter, relative links, JSON, module templates
+  accepted by `matter update`, optional modules check their switch).
 - `legal-workflow-setup` wizard: creates the private profile and fills it one question at a time (firms, whom they
   sell to → suggested modules, modules on/off, languages, side and risk threshold, own samples and contracts with
   house style, local tools after one approval); quick or full depth, resumes from `integration-status.md`, never
