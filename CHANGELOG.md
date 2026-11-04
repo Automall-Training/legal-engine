@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- `legal-research` skill: legal question with quotes from the version in force (lawful path first, labelled
+  conclusions, weighed risk, sources and "not verified" blocks) and the current-version check of an act in seven
+  points (consolidation, amendments incl. the official journal, delayed entry, secondary acts, case law, repeal,
+  status of changes), one version card per act. `check_version.py` checks the card: evidence opened today from an
+  official source, archived copies never prove the latest version, future versions and drafts never in force,
+  optional quote-in-saved-text check (HTML and PDF artefacts tolerated). Access routes for MD / RO / EU sources,
+  traps, answer shell. `law-check.md` and `legal-contracts` point to it instead of copying it.
 - `legal-contracts` skill: draft, audit, edit and adapt contracts and commercial documents (MD / RO / EU) inside a
   matter: intake into `module_data`, law check with the shared source register, Romanian model library with official
   links (originals are downloaded on demand, not shipped), templates, audit report shell, delivery checklist.

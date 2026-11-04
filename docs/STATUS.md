@@ -6,9 +6,9 @@ Version: v0 (in development). Updated: 2026-11-04.
 |---|---|---|
 | 1 | Skeleton: install.sh, doctor, leak check + tests, licence, disclaimer, README | done |
 | 2 | `legal-workflow`: router, profile, matters, working norms | done (branch `phase-1/legal-workflow`) |
-| 3 | `legal-contracts` (draft / audit / redline, MD-RO-EU) | done (branch `phase-1/legal-contracts` on top of step 2; merge to `main` only after the owner's «да») |
-| 4 | `legal-research` (question with citations, current-version check) | next |
-| 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | — |
+| 3 | `legal-contracts` (draft / audit / redline, MD-RO-EU) | done (branch `phase-1/legal-contracts` on top of step 2) |
+| 4 | `legal-research` (question with citations, current-version check) | done (branch `phase-1/legal-research` on top of step 3; merge to `main` only after the owner's «да») |
+| 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | next |
 | 6 | modules `legal-privacy`, `legal-consumer` | — |
 | 7 | module `legal-trademark` | — |
 | 8 | module `legal-employment` | — |
@@ -25,12 +25,15 @@ Contracts later steps must follow (in `skills/legal-workflow/references/`): `pro
 `input/` · `output/` deliverables · `work/` working files, `intake.json` core + `module_data` written via
 `matter update`, `log.md`, handoff to a module), `norms.md`,
 `law-check.md` (law check and the shared `source-register.json`, task_id `<matter-id>@<date>`, checked by
-`scripts/check_register.py`), `sources.md`, `jurisdiction.md`. Document tools (DOCX, Word redline, Romanian style
+`scripts/check_register.py`), `sources.md`, `jurisdiction.md`. The current-version check of an act (seven points,
+version card in `work/versions/`, `check_version.py`) lives in `legal-research/references/version-check.md`; every
+module uses it and step 9 (`legal-watch`) builds monitoring on the same card. Document tools (DOCX, Word redline, Romanian style
 and structure checks, model library) live in `legal-contracts`; other modules reuse them by path.
 
 Minor, later: `check_register.py` stops at the first malformed source or finding (one `try`); per-item checks
 would list all errors at once.
-Open for step 4: `legal-research` builds on `law-check.md` (do not fork it); current-version check of a rule.
+Minor, later: no script yet checks that a register source's status matches its version card (the table in
+`version-check.md` is applied by hand). Live run against real official sites: step 10 (`legal-research/tests/scenarios.md`).
 Open for step 5: script commands `profile init` (folder + config.json) and `modules set`, so the wizard never
 writes these files by hand. Rollout: until step 5 do not install the engine next to a personal contracts skill with
 overlapping trigger phrases.
