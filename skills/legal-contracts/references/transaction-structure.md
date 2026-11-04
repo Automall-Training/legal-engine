@@ -53,7 +53,7 @@ structure, legal meaning, figures and pagination are separate checks. Passing on
   and keep the questions in the matter, without hiding the gaps.
 
 ```bash
-python3 <skill-dir>/scripts/check_structure.py <matter>/output/contract.ro.md --commercial <matter>/output/manifest.json --report <matter>/output/structure.json
+python3 <skill-dir>/scripts/check_structure.py <matter>/output/contract.ro.md --commercial <matter>/work/manifest.json --report <matter>/work/structure.json
 ```
 
 ## Own structural model

@@ -5,7 +5,8 @@ description: Entry point of the legal engine (Moldova, Romania, EU) for an entre
 
 # Legal Workflow
 
-Resolve this skill's directory (`<skill-dir>` below); sibling skills are `<skill-dir>/../<skill>/`. The engine is
+Resolve this skill's directory (`<skill-dir>` below; other skills and references call it `<legal-workflow>`);
+sibling skills are `<skill-dir>/../<skill>/`. The engine is
 generic: everything of the user lives in the **profile** (`references/profile.md`), never in the engine folder.
 
 The script answers every deterministic question as JSON (exit 2 = a typed error; show its message plainly):

@@ -12,7 +12,8 @@ matter stays in its folder inside the profile, never inside the engine.
     intake.json                created by legal_profile.py
     source-register.json       law the module cites (law-check.md); older checks: source-register.<date>.json
     input/                     files the user gave (originals, never edited)
-    output/                    files the engine produced (drafts, clean and tracked DOCX, reports)
+    output/                    deliverables only (drafts, clean and tracked DOCX, reports)
+    work/                      working files (inventories, change plans, downloaded originals, intake updates)
 ```
 
 `slug` is short lowercase latin words joined by `-` (for example `nda-supplier`, `privacy-policy-site`).
@@ -26,13 +27,14 @@ Two owners, so a module never breaks another:
 - **`module_data`**: an object owned by the matter's module (for contracts: action, document type, parties,
   governing law, forum, dates, agreed constraints, …). Other modules read it, never write it.
 
-Nobody deletes core fields. A module writes its answers only through the script, which keeps the identity fields
+Nobody deletes core fields. `task_id` here is the matter id; the source register's `task_id` is
+`<matter-id>@<check date>` (one per law check, see `law-check.md`). A module writes its answers only through the script, which keeps the identity fields
 (`schema_version`, `task_id`, `module`, `title`, `created`), replaces the editable core fields it is given and
 merges the keys of `module_data`:
 
 ```bash
-python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data '{"represented_party": "…", "module_data": {"action": "audit"}}'
-python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data @/tmp/intake-update.json   # long texts: a temporary JSON file
+python3 <legal-workflow>/scripts/legal_profile.py matter update <matter-id> --data '{"represented_party": "…", "module_data": {"action": "audit"}}'
+python3 <legal-workflow>/scripts/legal_profile.py matter update <matter-id> --data @<matter>/work/intake-update.json
 ```
 
 ## log.md
@@ -51,10 +53,10 @@ Events: `opened` (written only by `matter new`), `waiting` (needs the user), `re
 `note`. Write and read them only through the script; modules never parse `log.md` themselves:
 
 ```bash
-python3 <skill>/scripts/legal_profile.py matter new --slug nda-supplier --title "NDA with a supplier" --module contracts
-python3 <skill>/scripts/legal_profile.py matter log 2026-11-04-nda-supplier --event done --note "clean and tracked DOCX delivered"
-python3 <skill>/scripts/legal_profile.py matter show 2026-11-04-nda-supplier
-python3 <skill>/scripts/legal_profile.py matter list --open
+python3 <legal-workflow>/scripts/legal_profile.py matter new --slug nda-supplier --title "NDA with a supplier" --module contracts
+python3 <legal-workflow>/scripts/legal_profile.py matter log 2026-11-04-nda-supplier --event done --note "clean and tracked DOCX delivered"
+python3 <legal-workflow>/scripts/legal_profile.py matter show 2026-11-04-nda-supplier
+python3 <legal-workflow>/scripts/legal_profile.py matter list --open
 ```
 
 Notes carry no personal data beyond what the user already put into the matter; never IDs, bank accounts or
@@ -65,7 +67,7 @@ health data.
 `legal-workflow` gives the module: the matter id and path, the user's request word for word, the profile path,
 the module id, and the language pair from `context/language.md`. The module then:
 
-- keeps the user's files in `input/` unchanged and writes everything it produces to `output/`;
+- keeps the user's files in `input/` unchanged, deliverables in `output/` and working files in `work/`;
 - fills its part of `intake.json` (`module_data`) and the core fields it learns, through `matter update`;
 - keeps law it cites in `source-register.json` in the matter folder, in the one shared format of
   `law-check.md` (template `assets/source-register.json`, checked by `scripts/check_register.py`);

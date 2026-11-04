@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `legal-contracts` skill: draft, audit, edit and adapt contracts and commercial documents (MD / RO / EU) inside a
+  matter: intake into `module_data`, law check with the shared source register, Romanian model library with official
+  links (originals are downloaded on demand, not shipped), templates, audit report shell, delivery checklist.
+  Scripts: `build_docx.py`, `docx_redline.py` (real Word tracked changes + clean copy, accept = clean,
+  reject = original), `check_ro_style.py`, `check_structure.py`; they re-run in the engine's `.venv` when needed and
+  refuse to write inside the engine folder. Tests with the synthetic redline example.
+- `legal-workflow`: shared law check (`law-check.md`, `sources.md`, `jurisdiction.md`), source register template and
+  `check_register.py`, command `matter update` (modules fill `intake.json` without hand edits).
+- Pre-commit hook runs skill tests with `.venv` when present.
 - `legal-workflow` skill: entry point and router by module (states core / on / off / unset / not-installed),
   profile lookup via `~/.config/legal-engine/config.json` (a profile inside the engine is refused), only the
   missing setup steps, matters `matters/YYYY-MM-DD-slug/` with an append-only `matters/log.md`, approval

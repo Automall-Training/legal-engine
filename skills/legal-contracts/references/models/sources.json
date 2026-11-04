@@ -26,7 +26,7 @@
           "sha256": "ecd593002a2efd5f1cd824a08494be5546fed453b6fbe65a9f89b5009f8e381f",
           "modified_from_download": false,
           "file_name": "S01-md-aap-2021.docx",
-          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+          "local_copy": "not shipped: download into the matter (work/sources/) and compare sha256"
         }
       ],
       "current_law_verified": false
@@ -83,7 +83,7 @@
           "sha256": "77823dcf8702d10508e2b079b837003e060c063acdf08d7ae01c29cbb668a620",
           "modified_from_download": false,
           "file_name": "S04-ipo-nda-unilateral.pdf",
-          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+          "local_copy": "not shipped: download into the matter (work/sources/) and compare sha256"
         }
       ],
       "current_law_verified": false
@@ -109,7 +109,7 @@
           "sha256": "bbec9c3638a4cdf8f2bb9da889057d94e6da9481d7ed202bfcab2bcde37b32bb",
           "modified_from_download": false,
           "file_name": "S05-ipo-nda-mutual.pdf",
-          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+          "local_copy": "not shipped: download into the matter (work/sources/) and compare sha256"
         }
       ],
       "current_law_verified": false
@@ -152,7 +152,7 @@
           "archive_entry": "RO Standard Contractual Clauses EU-EEA.docx",
           "archive_sha256": "88602c413cde795e64315cf829d0e6fa8718af61617b9ba848ad461aee676e42",
           "file_name": "S07-ec-dpa-decision-ro.docx",
-          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+          "local_copy": "not shipped: download into the matter (work/sources/) and compare sha256"
         },
         {
           "source_id": "S07",
@@ -164,7 +164,7 @@
           "archive_entry": "RO Annex Standard Contractual Clauses EU-EEA.docx",
           "archive_sha256": "88602c413cde795e64315cf829d0e6fa8718af61617b9ba848ad461aee676e42",
           "file_name": "S07-ec-dpa-clauses-ro.docx",
-          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+          "local_copy": "not shipped: download into the matter (work/sources/) and compare sha256"
         }
       ],
       "current_law_verified": false
@@ -190,7 +190,7 @@
           "sha256": "f0ee9e1c82443cb41aa0cf0f993aaf6c16195fd6830589db435a004e4d778728",
           "modified_from_download": false,
           "file_name": "S08-ec-transfer-clauses-ro.docx",
-          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+          "local_copy": "not shipped: download into the matter (work/sources/) and compare sha256"
         }
       ],
       "current_law_verified": false
@@ -344,5 +344,5 @@
   "licence_links": {
     "UK_IPO_OGL_v3": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
   },
-  "originals_policy": "Originalele nu sunt incluse în motor. Se descarcă de la download_url în dosarul cauzei (input/sources/); un sha256 diferit înseamnă altă ediție: se citește și se notează."
+  "originals_policy": "Originalele nu sunt incluse în motor. Se descarcă de la download_url în dosarul cauzei (work/sources/); un sha256 diferit înseamnă altă ediție: se citește și se notează."
 }

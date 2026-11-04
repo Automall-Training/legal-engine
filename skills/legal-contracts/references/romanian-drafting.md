@@ -47,8 +47,8 @@ Avoid an impersonal construction that hides the responsible party.
    Word check of all pages. Zero lexical hits never replace this editorial reading.
 
 ```bash
-python3 <skill-dir>/scripts/check_ro_style.py <matter>/output/contract.ro.md <matter>/output/anexa.ro.md --root <matter> --report <matter>/output/style-source.json
-python3 <skill-dir>/scripts/check_ro_style.py <matter>/output/redline-v1/clean.docx --root <matter> --review <matter>/output/style-decisions.json --report <matter>/output/style-final.json
+python3 <skill-dir>/scripts/check_ro_style.py <matter>/output/contract.ro.md <matter>/output/anexa.ro.md --root <matter> --report <matter>/work/style-source.json
+python3 <skill-dir>/scripts/check_ro_style.py <matter>/output/redline-v1/clean.docx --root <matter> --review <matter>/work/style-decisions.json --report <matter>/work/style-final.json
 ```
 
 Decisions file: `{"exceptions": [{"id": "<id from the report>", "text_sha256": "<hash from the report>",

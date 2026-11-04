@@ -26,8 +26,7 @@ re-runs itself in the engine's environment (missing → it says to run `./instal
 1. **Intake** — [intake.md](references/intake.md). Action, document type and goal, represented party, parties and
    facts, law, forum, cross-border links, dates, agreed terms, both languages. Ask only material unknowns (one
    question at a time, options with the recommended one first); continue independent work. Record the answers:
-   `python3 <legal-workflow>/scripts/legal_profile.py matter update <id> --data @<temp-file>.json` (a temporary
-   file outside `output/`, which holds only deliverables).
+   `python3 <legal-workflow>/scripts/legal_profile.py matter update <id> --data @<matter>/work/intake-update.json`.
 2. **Files and tools** — [files.md](references/files.md). Copy (never move) the user's files into `input/` and
    record their SHA-256. Map clauses, tables, notes and annexes. Check that reading, opening official texts, DOCX
    building, redlining and rendering actually work here; never accept old revisions silently.
@@ -35,7 +34,7 @@ re-runs itself in the engine's environment (missing → it says to run `./instal
    forum and the data regime are separate decisions.
 4. **Law check** — `<legal-workflow>/references/law-check.md` before every draft, audit, edit and adaptation. A new
    request, a re-audit, a new substantive edit or a new day is a new check. Keep `<matter>/source-register.json`
-   and run `python3 <legal-workflow>/scripts/check_register.py <matter>/source-register.json --task-id <id>@<date>`.
+   and run `python3 <legal-workflow>/scripts/check_register.py <matter>/source-register.json --task-id <matter-id>@<today's check date>`.
    This package and any cache are navigation only.
 5. **Subject checks** — [commercial.md](references/commercial.md). Every material conclusion is linked to a
    verified rule and version in the register; negotiation advice is labelled as such.
@@ -63,7 +62,8 @@ python3 <skill-dir>/scripts/check_ro_style.py <files…> --root <matter> [--revi
 python3 <skill-dir>/scripts/check_structure.py <contract.md…> [--commercial <manifest.json>] [--report <out.json>]
 ```
 
-Every output path is inside the matter's `output/`; the scripts refuse the engine folder and never overwrite.
+Deliverables go to the matter's `output/`, working files (inventories, change plans, reports of the checks) to
+`work/`. The scripts refuse the engine folder; the DOCX tools never overwrite (a report is rewritten on a re-run).
 
 ## Result standard
 

@@ -1,7 +1,7 @@
 # DOCX, PDF and text
 
-All files of a matter live in its folder: the user's originals in `input/` (never edited), everything produced in
-`output/`. The scripts refuse to write inside the engine folder.
+All files of a matter live in its folder: the user's originals in `input/` (never edited), deliverables in
+`output/`, working files in `work/`. The scripts refuse to write inside the engine folder.
 
 ## Reading
 
@@ -42,8 +42,8 @@ the new text.
   the unsupported object.
 
 ```bash
-python3 <skill-dir>/scripts/docx_redline.py inspect <matter>/input/contract.docx > <matter>/output/inventory.json
-python3 <skill-dir>/scripts/docx_redline.py apply <matter>/input/contract.docx <matter>/output/changes.json <matter>/output/redline-v1
+python3 <skill-dir>/scripts/docx_redline.py inspect <matter>/input/contract.docx > <matter>/work/inventory.json
+python3 <skill-dir>/scripts/docx_redline.py apply <matter>/input/contract.docx <matter>/work/changes.json <matter>/output/redline-v1
 python3 <skill-dir>/scripts/docx_redline.py verify <matter>/input/contract.docx <matter>/output/redline-v1/tracked.docx <matter>/output/redline-v1/clean.docx
 ```
 
@@ -57,7 +57,9 @@ recommended terms):
 
 Write a plan only for an agreed edit. The author is the role (for example "Legal review"), never a person's name
 unless the user asks. The script translates no comments, takes no legal decision and does not recalculate Word
-fields. The output folder must be new; nothing is overwritten.
+fields. The output folder must be new; nothing is overwritten; it appears only after verification passed.
+In `apply`, "accept = clean" holds by construction (both come from the same edit); the real tests are
+"reject = original" and `verify` on files edited outside the helper.
 
 ## Checking the result
 

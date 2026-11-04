@@ -20,7 +20,7 @@ This module fills the core fields it learns and owns **`module_data`**, shaped l
 | `parties` | Countries, B2B/B2C status, place of business and performance, authority to sign |
 | `confirmed_facts`, `assumptions` | Kept apart; an assumption never changes an agreed term |
 | `governing_law`, `forum`, `cross_border_factors` | Existing clauses, court, arbitration and its seat, enforcement; method in `legal-workflow/references/jurisdiction.md` |
-| `execution_date`, `performance_period`, `analysis_date`, `checked_at` | Today's date from the clock, analysis date, signing, performance, renewal |
+| `execution_date`, `performance_period` | Signing, performance, renewal (the analysis and check dates live in the source register) |
 | `agreed_constraints` | What is agreed and must not change; depth and priorities of the work |
 | `structure_sources` | Model id (`M01`…) and source sections used, see `models/catalog.md` |
 
