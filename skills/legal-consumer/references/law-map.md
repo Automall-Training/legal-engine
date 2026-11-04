@@ -18,7 +18,7 @@ these laws often.
 | `eu.dir.98-6` | Directive 98/6/EC, price indication | announced price reduction: the lowest price of the previous 30 days (art. 6a) |
 | `eu.dir.2000-31` | Directive 2000/31/EC, e-commerce | seller identity on the site, order steps |
 | `eu.reg.2024-3228` | Regulation (EU) 2024/3228 | repealed the online dispute resolution platform regulation 524/2013 (*reported*: from 20.07.2025); an old "ODR link" duty is checked, not copied |
-| `eu.reg.593-2008` | Rome I, art. 6 | consumer protection of the buyer's country |
+| `eu.reg.593-2008` | Rome I, art. 6 | consumer protection of the buyer's country before EU courts |
 
 Directives work through national law: cite the national act for the duty and the directive for its meaning.
 
@@ -30,6 +30,8 @@ Directives work through national law: cite the national act for the duty and the
 | `ro.oug.140-2021` | OUG 140/2021, sale of goods | legal guarantee of conformity for goods |
 | `ro.oug.141-2021` | OUG 141/2021, digital content and services | conformity, updates, the consumer's remedies |
 | `ro.og.21-1992` | OG 21/1992, consumer protection | general duties, information, ANPC powers |
+| `ro.og.99-2000` | OG 99/2000 on selling products and services, with its rules HG 947/2000 (as amended in 2022, *reported*) | price display and announced reductions: the lowest price of the previous 30 days and its exceptions |
+| `ro.og.38-2015` | OG 38/2015, alternative dispute resolution | out-of-court resolution entities (SAL) and the information traders give |
 | `ro.lege.363-2007` | Law 363/2007, unfair commercial practices | misleading and aggressive practices |
 | `ro.lege.193-2000` | Law 193/2000, unfair terms | terms that create a significant imbalance; the annex list |
 | `ro.lege.365-2002` | Law 365/2002, electronic commerce | identity of the provider, order steps |
@@ -45,6 +47,7 @@ Whether the law approving OUG 18/2026 changed it, and the dates of its sanction 
 | `md.lege.105-2003` | Law 105/2003 on consumer protection, republished in 2024 with later amendments (*reported*) | general rights, information, conformity, complaints, the authority (APCSP) |
 | `md.cod.civil` | Civil Code (as modernised by Law 133/2018) | consumer contracts, distance and off-premises contracts (definition: *reported* art. 1013), withdrawal, unfair terms, sale of goods with consumer guarantees; find the articles on the task date |
 | MD e-commerce | the e-commerce law in force: Law 284/2004 or the newer act that amended Law 105/2003 in 2023 (*reported*) | seller identity, order steps; which act is in force is **not verified** |
+| MD conflict of laws | the Civil Code book on private international law, its rule on consumer contracts (*reported*) | which law protects a consumer before a Moldovan court |
 | MD advertising | the advertising law in force | claims, discounts |
 
 The Moldovan part is the least checked: the withdrawal period, its exceptions for digital content and the

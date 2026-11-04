@@ -46,6 +46,9 @@ the account) · Q (a role that depends on how the user actually uses the service
 - [ ] GDPR exporter: an adequacy decision on the task date (for the US: is the recipient certified under the
       framework?) · else SCC 2021/914 with the module for the roles (model M07) and a transfer assessment · else an
       art. 49 derogation, which fits one-off or contract-necessary transfers, not a regular flow.
+- [ ] Importer itself under GDPR by art. 3(2) (for example an EU processor sending data back to a Moldovan
+      controller that sells to people in the EU): SCC 2021/914 are not meant for that case (recital 7 of the
+      decision, *reported*); check the Commission's current position on the task date, do not conclude by default.
 - [ ] L195 exporter: EEA recipient — free; else an adequacy decision of the Center · Commission or Center SCC
       without authorisation · other clauses only with authorisation.
 - [ ] Transfer assessment: the recipient country's access-by-authorities law and practice, extra measures
@@ -92,7 +95,10 @@ affected?" with options.
       the DPA is a contract term, not the law's.
 - [ ] Controller: notify the authority within 72 hours of awareness unless the breach is unlikely to result in a
       risk; later only with the reasons for the delay. Moldova → the Center; Romania → ANSPDCP (lead authority by
-      art. 56 for cross-border processing). Notification may be given in phases (art. 33(4)).
+      art. 56 only for a controller with an EU establishment). A controller with no EU establishment (a Moldovan
+      firm under GDPR by art. 3(2)) has no lead authority: it notifies the authority of each Member State whose
+      residents are affected, through its art. 27 representative where there is one (EDPB guidance, *reported*).
+      Notification may be given in phases (art. 33(4)).
 - [ ] People affected: only at high risk, unless art. 34(3) applies (encryption, later measures, disproportionate
       effort → public communication).
 - [ ] Document every breach, notified or not (art. 33(5)).

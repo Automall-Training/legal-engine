@@ -19,7 +19,9 @@ Romanian style check and the tracked changes are made with the contract tools.
 2. **Module on?** `python3 <legal-workflow>/scripts/legal_profile.py module privacy` → `on` continues. `off` →
    say the module is off and that the setup wizard (step `modules`) or `legal-workflow-update` turns it on; do
    nothing else in this area. `unset` → run the wizard's step `modules`. A breach is answered even when the
-   module is off: the deadline facts and the advice to switch it on, nothing drafted.
+   module is off or setup is unfinished (the router sends it here first): the deadline facts and the advice to
+   switch it on, nothing drafted; those facts are labelled "not verified on the task date" unless art. 33 of
+   GDPR or L195/2024 was read in the official text today.
 3. **Handoff.** Work needs what `<legal-workflow>/references/matters.md` § "Handoff to a module" lists. Called
    directly without it → load `<legal-workflow>/SKILL.md`, follow its Start, then come back.
 4. **Norms.** Read `<legal-workflow>/references/norms.md` once per session and [law-map.md](references/law-map.md)

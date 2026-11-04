@@ -38,6 +38,10 @@ python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
    - `off` — the user turned it off: say so and offer to turn it on through the setup wizard (step `modules`) or
      `legal-workflow-update`; do nothing else in that area;
    - `core` / `on` — continue.
+
+   Exception: a personal-data breach (leak, hack, lost device, data sent to the wrong person) goes to procedure 6
+   of `legal-privacy` first, whatever the module state or missing setup, when that skill is installed: the
+   72-hour clock does not wait for setup. Then the steps above apply.
 7. **Matter.** Open a matter for any work that produces a file or a reasoned answer (`matter new`); a quick
    factual reply in the conversation needs none. Resuming → `matter show <id>`, then `matter log <id> --event resumed`.
 8. **Hand over.** Read `references/norms.md`, then the module's `SKILL.md`, and give it what

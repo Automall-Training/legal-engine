@@ -32,8 +32,8 @@ Romanian style check and the tracked changes are made with the contract tools.
    `python3 <legal-workflow>/scripts/legal_profile.py matter update <id> --data @<matter>/work/intake-update.json`
    (shape: [templates/module-data.json](templates/module-data.json)).
 2. **Regime** — when the seller directs its activity to the buyer's country, a choice of law in the terms cannot
-   take away that country's mandatory consumer protection (Rome I art. 6 before EU courts;
-   `<legal-workflow>/references/jurisdiction.md`). A Moldovan seller with Romanian buyers checks the Romanian and
+   take away that country's mandatory consumer protection (Rome I art. 6 before EU courts; before Moldovan courts
+   the Civil Code conflict rule on consumer contracts, *reported*; `<legal-workflow>/references/jurisdiction.md`). A Moldovan seller with Romanian buyers checks the Romanian and
    EU rules for them; each regime answered on its own.
 3. **Checkpoints** — [checkpoints.md](references/checkpoints.md): go through every point that fits the sale and
    mark it met · missing · not applicable · not verified, each with the rule, the sanction if one exists, and the

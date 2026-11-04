@@ -26,16 +26,21 @@ def skill_dirs() -> list[Path]:
     return sorted(p.parent for p in SKILLS.glob("*/SKILL.md"))
 
 
-def frontmatter(text: str) -> dict[str, str]:
-    block = text.split("---")[1]
-    return dict(line.split(": ", 1) for line in block.strip().splitlines())
+def frontmatter(path: Path) -> dict[str, str]:
+    """Flat `key: value` lines only; a multi-line YAML value fails with the file named."""
+    block = path.read_text(encoding="utf-8").split("---")[1]
+    lines = block.strip().splitlines()
+    bad = [line for line in lines if ": " not in line]
+    if bad:
+        raise AssertionError(f"{path}: frontmatter lines must be 'key: value', got {bad[0]!r}")
+    return dict(line.split(": ", 1) for line in lines)
 
 
 class Frontmatter(unittest.TestCase):
     def test_name_matches_folder_and_description_present(self):
         for skill in skill_dirs():
             with self.subTest(skill=skill.name):
-                meta = frontmatter((skill / "SKILL.md").read_text(encoding="utf-8"))
+                meta = frontmatter(skill / "SKILL.md")
                 self.assertEqual(meta["name"], skill.name)
                 self.assertGreater(len(meta.get("description", "")), 80)
 
@@ -101,10 +106,11 @@ class OptionalModules(unittest.TestCase):
             if mod["core"] or not skill.is_dir():
                 continue
             with self.subTest(module=mid):
-                text = (skill / "SKILL.md").read_text(encoding="utf-8")
-                self.assertIn("<skill-dir>/../legal-contracts/", text)
-                for card in re.findall(r"models/(\d\d-[a-z-]+\.ro\.md)", text):
-                    self.assertTrue((SKILLS / "legal-contracts" / "references" / "models" / card).is_file(), card)
+                self.assertIn("<skill-dir>/../legal-contracts/", (skill / "SKILL.md").read_text(encoding="utf-8"))
+                for md in [skill / "SKILL.md", *skill.glob("references/*.md")]:
+                    for card in re.findall(r"(\d\d-[a-z-]+\.ro\.md)", md.read_text(encoding="utf-8")):
+                        models = SKILLS / "legal-contracts" / "references" / "models"
+                        self.assertTrue((models / card).is_file(), f"{md.name}: {card}")
 
 
 if __name__ == "__main__":

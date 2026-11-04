@@ -49,9 +49,25 @@ class Documents(unittest.TestCase):
                 self.assertTrue((MODELS / card).is_file())
 
     def test_template_documents_have_a_row(self):
+        rows = {"privacy-notice": "Privacy notice", "cookie-notice": "Cookie notice", "consent": "Consent wording",
+                "dpa": "DPA", "scc": "Transfer clauses", "record": "Record of processing",
+                "joint-controllers": "Joint controllers", "letter": "Reply to a data request"}
         kinds = TEMPLATE["module_data"]["documents"][0].split(" | ")
-        rows = [line for line in DOCUMENTS.splitlines() if line.startswith("| ") and not line.startswith("| Document")]
-        self.assertGreaterEqual(len(rows) - 1, len(kinds) - 1)  # why: the separator row is not a document
+        self.assertEqual(sorted(kinds), sorted(rows))
+        firsts = [line.split("|")[1].strip() for line in DOCUMENTS.splitlines() if line.startswith("| ")]
+        for kind, label in rows.items():
+            with self.subTest(kind=kind):
+                self.assertTrue(any(cell.startswith(label) for cell in firsts))
+
+
+class Router(unittest.TestCase):
+    def test_router_sends_a_breach_here_whatever_the_state(self):
+        # why: without this the router stops at "module off" or "missing setup" and the 72-hour clock is lost.
+        router = (SKILL.parent / "legal-workflow" / "SKILL.md").read_text(encoding="utf-8")
+        paragraph = router.split("Exception: a personal-data breach")[1].split("\n\n")[0]
+        self.assertIn("procedure 6", paragraph)
+        self.assertIn("`legal-privacy`", paragraph)
+        self.assertIn("missing setup", paragraph)
 
 
 class LawMap(unittest.TestCase):
