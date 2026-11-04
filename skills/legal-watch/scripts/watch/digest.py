@@ -1,0 +1,135 @@
+"""The short digest of a run in the user's language (`laws/runs/<date>/digest.md`).
+
+Order: what changed (confirmed first), contracts to re-review, what was not verified and why, signals from the
+Official Gazette, run health. "No changes" is written only when every p1 act was checked (result OK).
+"""
+from __future__ import annotations
+
+import datetime as _dt
+
+MAX_DAYS = {"weekly": 9, "claude-schedule": 9}   # a weekly run that has not succeeded for 9 days is overdue
+
+T = {
+    "en": {
+        "title": "Law monitoring", "result": {"OK": "no changes", "CHANGES": "changes found",
+                                              "INCOMPLETE": "incomplete: not every key act was checked"},
+        "checked": "checked", "of": "of", "changes": "Changes", "kind": {"in_force": "new version in force",
+                                                                         "future": "future version (not yet in force)",
+                                                                         "repealed": "repealed"},
+        "from": "from", "possible": "possible, not confirmed: check by hand",
+        "contracts": "Contracts to re-review", "clauses": "clauses",
+        "propose": "Proposed: a matter \"re-review contract {c}\" (audit and redline); nothing is changed without you.",
+        "unverified": "Not verified", "why": {
+            "fetch_failed": "the official site did not answer", "blocked_403": "the site blocked automatic access",
+            "parse_failed": "the page could not be read reliably", "stale_fallback": "only an archived copy was read",
+            "parser_uncalibrated": "the reader of this site is not yet calibrated",
+            "no_source": "no official source configured", "adapter_crashed": "the reader failed",
+            "gazette_scan_incomplete": "the Official Gazette scan did not finish"},
+        "byhand": "Ask me to check these by hand (the agent opens the official page and records a version card).",
+        "baselines": "First reading recorded (baseline)", "signals": "Official Gazette (MD): issues mentioning watched acts",
+        "health": "Last complete run", "overdue": "overdue: the scheduled run has not completed for {d} days",
+        "never": "none yet", "nochanges": "No changes in the acts checked."},
+    "ro": {
+        "title": "Monitorizarea legislației", "result": {"OK": "fără modificări", "CHANGES": "modificări găsite",
+                                                         "INCOMPLETE": "incomplet: nu toate actele principale au fost verificate"},
+        "checked": "verificate", "of": "din", "changes": "Modificări", "kind": {"in_force": "redacție nouă în vigoare",
+                                                                               "future": "redacție viitoare (încă nu în vigoare)",
+                                                                               "repealed": "abrogat"},
+        "from": "din", "possible": "posibilă, neconfirmată: de verificat manual",
+        "contracts": "Contracte de revizuit", "clauses": "clauze",
+        "propose": "Propunere: un dosar „revizuirea contractului {c}” (audit și modificări urmărite); nimic nu se schimbă fără dvs.",
+        "unverified": "Neverificate", "why": {
+            "fetch_failed": "site-ul oficial nu a răspuns", "blocked_403": "site-ul a blocat accesul automat",
+            "parse_failed": "pagina nu a putut fi citită sigur", "stale_fallback": "s-a citit doar o copie arhivată",
+            "parser_uncalibrated": "cititorul acestui site nu este încă calibrat",
+            "no_source": "nu există sursă oficială configurată", "adapter_crashed": "cititorul a eșuat",
+            "gazette_scan_incomplete": "scanarea Monitorului Oficial nu s-a încheiat"},
+        "byhand": "Cereți-mi să le verific manual (agentul deschide pagina oficială și înregistrează fișa redacției).",
+        "baselines": "Prima citire înregistrată (punct de referință)",
+        "signals": "Monitorul Oficial (MD): numere care menționează acte urmărite",
+        "health": "Ultima rulare completă", "overdue": "întârziere: rularea programată nu s-a încheiat de {d} zile",
+        "never": "încă niciuna", "nochanges": "Nicio modificare în actele verificate."},
+    "ru": {
+        "title": "Мониторинг законов", "result": {"OK": "без изменений", "CHANGES": "есть изменения",
+                                                  "INCOMPLETE": "неполно: проверены не все главные акты"},
+        "checked": "проверено", "of": "из", "changes": "Изменения", "kind": {"in_force": "новая редакция действует",
+                                                                            "future": "будущая редакция (ещё не действует)",
+                                                                            "repealed": "отменён"},
+        "from": "с", "possible": "возможно, не подтверждено: проверить вручную",
+        "contracts": "Договоры на пересмотр", "clauses": "пункты",
+        "propose": "Предлагаю дело «пересмотр договора {c}» (аудит и правки Word); без вас ничего не меняется.",
+        "unverified": "Не проверено", "why": {
+            "fetch_failed": "официальный сайт не ответил", "blocked_403": "сайт закрыл автоматический доступ",
+            "parse_failed": "страницу не удалось надёжно прочитать", "stale_fallback": "прочитана только архивная копия",
+            "parser_uncalibrated": "чтение этого сайта ещё не сверено",
+            "no_source": "нет официального источника", "adapter_crashed": "чтение сломалось",
+            "gazette_scan_incomplete": "просмотр Monitorul Oficial не закончен"},
+        "byhand": "Попросите меня проверить их вручную (агент откроет официальную страницу и запишет карточку редакции).",
+        "baselines": "Первое чтение записано (исходная редакция)",
+        "signals": "Monitorul Oficial (MD): номера, где упомянуты отслеживаемые акты",
+        "health": "Последний полный прогон", "overdue": "просрочено: плановый прогон не завершался {d} дн.",
+        "never": "ещё не было", "nochanges": "В проверенных актах изменений нет."},
+}
+
+
+def health(state: dict, today: _dt.date, schedule: str | None) -> dict:
+    """When the last run that checked every p1 act happened, and whether a scheduled run is overdue."""
+    good = [r["date"] for r in state.get("runs", []) if r.get("result") in ("OK", "CHANGES")]
+    last = max(good) if good else None
+    days = (today - _dt.date.fromisoformat(last)).days if last else None
+    limit = MAX_DAYS.get(schedule or "")
+    overdue = limit is not None and (days is None or days > limit) and bool(state.get("runs"))
+    return {"last_complete": last, "days_since": days, "overdue": overdue}
+
+
+def _name(x: dict) -> str:
+    return f"{x.get('title') or x['act_id']} (`{x['act_id']}`)"
+
+
+def render(run: dict, language: str = "en") -> str:
+    t = T.get(language, T["en"])
+    s = run["summary"]
+    lines = [f"# {t['title']} — {run['date']}", "",
+             f"**{t['result'][run['result']]}** · {t['checked']} {s['checked']} {t['of']} {s['acts']}", ""]
+    changes = sorted(run.get("changes") or [], key=lambda c: (not c["confirmed"], c.get("priority") or "p9"))
+    if changes:
+        lines += [f"## {t['changes']}", ""]
+        for c in changes:
+            when = f", {t['from']} {c['in_force_from']}" if c.get("in_force_from") else ""
+            label = f" — {c['label']}" if c.get("label") else ""
+            tail = "" if c["confirmed"] else f" — *{t['possible']}*"
+            lines.append(f"- {_name(c)}: {t['kind'][c['kind']]}{label}{when}{tail}")
+        lines.append("")
+    if run.get("contracts_to_review"):
+        lines += [f"## {t['contracts']}", ""]
+        for k in run["contracts_to_review"]:
+            lines.append(f"- {k['contract']}: {t['clauses']} {', '.join(k['clauses'])}")
+            lines.append(f"  {t['propose'].format(c=k['contract'])}")
+        lines.append("")
+    if run.get("unverified"):
+        lines += [f"## {t['unverified']}", ""]
+        for u in run["unverified"]:
+            why = "; ".join(t["why"].get(r, r) for r in u["reasons"])
+            lines.append(f"- {_name(u)} [{u.get('priority')}]: {why}")
+        lines += ["", t["byhand"], ""]
+    baselines = [r for r in run.get("acts") or [] if r["status"] == "baseline"]
+    if baselines:
+        lines += [f"## {t['baselines']}", ""]
+        for r in baselines:
+            cur = r.get("current") or {}
+            lines.append(f"- {_name(r)}: {cur.get('label')} ({t['from']} {cur.get('in_force_from')})")
+        lines.append("")
+    mon = run.get("monitorul") or {}
+    if mon.get("signals"):
+        lines += [f"## {t['signals']}", ""]
+        for sig in mon["signals"]:
+            lines.append(f"- `{sig['act_id']}`: MO {sig.get('edition_number') or sig['edition_id']} "
+                         f"({sig.get('edition_date') or '?'}) — {sig['item'][:160]} <{sig['url']}>")
+        lines.append("")
+    if run["result"] == "OK" and not changes:
+        lines += [t["nochanges"], ""]
+    h = run.get("health") or {}
+    lines.append(f"{t['health']}: {h.get('last_complete') or t['never']}")
+    if h.get("overdue"):
+        lines.append(f"**{t['overdue'].format(d=h.get('days_since') if h.get('days_since') is not None else '?')}**")
+    return "\n".join(lines) + "\n"

@@ -104,8 +104,9 @@ the law library and monitoring come with an engine update; every answer still ch
 (recommended for a first try) · samples · contracts in force · both. Copy (never move) each file the user names:
 samples into `templates/`, contracts in force into `contracts/`; the originals stay untouched. Name the copies
 with short latin words (`supply-contract-2025.docx`); a name already taken gets `-02`, `-03`, … (never overwrite
-an earlier copy). The clause index of contracts in force is built by
-`legal-watch`; until it is installed the files just wait there.
+an earlier copy). The clause index of each contract in force is built by
+`legal-watch` (`../legal-watch/references/contracts.md`) at the step `first-run`, or right away when the law library
+already exists; until `legal-watch` is installed the files just wait there.
 
 Then, optional (skip by default): default forum for disputes and any preferred clauses → `context/house-style.md`
 from `assets/context/house-style.md`. Write the file even when nothing is chosen, so `legal-workflow-update`

@@ -1,6 +1,6 @@
 ---
 name: legal-workflow-setup
-description: Setup wizard of the legal engine (Moldova, Romania, EU). Creates the user's private profile outside the engine and fills it one question at a time - firms, whom they sell to, modules on/off, languages, side and risk threshold, own samples and contracts, local tools (law library steps come with legal-watch). Resumes where it stopped and never overwrites an answer silently. Use for "настрой юриста", "настроить юриста", "configurează juristul", "set up the lawyer", "legal engine setup", and when legal-workflow reports missing setup steps.
+description: Setup wizard of the legal engine (Moldova, Romania, EU). Creates the user's private profile outside the engine and fills it one question at a time - firms, whom they sell to, modules on/off, languages, side and risk threshold, business niches and the laws to keep and monitor (through legal-watch), own samples and contracts, local tools, a first law download. Resumes where it stopped and never overwrites an answer silently. Use for "настрой юриста", "настроить юриста", "configurează juristul", "set up the lawyer", "legal engine setup", and when legal-workflow reports missing setup steps.
 ---
 
 # Legal Workflow Setup

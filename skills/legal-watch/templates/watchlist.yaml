@@ -1,0 +1,16 @@
+# Laws the engine keeps and monitors (legal-watch). Edit by hand or re-run the wizard.
+# Example for an invented online school selling courses to people in Moldova and Romania.
+# acts: ids from the engine catalog; an own act also needs title, jurisdiction and sources.
+schema_version: 1
+settings:
+  countries: [MD, RO, EU]
+  language: ru
+  engines: [urllib, host]
+  fetch_command: null
+  schedule: weekly
+niches: [online-courses]
+categories: [civil, tax, accounting, company, data, consumer, digital-content, advertising]
+acts:
+  - id: md.cod.civil
+  - id: ro.lege.287-2009
+  - id: eu.reg.2016-679
