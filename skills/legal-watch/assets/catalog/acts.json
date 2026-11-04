@@ -1,0 +1,2036 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-04",
+  "notes": [
+    "A legis.md doc_id identifies one version (redaction) of an act, not the act: a newer version has a new doc_id. The engine finds the version in force on the task date and never trusts a stored doc_id as current.",
+    "A legislatie.just.ro doc_id identifies the act record; its consolidated text may lag behind amendments.",
+    "EU entries: the CELEX number was checked against the EU Publications Office (Cellar) on checked_on; the consolidated version in force is found on EUR-Lex on the task date.",
+    "status 'verified' means only that the identifier points to this act, checked on checked_on; it never means the text or its version in force was checked. 'reported' means the identifier comes from an earlier record or a secondary page and is re-checked on first run.",
+    "Law is never cached as truth: every conclusion that a rule is in force is re-checked against the official text on the task date."
+  ],
+  "acts": [
+    {
+      "id": "eu.reg.2016-679",
+      "title": "Regulation (EU) 2016/679 (General Data Protection Regulation)",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "679",
+      "year": "2016",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32016R0679"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32016R0679",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2002-58",
+      "title": "Directive 2002/58/EC on privacy and electronic communications",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "58",
+      "year": "2002",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32002L0058"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32002L0058",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dec.2021-914",
+      "title": "Commission Implementing Decision (EU) 2021/914, standard contractual clauses for transfers to third countries",
+      "jurisdiction": "EU",
+      "kind": "decision",
+      "number": "914",
+      "year": "2021",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32021D0914"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32021D0914",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dec.2021-915",
+      "title": "Commission Implementing Decision (EU) 2021/915, standard contractual clauses between controllers and processors",
+      "jurisdiction": "EU",
+      "kind": "decision",
+      "number": "915",
+      "year": "2021",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32021D0915"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32021D0915",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dec.2023-1795",
+      "title": "Commission Implementing Decision (EU) 2023/1795, adequacy of the EU-US Data Privacy Framework",
+      "jurisdiction": "EU",
+      "kind": "decision",
+      "number": "1795",
+      "year": "2023",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32023D1795"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32023D1795",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2011-83",
+      "title": "Directive 2011/83/EU on consumer rights",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "83",
+      "year": "2011",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32011L0083"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32011L0083",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2023-2673",
+      "title": "Directive (EU) 2023/2673 amending Directive 2011/83/EU (financial services at a distance, withdrawal function)",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "2673",
+      "year": "2023",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32023L2673"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32023L2673",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2019-770",
+      "title": "Directive (EU) 2019/770 on contracts for the supply of digital content and digital services",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "770",
+      "year": "2019",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32019L0770"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32019L0770",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2019-771",
+      "title": "Directive (EU) 2019/771 on contracts for the sale of goods",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "771",
+      "year": "2019",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32019L0771"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32019L0771",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2005-29",
+      "title": "Directive 2005/29/EC on unfair commercial practices",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "29",
+      "year": "2005",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32005L0029"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32005L0029",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2019-2161",
+      "title": "Directive (EU) 2019/2161 on better enforcement and modernisation of EU consumer protection rules (Omnibus)",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "2161",
+      "year": "2019",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32019L2161"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32019L2161",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.93-13",
+      "title": "Council Directive 93/13/EEC on unfair terms in consumer contracts",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "13",
+      "year": "1993",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "31993L0013"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:31993L0013",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.98-6",
+      "title": "Directive 98/6/EC on the indication of prices",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "6",
+      "year": "1998",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "31998L0006"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:31998L0006",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2000-31",
+      "title": "Directive 2000/31/EC on electronic commerce",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "31",
+      "year": "2000",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32000L0031"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32000L0031",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2022-2065",
+      "title": "Regulation (EU) 2022/2065 (Digital Services Act)",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "2065",
+      "year": "2022",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32022R2065"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32022R2065",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2024-3228",
+      "title": "Regulation (EU) 2024/3228 repealing Regulation (EU) No 524/2013 (online dispute resolution platform)",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "3228",
+      "year": "2024",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32024R3228"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32024R3228",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2023-988",
+      "title": "Regulation (EU) 2023/988 on general product safety",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "988",
+      "year": "2023",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32023R0988"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32023R0988",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2006-114",
+      "title": "Directive 2006/114/EC concerning misleading and comparative advertising",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "114",
+      "year": "2006",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32006L0114"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32006L0114",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2010-13",
+      "title": "Directive 2010/13/EU (Audiovisual Media Services Directive)",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "13",
+      "year": "2010",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32010L0013"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32010L0013",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.593-2008",
+      "title": "Regulation (EC) No 593/2008 on the law applicable to contractual obligations (Rome I)",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "593",
+      "year": "2008",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32008R0593"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32008R0593",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.1215-2012",
+      "title": "Regulation (EU) No 1215/2012 on jurisdiction and the recognition and enforcement of judgments (Brussels I recast)",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "1215",
+      "year": "2012",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32012R1215"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32012R1215",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2006-112",
+      "title": "Council Directive 2006/112/EC on the common system of value added tax",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "112",
+      "year": "2006",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32006L0112"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32006L0112",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2019-1152",
+      "title": "Directive (EU) 2019/1152 on transparent and predictable working conditions",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "1152",
+      "year": "2019",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32019L1152"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32019L1152",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2003-88",
+      "title": "Directive 2003/88/EC concerning certain aspects of the organisation of working time",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "88",
+      "year": "2003",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32003L0088"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32003L0088",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.1999-70",
+      "title": "Council Directive 1999/70/EC concerning the framework agreement on fixed-term work",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "70",
+      "year": "1999",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "31999L0070"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:31999L0070",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.97-81",
+      "title": "Council Directive 97/81/EC concerning the framework agreement on part-time work",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "81",
+      "year": "1997",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "31997L0081"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:31997L0081",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.96-71",
+      "title": "Directive 96/71/EC concerning the posting of workers",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "71",
+      "year": "1996",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "31996L0071"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:31996L0071",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.883-2004",
+      "title": "Regulation (EC) No 883/2004 on the coordination of social security systems",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "883",
+      "year": "2004",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32004R0883"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32004R0883",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.89-391",
+      "title": "Council Directive 89/391/EEC on safety and health of workers at work (framework directive)",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "391",
+      "year": "1989",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "31989L0391"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:31989L0391",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2017-1001",
+      "title": "Regulation (EU) 2017/1001 on the European Union trade mark",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "1001",
+      "year": "2017",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32017R1001"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32017R1001",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2018-625",
+      "title": "Commission Delegated Regulation (EU) 2018/625 supplementing Regulation (EU) 2017/1001",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "625",
+      "year": "2018",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32018R0625"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32018R0625",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2018-626",
+      "title": "Commission Implementing Regulation (EU) 2018/626 laying down rules for implementing Regulation (EU) 2017/1001",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "626",
+      "year": "2018",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32018R0626"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32018R0626",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2015-2436",
+      "title": "Directive (EU) 2015/2436 to approximate the laws of the Member States relating to trade marks",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "2436",
+      "year": "2015",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32015L2436"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32015L2436",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.608-2013",
+      "title": "Regulation (EU) No 608/2013 concerning customs enforcement of intellectual property rights",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "608",
+      "year": "2013",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32013R0608"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32013R0608",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.2019-517",
+      "title": "Regulation (EU) 2019/517 on the .eu top-level domain name",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "517",
+      "year": "2019",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32019R0517"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32019R0517",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.178-2002",
+      "title": "Regulation (EC) No 178/2002, general principles of food law",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "178",
+      "year": "2002",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32002R0178"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32002R0178",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.852-2004",
+      "title": "Regulation (EC) No 852/2004 on the hygiene of foodstuffs",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "852",
+      "year": "2004",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32004R0852"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32004R0852",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.reg.1169-2011",
+      "title": "Regulation (EU) No 1169/2011 on the provision of food information to consumers",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "1169",
+      "year": "2011",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32011R1169"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32011R1169",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": null
+    },
+    {
+      "id": "eu.dir.2015-849",
+      "title": "Directive (EU) 2015/849 on the prevention of the use of the financial system for money laundering",
+      "jurisdiction": "EU",
+      "kind": "directive",
+      "number": "849",
+      "year": "2015",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32015L0849"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32015L0849",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "To be replaced by Regulation (EU) 2024/1624 (reported: applies from 10.07.2027); check which applies on the task date"
+    },
+    {
+      "id": "eu.reg.2024-1624",
+      "title": "Regulation (EU) 2024/1624 on the prevention of the use of the financial system for money laundering (AMLR)",
+      "jurisdiction": "EU",
+      "kind": "regulation",
+      "number": "1624",
+      "year": "2024",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "eurlex",
+          "celex": "32024R1624"
+        }
+      ],
+      "official_url": "https://eur-lex.europa.eu/legal-content/RO/ALL/?uri=CELEX:32024R1624",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "Application date reported: 10.07.2027; until then the national laws transposing Directive (EU) 2015/849 apply"
+    },
+    {
+      "id": "md.cod.civil",
+      "title": "Codul civil al Republicii Moldova nr. 1107/2002 (republicat 2019)",
+      "jurisdiction": "MD",
+      "kind": "code",
+      "number": "1107",
+      "year": "2002",
+      "code": "civil",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "150498"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=150498&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.cod.fiscal",
+      "title": "Codul fiscal nr. 1163/1997",
+      "jurisdiction": "MD",
+      "kind": "code",
+      "number": "1163",
+      "year": "1997",
+      "code": "fiscal",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "138613"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=138613&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.cod.muncii",
+      "title": "Codul muncii al Republicii Moldova nr. 154/2003",
+      "jurisdiction": "MD",
+      "kind": "code",
+      "number": "154",
+      "year": "2003",
+      "code": "muncii",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "155185"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=155185&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.cod.educatiei",
+      "title": "Codul educației al Republicii Moldova nr. 152/2014",
+      "jurisdiction": "MD",
+      "kind": "code",
+      "number": "152",
+      "year": "2014",
+      "code": "educatiei",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.cod.audiovizual",
+      "title": "Codul serviciilor media audiovizuale al Republicii Moldova nr. 174/2018",
+      "jurisdiction": "MD",
+      "kind": "code",
+      "number": "174",
+      "year": "2018",
+      "code": "audiovizual",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.1125-2002",
+      "title": "Legea nr. 1125/2002 pentru punerea în aplicare a Codului civil",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "1125",
+      "year": "2002",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "150208"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=150208&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.135-2007",
+      "title": "Legea nr. 135/2007 privind societățile cu răspundere limitată",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "135",
+      "year": "2007",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "153674"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=153674&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.220-2007",
+      "title": "Legea nr. 220/2007 privind înregistrarea de stat a persoanelor juridice și a întreprinzătorilor individuali",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "220",
+      "year": "2007",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "155438"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=155438&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.287-2017",
+      "title": "Legea contabilității și raportării financiare nr. 287/2017",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "287",
+      "year": "2017",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "154725"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=154725&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.195-2024",
+      "title": "Legea nr. 195/2024 privind protecția datelor cu caracter personal",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "195",
+      "year": "2024",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "144681"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=144681&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "In force from 23.08.2026, repeals Law 133/2011 (reported)"
+    },
+    {
+      "id": "md.lege.105-2003",
+      "title": "Legea nr. 105/2003 privind protecția consumatorilor",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "105",
+      "year": "2003",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "150997"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=150997&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.284-2004",
+      "title": "Legea nr. 284/2004 privind serviciile societății informaționale (comerțul electronic)",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "284",
+      "year": "2004",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "150486"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=150486&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.247-2024",
+      "title": "Legea nr. 247/2024 privind contractele de furnizare de conținut digital și servicii digitale",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "247",
+      "year": "2024",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "145889"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=145889&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.62-2022",
+      "title": "Legea nr. 62/2022 cu privire la publicitate",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "62",
+      "year": "2022",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "152948"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=152948&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id seen on an official-body page linking legis.md, not opened"
+    },
+    {
+      "id": "md.lege.230-2022",
+      "title": "Legea nr. 230/2022 privind dreptul de autor și drepturile conexe",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "230",
+      "year": "2022",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "149374"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=149374&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.38-2008",
+      "title": "Legea nr. 38/2008 privind protecția mărcilor",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "38",
+      "year": "2008",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "136351"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=136351&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.25-2024",
+      "title": "Legea nr. 25/2024 privind mărcile",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "25",
+      "year": "2024",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "142601"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=142601&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "Application date reported as 02.04.2027, with a 2026 draft amending it; check which trademark law applies on the task date"
+    },
+    {
+      "id": "md.hg.488-2009",
+      "title": "HG nr. 488/2009, regulamentul privind procedura de depunere și examinare a cererii de înregistrare a mărcii",
+      "jurisdiction": "MD",
+      "kind": "government-decision",
+      "number": "488",
+      "year": "2009",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.384-2023",
+      "title": "Legea nr. 384/2023 privind protecția secretelor comerciale",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "384",
+      "year": "2023",
+      "priority": "p3",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "152656"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=152656&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.183-2012",
+      "title": "Legea concurenței nr. 183/2012",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "183",
+      "year": "2012",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.77-2016",
+      "title": "Legea nr. 77/2016 cu privire la parcurile pentru tehnologia informației",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "77",
+      "year": "2016",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "143443"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=143443&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.186-2008",
+      "title": "Legea securității și sănătății în muncă nr. 186/2008",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "186",
+      "year": "2008",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "151092"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=151092&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.hg.95-2009",
+      "title": "HG nr. 95/2009 pentru aprobarea unor acte normative privind implementarea Legii securității și sănătății în muncă nr. 186/2008",
+      "jurisdiction": "MD",
+      "kind": "government-decision",
+      "number": "95",
+      "year": "2009",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "145415"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=145415&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.489-1999",
+      "title": "Legea nr. 489/1999 privind sistemul public de asigurări sociale",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "489",
+      "year": "1999",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "156677"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=156677&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.1585-1998",
+      "title": "Legea nr. 1585/1998 cu privire la asigurarea obligatorie de asistență medicală",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "1585",
+      "year": "1998",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "legis_md",
+          "doc_id": "155334"
+        }
+      ],
+      "official_url": "https://www.legis.md/cautare/getResults?doc_id=155334&lang=ro",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "md.lege.22-2018",
+      "title": "Legea nr. 22/2018 privind exercitarea unor activități necalificate cu caracter ocazional desfășurate de zilieri",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "22",
+      "year": "2018",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.200-2010",
+      "title": "Legea nr. 200/2010 privind regimul străinilor în Republica Moldova",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "200",
+      "year": "2010",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.306-2018",
+      "title": "Legea nr. 306/2018 privind siguranța alimentelor",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "306",
+      "year": "2018",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.231-2010",
+      "title": "Legea nr. 231/2010 cu privire la comerțul interior",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "231",
+      "year": "2010",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.160-2011",
+      "title": "Legea nr. 160/2011 privind reglementarea prin autorizare a activității de întreprinzător",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "160",
+      "year": "2011",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.422-2006",
+      "title": "Legea nr. 422/2006 privind securitatea generală a produselor",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "422",
+      "year": "2006",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.308-2017",
+      "title": "Legea nr. 308/2017 cu privire la prevenirea și combaterea spălării banilor și finanțării terorismului",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "308",
+      "year": "2017",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.721-1996",
+      "title": "Legea nr. 721/1996 privind calitatea în construcții",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "721",
+      "year": "1996",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "md.lege.163-2010",
+      "title": "Legea nr. 163/2010 privind autorizarea executării lucrărilor de construcție",
+      "jurisdiction": "MD",
+      "kind": "law",
+      "number": "163",
+      "year": "2010",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://www.legis.md/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.287-2009",
+      "title": "Legea nr. 287/2009 privind Codul civil (republicată)",
+      "jurisdiction": "RO",
+      "kind": "code",
+      "number": "287",
+      "year": "2009",
+      "code": "civil",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "109884"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/109884",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.lege.227-2015",
+      "title": "Legea nr. 227/2015 privind Codul fiscal",
+      "jurisdiction": "RO",
+      "kind": "code",
+      "number": "227",
+      "year": "2015",
+      "code": "fiscal",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "171282"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/171282",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "ro.lege.207-2015",
+      "title": "Legea nr. 207/2015 privind Codul de procedură fiscală",
+      "jurisdiction": "RO",
+      "kind": "code",
+      "number": "207",
+      "year": "2015",
+      "code": "procedura-fiscala",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.53-2003",
+      "title": "Legea nr. 53/2003 — Codul muncii (republicată)",
+      "jurisdiction": "RO",
+      "kind": "code",
+      "number": "53",
+      "year": "2003",
+      "code": "muncii",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "41627"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/41627",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.lege.82-1991",
+      "title": "Legea contabilității nr. 82/1991 (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "82",
+      "year": "1991",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "293379"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/293379",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "ro.lege.31-1990",
+      "title": "Legea societăților nr. 31/1990 (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "31",
+      "year": "1990",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "169688"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/169688",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed by a search result showing the official page and its title"
+    },
+    {
+      "id": "ro.lege.265-2022",
+      "title": "Legea nr. 265/2022 privind registrul comerțului",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "265",
+      "year": "2022",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "Replaced most of Law 26/1990 (reported); doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.26-1990",
+      "title": "Legea nr. 26/1990 privind registrul comerțului (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "26",
+      "year": "1990",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "Largely replaced by Law 265/2022 (reported); kept because the trademark module cites it for firm names as earlier rights; doc_id to be found on first run"
+    },
+    {
+      "id": "ro.oug.44-2008",
+      "title": "OUG nr. 44/2008 privind desfășurarea activităților economice de către persoanele fizice autorizate, întreprinderile individuale și întreprinderile familiale",
+      "jurisdiction": "RO",
+      "kind": "emergency-ordinance",
+      "number": "44",
+      "year": "2008",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.190-2018",
+      "title": "Legea nr. 190/2018 privind măsuri de punere în aplicare a Regulamentului (UE) 2016/679",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "190",
+      "year": "2018",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "203151"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/203151",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id seen as DetaliiDocumentAfis/203151 in a search result"
+    },
+    {
+      "id": "ro.lege.506-2004",
+      "title": "Legea nr. 506/2004 privind prelucrarea datelor cu caracter personal și protecția vieții private în sectorul comunicațiilor electronice",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "506",
+      "year": "2004",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "56973"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/56973",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "ro.oug.34-2014",
+      "title": "OUG nr. 34/2014 privind drepturile consumatorilor în cadrul contractelor încheiate cu profesioniștii",
+      "jurisdiction": "RO",
+      "kind": "emergency-ordinance",
+      "number": "34",
+      "year": "2014",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "158913"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/158913",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.oug.140-2021",
+      "title": "OUG nr. 140/2021 privind anumite aspecte referitoare la contractele de vânzare de bunuri",
+      "jurisdiction": "RO",
+      "kind": "emergency-ordinance",
+      "number": "140",
+      "year": "2021",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "303291"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/303291",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id seen as DetaliiDocumentAfis/303291 in a search result"
+    },
+    {
+      "id": "ro.oug.141-2021",
+      "title": "OUG nr. 141/2021 privind anumite aspecte referitoare la contractele de furnizare de conținut digital și de servicii digitale",
+      "jurisdiction": "RO",
+      "kind": "emergency-ordinance",
+      "number": "141",
+      "year": "2021",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "250054"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/250054",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.og.21-1992",
+      "title": "OG nr. 21/1992 privind protecția consumatorilor (republicată)",
+      "jurisdiction": "RO",
+      "kind": "government-ordinance",
+      "number": "21",
+      "year": "1992",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "2175"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/2175",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.og.99-2000",
+      "title": "OG nr. 99/2000 privind comercializarea produselor și serviciilor de piață",
+      "jurisdiction": "RO",
+      "kind": "government-ordinance",
+      "number": "99",
+      "year": "2000",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.og.38-2015",
+      "title": "OG nr. 38/2015 privind soluționarea alternativă a litigiilor dintre consumatori și comercianți",
+      "jurisdiction": "RO",
+      "kind": "government-ordinance",
+      "number": "38",
+      "year": "2015",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.363-2007",
+      "title": "Legea nr. 363/2007 privind combaterea practicilor incorecte ale comercianților în relația cu consumatorii",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "363",
+      "year": "2007",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "88290"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/88290",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "ro.lege.193-2000",
+      "title": "Legea nr. 193/2000 privind clauzele abuzive din contractele încheiate între profesioniști și consumatori (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "193",
+      "year": "2000",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "254145"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/254145",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "ro.lege.365-2002",
+      "title": "Legea nr. 365/2002 privind comerțul electronic",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "365",
+      "year": "2002",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "37075"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/37075",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.lege.148-2000",
+      "title": "Legea nr. 148/2000 privind publicitatea",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "148",
+      "year": "2000",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.158-2008",
+      "title": "Legea nr. 158/2008 privind publicitatea înșelătoare și publicitatea comparativă",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "158",
+      "year": "2008",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.504-2002",
+      "title": "Legea audiovizualului nr. 504/2002",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "504",
+      "year": "2002",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.8-1996",
+      "title": "Legea nr. 8/1996 privind dreptul de autor și drepturile conexe (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "8",
+      "year": "1996",
+      "priority": "p1",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "221527"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/221527",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed by a search result showing the official page and its title"
+    },
+    {
+      "id": "ro.lege.84-1998",
+      "title": "Legea nr. 84/1998 privind mărcile și indicațiile geografice (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "84",
+      "year": "1998",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "14558"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/14558",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": null
+    },
+    {
+      "id": "ro.hg.1134-2010",
+      "title": "HG nr. 1134/2010, regulamentul de aplicare a Legii nr. 84/1998",
+      "jurisdiction": "RO",
+      "kind": "government-decision",
+      "number": "1134",
+      "year": "2010",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.og.41-1998",
+      "title": "OG nr. 41/1998 privind taxele în domeniul proprietății industriale",
+      "jurisdiction": "RO",
+      "kind": "government-ordinance",
+      "number": "41",
+      "year": "1998",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.11-1991",
+      "title": "Legea nr. 11/1991 privind combaterea concurenței neloiale",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "11",
+      "year": "1991",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.319-2006",
+      "title": "Legea securității și sănătății în muncă nr. 319/2006",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "319",
+      "year": "2006",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.hg.1425-2006",
+      "title": "HG nr. 1425/2006, normele metodologice de aplicare a Legii nr. 319/2006",
+      "jurisdiction": "RO",
+      "kind": "government-decision",
+      "number": "1425",
+      "year": "2006",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.hg.905-2017",
+      "title": "HG nr. 905/2017 privind registrul general de evidență a salariaților",
+      "jurisdiction": "RO",
+      "kind": "government-decision",
+      "number": "905",
+      "year": "2017",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.81-2018",
+      "title": "Legea nr. 81/2018 privind reglementarea activității de telemuncă",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "81",
+      "year": "2018",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.283-2022",
+      "title": "Legea nr. 283/2022 pentru modificarea Legii nr. 53/2003 (transpunerea Directivei (UE) 2019/1152)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "283",
+      "year": "2022",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.52-2011",
+      "title": "Legea nr. 52/2011 privind exercitarea unor activități cu caracter ocazional desfășurate de zilieri",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "52",
+      "year": "2011",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.367-2022",
+      "title": "Legea dialogului social nr. 367/2022",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "367",
+      "year": "2022",
+      "priority": "p3",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.150-2004",
+      "title": "Legea nr. 150/2004 privind siguranța alimentelor și a hranei pentru animale (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "150",
+      "year": "2004",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.198-2023",
+      "title": "Legea învățământului preuniversitar nr. 198/2023",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "198",
+      "year": "2023",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.og.129-2000",
+      "title": "OG nr. 129/2000 privind formarea profesională a adulților (republicată)",
+      "jurisdiction": "RO",
+      "kind": "government-ordinance",
+      "number": "129",
+      "year": "2000",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.hg.522-2003",
+      "title": "HG nr. 522/2003, normele metodologice de aplicare a OG nr. 129/2000",
+      "jurisdiction": "RO",
+      "kind": "government-decision",
+      "number": "522",
+      "year": "2003",
+      "priority": "p2",
+      "sources": [
+        {
+          "kind": "just_ro",
+          "doc_id": "169927"
+        }
+      ],
+      "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/169927",
+      "checked_on": "2026-11-04",
+      "status": "verified",
+      "note": "doc_id confirmed on an archived copy (Wayback Machine) of the official page"
+    },
+    {
+      "id": "ro.lege.129-2019",
+      "title": "Legea nr. 129/2019 pentru prevenirea și combaterea spălării banilor și finanțării terorismului",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "129",
+      "year": "2019",
+      "priority": "p2",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.10-1995",
+      "title": "Legea nr. 10/1995 privind calitatea în construcții (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "10",
+      "year": "1995",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    },
+    {
+      "id": "ro.lege.50-1991",
+      "title": "Legea nr. 50/1991 privind autorizarea executării lucrărilor de construcții (republicată)",
+      "jurisdiction": "RO",
+      "kind": "law",
+      "number": "50",
+      "year": "1991",
+      "priority": "p1",
+      "sources": [],
+      "official_url": "https://legislatie.just.ro/",
+      "checked_on": "2026-11-04",
+      "status": "reported",
+      "note": "doc_id to be found on first run"
+    }
+  ]
+}

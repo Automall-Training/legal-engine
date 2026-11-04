@@ -1,0 +1,489 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-04",
+  "categories": {
+    "civil": {
+      "label": {
+        "en": "Civil law and contracts",
+        "ro": "Drept civil și contracte",
+        "ru": "Гражданское право и договоры"
+      },
+      "acts": [
+        "eu.reg.593-2008",
+        "eu.reg.1215-2012",
+        "md.cod.civil",
+        "md.lege.1125-2002",
+        "ro.lege.287-2009"
+      ]
+    },
+    "tax": {
+      "label": {
+        "en": "Taxes",
+        "ro": "Impozite și taxe",
+        "ru": "Налоги"
+      },
+      "acts": [
+        "eu.dir.2006-112",
+        "md.cod.fiscal",
+        "md.lege.489-1999",
+        "md.lege.1585-1998",
+        "ro.lege.227-2015",
+        "ro.lege.207-2015"
+      ]
+    },
+    "accounting": {
+      "label": {
+        "en": "Accounting",
+        "ro": "Contabilitate",
+        "ru": "Бухгалтерский учёт"
+      },
+      "acts": [
+        "md.lege.287-2017",
+        "ro.lege.82-1991"
+      ]
+    },
+    "company": {
+      "label": {
+        "en": "Company law and registration",
+        "ro": "Societăți și înregistrare",
+        "ru": "Корпоративное право и регистрация"
+      },
+      "acts": [
+        "md.lege.135-2007",
+        "md.lege.220-2007",
+        "ro.lege.31-1990",
+        "ro.lege.265-2022",
+        "ro.lege.26-1990",
+        "ro.oug.44-2008"
+      ]
+    },
+    "data": {
+      "label": {
+        "en": "Personal data",
+        "ro": "Date cu caracter personal",
+        "ru": "Персональные данные"
+      },
+      "acts": [
+        "eu.reg.2016-679",
+        "eu.dir.2002-58",
+        "eu.dec.2021-914",
+        "eu.dec.2021-915",
+        "eu.dec.2023-1795",
+        "md.lege.195-2024",
+        "ro.lege.190-2018",
+        "ro.lege.506-2004"
+      ]
+    },
+    "consumer": {
+      "label": {
+        "en": "Consumer protection",
+        "ro": "Protecția consumatorilor",
+        "ru": "Защита прав потребителей"
+      },
+      "acts": [
+        "eu.dir.2011-83",
+        "eu.dir.2023-2673",
+        "eu.dir.2019-771",
+        "eu.dir.2005-29",
+        "eu.dir.2019-2161",
+        "eu.dir.93-13",
+        "eu.dir.98-6",
+        "eu.reg.2024-3228",
+        "eu.reg.593-2008",
+        "md.cod.civil",
+        "md.lege.105-2003",
+        "ro.lege.287-2009",
+        "ro.oug.34-2014",
+        "ro.oug.140-2021",
+        "ro.og.21-1992",
+        "ro.og.99-2000",
+        "ro.og.38-2015",
+        "ro.lege.363-2007",
+        "ro.lege.193-2000"
+      ]
+    },
+    "e-commerce": {
+      "label": {
+        "en": "E-commerce and online selling",
+        "ro": "Comerț electronic",
+        "ru": "Электронная торговля"
+      },
+      "acts": [
+        "eu.dir.2011-83",
+        "eu.dir.2023-2673",
+        "eu.dir.2000-31",
+        "eu.reg.2022-2065",
+        "md.lege.284-2004",
+        "ro.oug.34-2014",
+        "ro.lege.365-2002"
+      ]
+    },
+    "digital-content": {
+      "label": {
+        "en": "Digital content and services",
+        "ro": "Conținut și servicii digitale",
+        "ru": "Цифровой контент и услуги"
+      },
+      "acts": [
+        "eu.dir.2019-770",
+        "md.lege.247-2024",
+        "ro.oug.141-2021"
+      ]
+    },
+    "advertising": {
+      "label": {
+        "en": "Advertising and marketing",
+        "ro": "Publicitate și marketing",
+        "ru": "Реклама и маркетинг"
+      },
+      "acts": [
+        "eu.dir.2002-58",
+        "eu.dir.2005-29",
+        "eu.dir.2006-114",
+        "md.lege.62-2022",
+        "md.lege.183-2012",
+        "ro.lege.506-2004",
+        "ro.lege.363-2007",
+        "ro.lege.148-2000",
+        "ro.lege.158-2008",
+        "ro.lege.11-1991"
+      ]
+    },
+    "employment": {
+      "label": {
+        "en": "Employment",
+        "ro": "Relații de muncă",
+        "ru": "Трудовые отношения"
+      },
+      "acts": [
+        "eu.reg.2016-679",
+        "eu.reg.593-2008",
+        "eu.dir.2019-1152",
+        "eu.dir.2003-88",
+        "eu.dir.1999-70",
+        "eu.dir.97-81",
+        "eu.dir.96-71",
+        "eu.reg.883-2004",
+        "md.cod.muncii",
+        "md.lege.195-2024",
+        "md.lege.186-2008",
+        "md.lege.489-1999",
+        "md.lege.1585-1998",
+        "md.lege.22-2018",
+        "md.lege.200-2010",
+        "ro.lege.227-2015",
+        "ro.lege.53-2003",
+        "ro.lege.190-2018",
+        "ro.lege.319-2006",
+        "ro.hg.905-2017",
+        "ro.lege.81-2018",
+        "ro.lege.283-2022",
+        "ro.lege.52-2011",
+        "ro.lege.367-2022"
+      ]
+    },
+    "ip": {
+      "label": {
+        "en": "Intellectual property (copyright, trademarks)",
+        "ro": "Proprietate intelectuală (drept de autor, mărci)",
+        "ru": "Интеллектуальная собственность (авторское право, товарные знаки)"
+      },
+      "acts": [
+        "eu.reg.2022-2065",
+        "eu.reg.2017-1001",
+        "eu.reg.2018-625",
+        "eu.reg.2018-626",
+        "eu.dir.2015-2436",
+        "eu.reg.608-2013",
+        "eu.reg.2019-517",
+        "md.lege.230-2022",
+        "md.lege.38-2008",
+        "md.lege.25-2024",
+        "md.hg.488-2009",
+        "md.lege.384-2023",
+        "md.lege.183-2012",
+        "ro.lege.26-1990",
+        "ro.lege.8-1996",
+        "ro.lege.84-1998",
+        "ro.hg.1134-2010",
+        "ro.og.41-1998",
+        "ro.lege.11-1991"
+      ]
+    },
+    "education": {
+      "label": {
+        "en": "Education and training",
+        "ro": "Educație și formare",
+        "ru": "Образование и обучение"
+      },
+      "acts": [
+        "md.cod.educatiei",
+        "ro.lege.198-2023",
+        "ro.og.129-2000",
+        "ro.hg.522-2003"
+      ]
+    },
+    "it-park": {
+      "label": {
+        "en": "Moldova IT Park",
+        "ro": "Moldova IT Park",
+        "ru": "Moldova IT Park"
+      },
+      "acts": [
+        "md.cod.fiscal",
+        "md.lege.77-2016"
+      ]
+    },
+    "aml": {
+      "label": {
+        "en": "Anti-money laundering",
+        "ro": "Prevenirea spălării banilor",
+        "ru": "Противодействие отмыванию денег"
+      },
+      "acts": [
+        "eu.dir.2015-849",
+        "eu.reg.2024-1624",
+        "md.lege.308-2017",
+        "ro.lege.129-2019"
+      ]
+    },
+    "health-safety": {
+      "label": {
+        "en": "Health and safety at work",
+        "ro": "Securitate și sănătate în muncă",
+        "ru": "Охрана труда"
+      },
+      "acts": [
+        "eu.dir.89-391",
+        "md.lege.186-2008",
+        "md.hg.95-2009",
+        "ro.lege.319-2006",
+        "ro.hg.1425-2006"
+      ]
+    },
+    "food-safety": {
+      "label": {
+        "en": "Food safety",
+        "ro": "Siguranța alimentelor",
+        "ru": "Безопасность пищевых продуктов"
+      },
+      "acts": [
+        "eu.reg.178-2002",
+        "eu.reg.852-2004",
+        "eu.reg.1169-2011",
+        "md.lege.306-2018",
+        "ro.lege.150-2004"
+      ]
+    },
+    "licensing": {
+      "label": {
+        "en": "Licences and permits for trade",
+        "ro": "Autorizarea activității comerciale",
+        "ru": "Разрешения и лицензии на торговлю"
+      },
+      "acts": [
+        "md.lege.231-2010",
+        "md.lege.160-2011",
+        "ro.og.99-2000"
+      ]
+    },
+    "retail": {
+      "label": {
+        "en": "Retail trade and prices",
+        "ro": "Comerț cu amănuntul și prețuri",
+        "ru": "Розничная торговля и цены"
+      },
+      "acts": [
+        "eu.dir.98-6",
+        "md.lege.231-2010",
+        "ro.og.99-2000"
+      ]
+    },
+    "product-safety": {
+      "label": {
+        "en": "Product safety",
+        "ro": "Siguranța produselor",
+        "ru": "Безопасность продукции"
+      },
+      "acts": [
+        "eu.reg.2023-988",
+        "md.lege.422-2006"
+      ]
+    },
+    "media": {
+      "label": {
+        "en": "Audiovisual and online media",
+        "ro": "Audiovizual și media online",
+        "ru": "Аудиовизуальные и онлайн-медиа"
+      },
+      "acts": [
+        "eu.reg.2022-2065",
+        "eu.dir.2010-13",
+        "md.cod.audiovizual",
+        "md.lege.230-2022",
+        "ro.lege.504-2002",
+        "ro.lege.8-1996"
+      ]
+    },
+    "construction": {
+      "label": {
+        "en": "Construction",
+        "ro": "Construcții",
+        "ru": "Строительство"
+      },
+      "acts": [
+        "md.lege.721-1996",
+        "md.lege.163-2010",
+        "ro.lege.10-1995",
+        "ro.lege.50-1991"
+      ]
+    }
+  },
+  "general": [
+    "civil",
+    "tax",
+    "accounting",
+    "company",
+    "data"
+  ],
+  "b2c": [
+    "consumer"
+  ],
+  "niches": {
+    "online-courses": {
+      "label": {
+        "en": "Online courses and education",
+        "ro": "Cursuri online și educație",
+        "ru": "Онлайн-курсы и обучение"
+      },
+      "categories": [
+        "digital-content",
+        "education",
+        "advertising",
+        "e-commerce",
+        "ip"
+      ]
+    },
+    "e-commerce-goods": {
+      "label": {
+        "en": "Online shop (goods)",
+        "ro": "Magazin online (bunuri)",
+        "ru": "Интернет-магазин (товары)"
+      },
+      "categories": [
+        "e-commerce",
+        "product-safety",
+        "retail",
+        "advertising",
+        "ip"
+      ]
+    },
+    "saas-apps": {
+      "label": {
+        "en": "SaaS, apps and digital services",
+        "ro": "SaaS, aplicații și servicii digitale",
+        "ru": "SaaS, приложения и цифровые услуги"
+      },
+      "categories": [
+        "digital-content",
+        "e-commerce",
+        "ip",
+        "advertising"
+      ]
+    },
+    "it-services": {
+      "label": {
+        "en": "IT services and outsourcing",
+        "ro": "Servicii IT și outsourcing",
+        "ru": "IT-услуги и аутсорсинг"
+      },
+      "categories": [
+        "ip",
+        "it-park",
+        "employment"
+      ],
+      "note": "it-park applies only to a resident of Moldova IT Park"
+    },
+    "marketing-agency": {
+      "label": {
+        "en": "Marketing and advertising agency",
+        "ro": "Agenție de marketing și publicitate",
+        "ru": "Маркетинговое и рекламное агентство"
+      },
+      "categories": [
+        "advertising",
+        "ip",
+        "media",
+        "employment"
+      ]
+    },
+    "consulting": {
+      "label": {
+        "en": "Consulting and professional services",
+        "ro": "Consultanță și servicii profesionale",
+        "ru": "Консалтинг и профессиональные услуги"
+      },
+      "categories": [
+        "ip",
+        "employment",
+        "aml"
+      ],
+      "note": "aml applies only to obliged entities (accountants, auditors, tax advisers, legal and real-estate services)"
+    },
+    "retail-shop": {
+      "label": {
+        "en": "Retail shop (offline)",
+        "ro": "Magazin fizic",
+        "ru": "Розничный магазин (офлайн)"
+      },
+      "categories": [
+        "retail",
+        "licensing",
+        "product-safety",
+        "health-safety",
+        "employment",
+        "advertising"
+      ]
+    },
+    "horeca": {
+      "label": {
+        "en": "Food service (cafe, restaurant, catering)",
+        "ro": "Alimentație publică (HoReCa)",
+        "ru": "Общепит (кафе, ресторан, кейтеринг)"
+      },
+      "categories": [
+        "food-safety",
+        "licensing",
+        "retail",
+        "health-safety",
+        "employment"
+      ]
+    },
+    "content-creators": {
+      "label": {
+        "en": "Content creators and media",
+        "ro": "Creatori de conținut și media",
+        "ru": "Авторы контента и медиа"
+      },
+      "categories": [
+        "media",
+        "advertising",
+        "ip",
+        "digital-content"
+      ]
+    },
+    "construction": {
+      "label": {
+        "en": "Construction and renovation",
+        "ro": "Construcții și renovări",
+        "ru": "Строительство и ремонт"
+      },
+      "categories": [
+        "construction",
+        "health-safety",
+        "employment",
+        "licensing"
+      ]
+    }
+  }
+}
