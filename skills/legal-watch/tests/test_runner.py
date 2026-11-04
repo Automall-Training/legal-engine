@@ -153,7 +153,8 @@ class Failures(RunnerBase):
     def test_dry_run_writes_no_state(self):
         self.run_with([act()], adapter([V1]), dry_run=True)
         self.assertFalse((self.profile / "laws" / "state.json").exists())
-        self.assertTrue((self.profile / "laws" / "runs" / "2026-11-04" / "run.json").exists())
+        self.assertTrue((self.profile / "laws" / "runs" / "2026-11-04" / "dry-run" / "run.json").exists())
+        self.assertFalse((self.profile / "laws" / "runs" / "2026-11-04" / "run.json").exists())
 
 
 class ContractFlags(RunnerBase):
@@ -229,13 +230,15 @@ def card(act_id="ro.lege.1-2020", *, result="current", latest=("v2", "2026-10-01
             "latest_in_force": {"label": latest[0], "version_from": latest[1]},
             "next_versions": [{"label": nxt[0], "applies_from": nxt[1]}] if nxt else [],
             "repealed": repealed or {"by": None, "from": None},
-            "points": {"consolidation": {"evidence": [{"url": URL, "text_sha256": sha}]}},
+            "points": {"consolidation": {"status": "done", "evidence": [{"url": URL, "text_sha256": sha}]},
+                       **{n: {"status": "done", "evidence": [{"url": URL}]}
+                          for n in ("amendments", "deferred_entry", "repeal", "status_of_changes")}},
             "checked_at": "2026-11-04T10:00:00+02:00"}
 
 
 class HostEngine(RunnerBase):
     def test_card_equal_to_baseline_is_unchanged(self):
-        res = manual.card_to_result(act(current={"label": "v2", "in_force_from": "2026-10-01"}), card(), TODAY)
+        res = manual.card_to_result(act(current={"label": "v2", "in_force_from": "2026-10-01"}), card(), TODAY, "text read")
         self.assertEqual((res.status, res.adapter, res.evidence.via), ("unchanged", "host", "host"))
 
     def test_card_with_newer_version_is_a_change(self):
@@ -252,7 +255,7 @@ class HostEngine(RunnerBase):
         self.assertEqual(res.status, "repealed")
 
     def test_card_without_hash_cannot_be_unchanged(self):
-        res = manual.card_to_result(act(current={"label": "v2", "in_force_from": "2026-10-01"}), card(sha=None), TODAY)
+        res = manual.card_to_result(act(current={"label": "v2", "in_force_from": "2026-10-01"}), card(), TODAY)
         self.assertEqual(res.status, "parse_failed")
 
     def test_refusals(self):

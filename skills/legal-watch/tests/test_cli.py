@@ -83,6 +83,12 @@ class Cli(unittest.TestCase):
         code, out, _ = self.p("index", "scan", str(contract), "--jurisdiction", "RO")
         self.assertEqual(json.loads(out)["clauses"][0]["acts"][0]["id"], "eu.reg.2016-679")
         self.assertEqual(self.p("index", "scan", str(contract), "--jurisdiction", "RO", "--write")[0], 0)
+        self.assertEqual(self.p("index", "check")[0], 2)  # no watchlist yet: nothing can reach a clause
+        self.p("init", "--niches", self.niche, "--acts", "md.cod.civil")
+        code, out, _ = self.p("index", "check")
+        self.assertEqual(code, 1)  # in the catalog but not watched: reported
+        self.assertIn("eu.reg.2016-679", out)
+        self.p("init", "--niches", self.niche, "--acts", "eu.reg.2016-679", "--force")
         code, out, _ = self.p("index", "check")
         self.assertEqual(code, 0, out)
         self.assertEqual(json.loads(self.p("index", "pending")[1]), [])

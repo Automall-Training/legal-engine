@@ -15,9 +15,28 @@ from pathlib import Path
 
 from . import library as lib
 from . import runner
-from .contract import AdapterResult, Evidence, Redaction, classify, parse_date
+from .contract import AdapterResult, Evidence, Redaction, classify, parse_date, text_sha256
 
 CHECKER = lib.SKILL.parent / "legal-research" / "scripts" / "check_version.py"
+# The points of a `scope: "text"` card (version-check.md): all must be closed from a live official page before a
+# hand check can count. The checker accepts an `outdated` card with open points; monitoring may not.
+REQUIRED_POINTS = ("consolidation", "amendments", "deferred_entry", "repeal", "status_of_changes")
+
+
+def open_points(card: dict) -> list[str]:
+    """Required points not closed by live evidence (done, with at least one source that is not an archive copy)."""
+    out = []
+    for name in REQUIRED_POINTS:
+        point = (card.get("points") or {}).get(name) or {}
+        live = [e for e in point.get("evidence") or [] if isinstance(e, dict) and not e.get("archived_on")]
+        if point.get("status") != "done" or not live:
+            out.append(name)
+    return out
+
+
+def _consolidation_evidence(card: dict) -> list[dict]:
+    return [e for e in ((card.get("points") or {}).get("consolidation") or {}).get("evidence") or []
+            if isinstance(e, dict)]
 
 
 def _checker():
@@ -29,7 +48,7 @@ def _checker():
     return mod
 
 
-def card_to_result(act: dict, card: dict, today: _dt.date) -> AdapterResult:
+def card_to_result(act: dict, card: dict, today: _dt.date, text: str | None = None) -> AdapterResult:
     """A version card that passed the checker → the monitoring result for the act."""
     if (card.get("act") or {}).get("id") != act["id"]:
         raise lib.WatchError(f"the card is for {(card.get('act') or {}).get('id')!r}, not {act['id']}")
@@ -48,9 +67,11 @@ def card_to_result(act: dict, card: dict, today: _dt.date) -> AdapterResult:
     if rep.get("from") and not gone:
         # A repeal dated in the future is a next version of the act, not a repeal today.
         parsed.append(Redaction(label=f"repeal by {rep.get('by')}", in_force_from=rep["from"]))
-    ev_list = ((card.get("points") or {}).get("consolidation") or {}).get("evidence") or []
+    ev_list = _consolidation_evidence(card)
     ev0 = ev_list[0] if ev_list else {}
-    sha = ev0.get("text_sha256") or (card.get("held_version") or {}).get("sha256")
+    # Only the text read now, hashed like every engine's page text (whitespace-normalised): the card's raw-byte
+    # hash or the held hash would mix kinds and let "unchanged" rest on an old reading.
+    sha = text_sha256(text) if text else None
     evidence = Evidence(url=ev0.get("url") or (card.get("act") or {}).get("official_record_url") or "",
                         fetched_at=card.get("checked_at") or "", sha256=sha, parser="version-card",
                         parser_calibrated=True, via="host")
@@ -58,7 +79,7 @@ def card_to_result(act: dict, card: dict, today: _dt.date) -> AdapterResult:
                                             repealed_label=f"repealed by {rep.get('by')}" if gone else None)
     if status == "unchanged" and not sha:
         # The contract needs a hash for "unchanged": the agent saves the text it read (text_file + text_sha256).
-        status, err = "parse_failed", "the card has no text_sha256 of the text read: save the text and give its hash"
+        status, err = "parse_failed", "no saved text of the reading: give text_file in the card and --root"
     notes = ["checked by hand from a version card"] + notes
     return AdapterResult(act_id=act["id"], adapter="host", status=status, current=cur, next=nxt,
                          evidence=evidence, error=err, notes=notes).validate()
@@ -71,29 +92,31 @@ def record(profile: Path, acts: list[dict], card_path: Path, today: _dt.date, *,
     check = checker.validate(card, _dt.datetime.now().astimezone(), root)
     if check["errors"]:
         raise lib.WatchError("the version card fails its checker: " + "; ".join(check["errors"]))
+    gaps = open_points(card)
+    if gaps:
+        raise lib.WatchError("a hand check counts only when these points are closed from a live official page: "
+                             + ", ".join(gaps))
     act_id = (card.get("act") or {}).get("id")
     act = next((a for a in acts if a["id"] == act_id), None)
     if act is None:
         raise lib.WatchError(f"{act_id!r} is not in the watchlist; add it first")
-    res = card_to_result(act, card, today).to_dict()
+    text_file = next((e["text_file"] for e in _consolidation_evidence(card) if e.get("text_file")), None)
+    text = None
+    if text_file and root is not None and (Path(root) / text_file).is_file():
+        text = (Path(root) / text_file).read_text(encoding="utf-8", errors="replace")
+    res = card_to_result(act, card, today, text).to_dict()
     r = runner.classify_record({"act_id": act["id"], "title": act.get("title"),
                                 "jurisdiction": act.get("jurisdiction"), "priority": act.get("priority"),
-                                **res, "reasons": []})
+                                **res, "reasons": []}, repeal_held=bool(act.get("repealed")))
     state = lib.load_state(profile)
-    text_file = ((card.get("points") or {}).get("consolidation") or {}).get("evidence", [{}])[0].get("text_file")
     snap = None
-    if r.get("checked") and text_file and root is not None and (Path(root) / text_file).is_file():
-        text = (Path(root) / text_file).read_text(encoding="utf-8", errors="replace")
+    if r.get("checked") and text:
         snap = lib.save_snapshot(profile, act["id"], text, (r.get("evidence") or {}).get("sha256"), today.isoformat())
     r["snapshot"] = snap
     runner.update_state(state, r, today.isoformat(), snap)
 
-    run_path = lib.laws_dir(profile) / "runs" / today.isoformat() / "run.json"
-    if run_path.exists():
-        out = lib.read_json(run_path, "run of today")
-        out["acts"] = [x for x in out["acts"] if x["act_id"] != act["id"]] + [r]
-    else:
-        out = {"schema_version": 1, "date": today.isoformat(), "generated_at": runner.now_iso(), "mode": "host",
-               "dry_run": False, "selector": act["id"], "language": language, "schedule": schedule,
-               "acts": [r], "monitorul": None}
-    return runner.finish(profile, out, state, dry_run=False)
+    out = {"schema_version": 1, "date": today.isoformat(), "generated_at": runner.now_iso(), "mode": "host",
+           "dry_run": False, "selector": act["id"], "full": False, "language": language, "schedule": schedule,
+           "acts": [r], "monitorul": None}
+    out = runner.merge_day(profile, out)
+    return runner.finish(profile, out, state, dry_run=False, flag_ids={act["id"]})

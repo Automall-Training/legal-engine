@@ -213,10 +213,13 @@ def classify(*, act: dict, parsed: list[Redaction], today: _dt.date, repealed: b
     same = False
     if reg_cur.get("label") and norm_label(reg_cur.get("label")) == norm_label(cur.label):
         same = True
-    elif cur.doc_id and reg_cur.get("doc_id") and str(reg_cur["doc_id"]) == cur.doc_id and reg_d == cur_d:
+    elif reg_d is not None and reg_d == cur_d:
+        # Same start date = same version. Readers label versions differently (an amending act, a consolidation
+        # date, a hand-written card): a label difference alone must never confirm a change.
         same = True
-    elif reg_d is not None and reg_d == cur_d and _is_base(reg_cur.get("label")) and _is_base(cur.label):
-        same = True
+        if norm_label(reg_cur.get("label")) != norm_label(cur.label):
+            notes.append(f"same start date {cur_d}, label differs: held {reg_cur.get('label')!r}, "
+                         f"page {cur.label!r}")
 
     if not same:
         if reg_d is None:
@@ -224,19 +227,16 @@ def classify(*, act: dict, parsed: list[Redaction], today: _dt.date, repealed: b
             return NEW_IN_FORCE, cur, nxt, None, notes
         if cur_d > reg_d:
             return NEW_IN_FORCE, cur, nxt, None, notes
-        if cur_d == reg_d:
-            notes.append("same start date, different label")
-            return NEW_IN_FORCE, cur, nxt, None, notes
         # The page shows an older version than the one held: never "unchanged".
         return PARSE_FAILED, cur, nxt, (f"page version in force {cur_d} is older than the held {reg_d}: "
                                         "wrong page, wrong document id or an incomplete page"), notes
 
     reg_next_d = parse_date(reg_next.get("in_force_from"))
     if reg_next_d is not None and reg_next_d <= today:
-        # The held next version has started, yet the page still shows the old one: not "unchanged".
-        notes.append(f"held next version ({reg_next_d}) has started; the page still shows {cur_d}")
-        return NEW_IN_FORCE, Redaction(label=reg_next.get("label") or "next (held)",
-                                       in_force_from=reg_next_d.isoformat()), nxt, None, notes
+        # The held next version should have started, yet the page still shows the old one: either it was
+        # postponed or the page lags. Never confirm a version the page does not show: not verified, by hand.
+        return PARSE_FAILED, cur, nxt, (f"the held next version ({reg_next_d}) should be in force, but the page "
+                                        f"still shows {cur_d}: postponed or not yet consolidated; check by hand"), notes
 
     if nxt is not None:
         if reg_next_d != parse_date(nxt.in_force_from):
@@ -244,7 +244,3 @@ def classify(*, act: dict, parsed: list[Redaction], today: _dt.date, repealed: b
         notes.append("future version already known")
     return UNCHANGED, cur, nxt, None, notes
 
-
-def _is_base(label: str | None) -> bool:
-    low = (label or "").lower()
-    return "forma de bază" in low or "base version" in low

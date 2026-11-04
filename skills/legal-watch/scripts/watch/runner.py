@@ -8,6 +8,9 @@ Rules (the engine's law-check discipline, `<legal-workflow>/references/law-check
 - the first reading of an act records its baseline (`baseline`), it is not a change;
 - a change read by an uncalibrated parser is reported as *possible*, does not move the baseline and asks for a
   check by hand (`legal_watch.py record`);
+- an act named in a new issue of the Moldovan Official Gazette stays "not verified" (the consolidated page lags
+  the Gazette) until a new version is read or it is checked by hand;
+- a repeal already held is not a new change;
 - one p1 act not verified → the run is INCOMPLETE (exit 2) and the digest never says "no changes";
 - a future version is a change of kind `future`, never "in force".
 Result and exit code: OK → 0, CHANGES → 1, INCOMPLETE → 2.
@@ -15,20 +18,23 @@ Result and exit code: OK → 0, CHANGES → 1, INCOMPLETE → 2.
 from __future__ import annotations
 
 import datetime as _dt
+import functools
 from pathlib import Path
 
 from . import clauses as _clauses
 from . import digest as _digest
 from . import library as lib
-from .adapters import adapter_for, monitorul_md
+from .adapters import adapter_for, cellar, monitorul_md
 from .contract import (FETCH_FAILED, NEW_FUTURE, NEW_IN_FORCE, PARSE_FAILED, REPEALED, SCAN_COMPLETE, UNCHANGED,
                        AdapterResult, ContractError)
-from .fetchers import FetchResult, now_iso
+from .fetchers import FetchResult, _Paced, now_iso
 
 BASELINE = "baseline"
-VERIFIABLE = (UNCHANGED, NEW_IN_FORCE, NEW_FUTURE, REPEALED, BASELINE)
+REPEAL_KNOWN = "repealed_known"     # the act was already held as repealed: checked, no new change
+VERIFIABLE = (UNCHANGED, NEW_IN_FORCE, NEW_FUTURE, REPEALED, BASELINE, REPEAL_KNOWN)
 CHANGE_KIND = {NEW_IN_FORCE: "in_force", NEW_FUTURE: "future", REPEALED: "repealed"}
 EXIT = {"OK": 0, "CHANGES": 1, "INCOMPLETE": 2}
+HOST_ONLY_ERROR = "engine 'host' only"
 
 
 class RecordingFetcher:
@@ -44,7 +50,17 @@ class RecordingFetcher:
         return r
 
 
-def check_one(act: dict, fetcher, today: _dt.date) -> dict:
+class PacedCellarGet(_Paced):
+    """Cellar's own HTTP getter (it needs content negotiation headers), paced like every engine."""
+
+    via = "urllib"
+
+    def __call__(self, url, headers, *args, **kw):
+        self.pause()
+        return cellar.urllib_get(url, headers, *args, **kw)
+
+
+def check_one(act: dict, fetcher, today: _dt.date, *, cellar_get=None) -> dict:
     name, fn = adapter_for(act)
     base = {"act_id": act["id"], "title": act.get("title"), "jurisdiction": act.get("jurisdiction"),
             "priority": act.get("priority")}
@@ -54,6 +70,9 @@ def check_one(act: dict, fetcher, today: _dt.date) -> dict:
                             error=f"no monitoring source for this act (sources: {kinds or 'none'}); "
                                   "check it by hand and record the version card").to_dict()
         return {**base, **res, "reasons": ["no_source"]}
+    if name == "eurlex":
+        # Cellar is read with plain HTTP, so it runs only when the user allowed the urllib engine.
+        fn = functools.partial(fn, cellar_get=cellar_get, cellar_fallback=cellar_get is not None)
     try:
         res = fn(act, fetcher, today).to_dict()
     except ContractError as e:
@@ -67,22 +86,28 @@ def check_one(act: dict, fetcher, today: _dt.date) -> dict:
     return {**base, **res, "reasons": []}
 
 
-def classify_record(r: dict) -> dict:
+def classify_record(r: dict, *, repeal_held: bool = False, signals: list | None = None) -> dict:
     """Effective status and the reasons an act is not verified (in place)."""
     st, notes = r["status"], r.get("notes") or []
     reasons = r.setdefault("reasons", [])
     if st == NEW_IN_FORCE and any(n.startswith("baseline absent") for n in notes):
         r["adapter_status"], r["status"] = st, BASELINE
+    elif st == REPEALED and repeal_held:
+        r["adapter_status"], r["status"] = st, REPEAL_KNOWN
     elif st not in VERIFIABLE and not reasons:
-        reasons.append(st)
+        reasons.append("host_only" if HOST_ONLY_ERROR in (r.get("error") or "") else st)
     ev = r.get("evidence") or {}
     if r["status"] in VERIFIABLE and not ev.get("parser_calibrated"):
         reasons.append("parser_uncalibrated")
-        if r["status"] in (UNCHANGED, BASELINE):
+        if r["status"] in (UNCHANGED, BASELINE, REPEAL_KNOWN):
             r.setdefault("adapter_status", r["status"])
             r["status"] = PARSE_FAILED
             r["error"] = ("the parser of this source is not yet calibrated on a live page: the reading is not "
                           "accepted as a check; confirm the act by hand")
+    if signals and r["status"] in (UNCHANGED, BASELINE, REPEAL_KNOWN):
+        # The Gazette published something about this act that the consolidated page does not show yet.
+        reasons.append("gazette_signal")
+        r["gazette_signals"] = signals
     r["checked"] = r["status"] in VERIFIABLE and not reasons
     return r
 
@@ -104,16 +129,23 @@ def update_state(state: dict, r: dict, day: str, snapshot: str | None) -> None:
     held = state["acts"].setdefault(r["act_id"], {})
     if r["status"] == REPEALED:
         held["repealed"] = r.get("current")
-    else:
+    elif r["status"] != REPEAL_KNOWN:
         held["current"] = r.get("current")
         held["next"] = r.get("next")
     ev = r.get("evidence") or {}
     held.update({"sha256": ev.get("sha256"), "url": ev.get("url"), "via": ev.get("via"),
                  "checked_on": day, "snapshot": snapshot or held.get("snapshot")})
+    # A checked reading (a new version, or a check by hand) answers the Gazette's signals for this act.
+    if r["status"] in CHANGE_KIND or ev.get("via") == "host":
+        state.setdefault("signals", {}).pop(r["act_id"], None)
 
 
-def finish(profile: Path, out: dict, state: dict, *, dry_run: bool) -> dict:
-    """Shared tail of `run` and `record`: result, exit code, contract flags, digest, files."""
+def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: set[str] | None = None) -> dict:
+    """Shared tail of `run` and `record`: result, exit code, contract flags, digest, files.
+
+    `flag_ids` limits the contract flags to the acts read now (a hand record must not re-flag the clauses of
+    other acts of today's run that the user may already have cleared).
+    """
     records = out["acts"]
     unverified = [{"act_id": r["act_id"], "title": r.get("title"), "priority": r.get("priority"),
                    "status": r["status"], "reasons": list(r.get("reasons") or []) or [r["status"]],
@@ -130,7 +162,8 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool) -> dict:
         result = "CHANGES"
     else:
         result = "OK"
-    out.update({"result": result, "exit_code": EXIT[result], "phrase_no_changes_allowed": result == "OK",
+    out.update({"result": result, "exit_code": EXIT[result],
+                "phrase_no_changes_allowed": result == "OK" and not unverified,
                 "changes": changes, "unverified": unverified,
                 "summary": {"acts": len(records), "checked": sum(bool(r.get("checked")) for r in records),
                             "baselines": sum(r["status"] == BASELINE for r in records),
@@ -139,38 +172,55 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool) -> dict:
                             "changes": len(changes)}})
     flagged = []
     if not dry_run:
-        flagged = _clauses.flag_changes(profile, [c for c in changes if c["confirmed"]])
-    out["contracts_to_review"] = flagged
+        to_flag = [c for c in changes if c["confirmed"] and (flag_ids is None or c["act_id"] in flag_ids)]
+        flagged = _clauses.flag_changes(profile, to_flag)
+    out["contracts_to_review"] = _merge_flagged(out.get("contracts_to_review") or [], flagged)
     if not dry_run:
         runs = [x for x in state["runs"] if x.get("date") != out["date"]]
-        state["runs"] = runs + [{"date": out["date"], "result": result, "at": now_iso()}]
+        state["runs"] = runs + [{"date": out["date"], "result": result, "full": bool(out.get("full")),
+                                 "at": now_iso()}]
         lib.save_state(profile, state)
     out["health"] = _digest.health(state, _dt.date.fromisoformat(out["date"]), out.get("schedule"))
     run_dir = lib.laws_dir(profile) / "runs" / out["date"]
+    if dry_run:
+        run_dir = run_dir / "dry-run"   # a rehearsal never replaces the real run of the day
     lib.write_json(run_dir / "run.json", out)
     lib.write_atomic(run_dir / "digest.md", _digest.render(out, out.get("language", "en")))
     return out
 
 
+def _merge_flagged(old: list[dict], new: list[dict]) -> list[dict]:
+    by = {k["contract"]: dict(k) for k in old}
+    for k in new:
+        cur = by.setdefault(k["contract"], {**k, "clauses": []})
+        cur["clauses"] = sorted(set(cur["clauses"]) | set(k["clauses"]))
+    return list(by.values())
+
+
+def merge_day(profile: Path, out: dict) -> dict:
+    """A run of some acts (or a hand record) joins the day's run instead of replacing it."""
+    path = lib.laws_dir(profile) / "runs" / out["date"] / "run.json"
+    if not path.exists():
+        return out
+    day = lib.read_json(path, "run of the day")
+    ids = {r["act_id"] for r in out["acts"]}
+    out["acts"] = [r for r in day.get("acts", []) if r["act_id"] not in ids] + out["acts"]
+    out["full"] = bool(day.get("full")) or bool(out.get("full"))
+    out["contracts_to_review"] = day.get("contracts_to_review") or []
+    if out.get("monitorul") is None:
+        out["monitorul"] = day.get("monitorul")
+    return out
+
+
 def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: str = "all",
         dry_run: bool = False, language: str = "en", schedule: str | None = None, scan_gazette: bool = True,
-        mode: str = "live") -> dict:
+        direct_http: bool = True, mode: str = "live") -> dict:
+    """`direct_http`: the user allowed plain HTTP (engine urllib), so Cellar may be read as EUR-Lex fallback."""
     day = today.isoformat()
     state = lib.load_state(profile)
+    state.setdefault("signals", {})
     chosen = lib.select(acts, selector)
     rec = RecordingFetcher(fetcher)
-    records = []
-    for act in chosen:
-        r = classify_record(check_one(act, rec, today))
-        snap = None
-        ev = r.get("evidence") or {}
-        page = rec.pages.get(ev.get("url") or "")
-        if r.get("checked") and page is not None and not dry_run:
-            snap = lib.save_snapshot(profile, r["act_id"], page.text or page.markdown, ev.get("sha256"), day)
-        r["snapshot"] = snap
-        if not dry_run:
-            update_state(state, r, day, snap)
-        records.append(r)
 
     mon = None
     md_acts = [a for a in chosen if a.get("jurisdiction") == "MD"]
@@ -184,7 +234,31 @@ def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: 
                    "evidence": None, "error": f"scan crashed: {type(e).__name__}: {str(e)[:200]}"}
         if not dry_run and mon.get("checked_through") is not None:
             state["monitorul"] = {"checked_through": mon["checked_through"], "updated": day}
+        for sig in mon.get("signals") or []:
+            # Kept in the state until answered: the scan point moves on, the signal must not be lost.
+            pending = state["signals"].setdefault(sig["act_id"], [])
+            if sig not in pending:
+                pending.append(sig)
+
+    cellar_get = PacedCellarGet(pause_range=getattr(fetcher, "pause_range", (5.0, 15.0))) if direct_http else None
+    records = []
+    for act in chosen:
+        r = check_one(act, rec, today, cellar_get=cellar_get)
+        r = classify_record(r, repeal_held=bool(act.get("repealed")),
+                            signals=state["signals"].get(act["id"]))
+        snap = None
+        ev = r.get("evidence") or {}
+        page = rec.pages.get(ev.get("url") or "")
+        if r.get("checked") and page is not None and not dry_run:
+            snap = lib.save_snapshot(profile, r["act_id"], page.text or page.markdown, ev.get("sha256"), day)
+        r["snapshot"] = snap
+        if not dry_run:
+            update_state(state, r, day, snap)
+        records.append(r)
 
     out = {"schema_version": 1, "date": day, "generated_at": now_iso(), "mode": mode, "dry_run": dry_run,
-           "selector": selector, "language": language, "schedule": schedule, "acts": records, "monitorul": mon}
-    return finish(profile, out, state, dry_run=dry_run)
+           "selector": selector, "full": selector == "all", "language": language, "schedule": schedule,
+           "acts": records, "monitorul": mon}
+    if not dry_run:
+        out = merge_day(profile, out)
+    return finish(profile, out, state, dry_run=dry_run, flag_ids={a["id"] for a in chosen})

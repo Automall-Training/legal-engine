@@ -10,8 +10,9 @@
 | `host` | free | the agent in a conversation | not automatic: acts left not verified are checked by hand (monitoring.md, "Host check") |
 
 When an engine fails on a page, the next one is tried; the run records which engine produced each reading
-(`evidence.via`). Every engine sends GET requests to public pages only, waits 5–15 s between pages, and never fills
-forms, logs in or solves a CAPTCHA.
+(`evidence.via`). The EU fallback to the Publications Office (Cellar) uses plain HTTP, so it runs only when
+`urllib` is among the engines; with `host` alone, scripts open no page at all. Every engine sends GET requests
+to public pages only, waits 5–15 s between pages, and never fills forms, logs in or solves a CAPTCHA.
 
 ## Schedule (`settings.schedule`)
 

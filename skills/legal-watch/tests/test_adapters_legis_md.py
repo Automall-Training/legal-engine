@@ -85,9 +85,9 @@ class HtmlPath(unittest.TestCase):
         act = cm_act()
         act["next"] = {"label": "LP138 din 09.07.26, MO338/28.07.26 art.344", "in_force_from": "2026-10-28"}
         res = run(act, read("legis_md/normal.html"), today=dt.date(2026, 11, 2))
-        self.assertEqual(res.status, NEW_IN_FORCE)
-        self.assertEqual(res.current.in_force_from, "2026-10-28")
-        self.assertTrue(any("held next version" in n for n in res.notes))
+        # Postponed or not yet consolidated: never a confirmed version the page does not show.
+        self.assertEqual(res.status, PARSE_FAILED)
+        self.assertIn("held next version", res.error)
 
     def test_cloudflare_challenge_is_blocked(self):
         res = run(cm_act(), read("legis_md/cloudflare-challenge-2026-09-27.html"), status=403)
@@ -296,12 +296,14 @@ class AlignWithBaseline(unittest.TestCase):
         self.assertTrue(res.evidence.parser_calibrated)
         self.assertTrue(any("same start date 2026-08-23" in n for n in res.notes))
 
-    def test_same_date_other_amending_act_is_new(self):
+    def test_same_date_other_amending_act_is_not_a_confirmed_change(self):
+        # Same start date = same version (core rule): a label difference alone never confirms a change;
+        # it is kept in the notes for the reader.
         add = "| LP5 din 01.08.26, MO390/21.08.26 art.1; în vigoare 23.08.26 |\n"
         md = add + read(f"legis_md/markdown-{L160}-2026-10-02.md")
         res = run_md(l160_act(), L160, md)
-        self.assertEqual(res.status, NEW_IN_FORCE)
-        self.assertTrue(res.current.label.startswith("LP5 din 01.08.26"))
+        self.assertEqual(res.status, UNCHANGED)
+        self.assertTrue(any("label differs" in n for n in res.notes))
         # The baseline names the amending act's Official Gazette number → the same version.
         res2 = run_md(l160_act("Legea nr. 5/2026, MO 390/21.08.2026"), L160, md)
         self.assertEqual(res2.status, UNCHANGED, (res2.error, res2.notes))

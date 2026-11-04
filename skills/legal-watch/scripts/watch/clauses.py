@@ -20,22 +20,37 @@ SCHEMA = 1
 SOURCES = ("cited", "inferred")
 CONTRACT_SUFFIXES = (".docx", ".txt", ".md")
 
-# Citations recognised in Romanian contract text. Each pattern maps to an act id builder.
-_NUM = r"(?:nr\.?\s*)?(?P<n>\d+)(?:\s*-\s*[IVXL]+)?\s*/\s*(?P<y>\d{4})"
-LAW_RE = re.compile(rf"\b(?P<k>Legea|Legii|Legea\s+nr\.|OUG|O\.U\.G\.|Ordonan[țţt]a\s+de\s+urgen[țţt][ăa]|HG|H\.G\.|"
-                    rf"Hot[ăa]r[âa]rea\s+Guvernului|OG|O\.G\.)\s*(?:nr\.?\s*)?{_NUM}", re.I)
-EU_RE = re.compile(r"\b(?P<k>Regulamentul(?:ui)?|Directiva|Directivei|Regulation|Directive)\s*(?:\((?:UE|EU|CE|EC)\)\s*)?"
-                   r"(?:nr\.?\s*)?(?P<a>\d{2,4})/(?P<b>\d{2,4})", re.I)
-CODE_RE = re.compile(r"\bCod(?:ul|ului)\s+(?P<c>civil|muncii|fiscal|penal|de\s+procedur[ăa]\s+civil[ăa]|"
-                     r"contraven[țţ]ional|administrativ|vamal)\b", re.I)
+# Citations recognised in Romanian-language contract text (Moldova and Romania).
+_KINDS = (r"Legea|Legii|OUG|O\.U\.G\.|Ordonan[țţt]a\s+de\s+urgen[țţt][ăa]|HG|H\.G\.|Hot[ăa]r[âa]rea\s+Guvernului|"
+          r"Hot[ăa]r[âa]rii\s+Guvernului|OG|O\.G\.")
+# Romanian style: "Legea nr. 287/2009".
+LAW_RE = re.compile(rf"\b(?P<k>{_KINDS})\s*(?:nr\.?\s*)?(?P<n>\d+)(?:\s*-\s*[IVXL]+)?\s*/\s*(?P<y>\d{{4}})", re.I)
+# Moldovan style: "Legea nr. 133 din 08.07.2011", "nr. 1125-XV din 13.06.2002", "din 8 iulie 2011".
+LAW_DIN_RE = re.compile(rf"\b(?P<k>{_KINDS})\s*nr\.?\s*(?P<n>\d+)(?:\s*-\s*[IVXL]+)?\s+din\s+"
+                        r"(?:\d{1,2}[./]\d{1,2}[./]|\d{1,2}\s+[a-zăâîșşțţ]+\s+)(?P<y>\d{4})", re.I)
+# EU acts keep the order of the official citation: Regulation 2016/679 → eu.reg.2016-679, 593/2008 → 593-2008.
+EU_RE = re.compile(r"\b(?P<k>Regulamentul(?:ui)?|Directiva|Directivei|Regulation|Directive)\s*"
+                   r"(?:\((?:UE|EU|CE|EC|CEE|EEC)\)\s*)?(?:nr\.?\s*)?(?P<a>\d{2,4})/(?P<b>\d{2,4})", re.I)
+CODE_RE = re.compile(r"\bCod(?:ul|ului)\s+(?P<c>civil|muncii|fiscal|penal|educa[țţt]iei|audiovizual|"
+                     r"de\s+procedur[ăa]\s+(?:civil|fiscal)[ăa]|contraven[țţt]ional|administrativ|vamal)\b", re.I)
 ARTICLE_RE = re.compile(r"\bart(?:icolul|\.)\s*(?P<a>\d+(?:\^?\d+)?)(?:\s*(?:alin\.|al\.)\s*\((?P<p>\d+)\))?", re.I)
-CLAUSE_RE = re.compile(r"^\s*(?:Art(?:icolul|\.)\s*)?(?P<c>\d{1,2}(?:\.\d{1,2}){0,3})\.?\s+\S")
-CODE_IDS = {"civil": "cod.civil", "muncii": "cod.muncii", "fiscal": "cod.fiscal", "penal": "cod.penal",
-            "deprocedurăcivilă": "cod.procedura-civila", "deproceduracivila": "cod.procedura-civila",
-            "contravențional": "cod.contraventional", "contraventional": "cod.contraventional",
-            "contravenţional": "cod.contraventional", "administrativ": "cod.administrativ", "vamal": "cod.vamal"}
-KIND = {"legea": "lege", "legii": "lege", "legeanr.": "lege", "oug": "oug", "o.u.g.": "oug", "hg": "hg",
-        "h.g.": "hg", "og": "og", "o.g.": "og"}
+# A clause number: "5.2", "5.2.", "5.", "Art. 5" at the start of a line; "30 de zile" is not a clause.
+CLAUSE_RE = re.compile(r"^\s*(?:Art(?:icolul|\.)\s*(?P<a>\d{1,3})\b|(?P<c>\d{1,2}(?:\.\d{1,2}){1,3})\.?\s+\S|"
+                       r"(?P<d>\d{1,2})[.)]\s+\S)")
+KIND = {"legea": "lege", "legii": "lege", "oug": "oug", "o.u.g.": "oug", "hg": "hg", "h.g.": "hg", "og": "og",
+        "o.g.": "og"}
+_FOLD = str.maketrans("ăâîșşțţ", "aaisstt")
+
+
+def code_slug(name: str) -> str:
+    """'de procedură civilă' → 'procedura-civila' (the `code` field of the catalog)."""
+    words = name.lower().translate(_FOLD).split()
+    return "-".join(w for w in words if w != "de")
+
+
+def catalog_codes(acts: dict[str, dict]) -> dict[tuple[str, str], str]:
+    """(jurisdiction, code) → catalog id: Romanian codes live under their approving law (ro.lege.287-2009)."""
+    return {(a["jurisdiction"], a["code"]): i for i, a in acts.items() if a.get("code")}
 
 
 def index_dir(profile: Path) -> Path:
@@ -50,7 +65,10 @@ def contract_text(path: Path) -> list[str]:
             import docx
         except ImportError as e:
             raise lib.WatchError("python-docx is missing: run with the engine's .venv/bin/python") from e
-        return [p.text for p in docx.Document(str(path)).paragraphs]
+        doc = docx.Document(str(path))
+        # Contracts often keep clauses in tables (annexes, price lists): read their cells too.
+        cells = [c.text for t in doc.tables for row in t.rows for c in row.cells]
+        return [p.text for p in doc.paragraphs] + cells
     if path.suffix.lower() in (".txt", ".md"):
         return path.read_text(encoding="utf-8").splitlines()
     raise lib.WatchError(f"unsupported contract format {path.suffix!r}; use {', '.join(CONTRACT_SUFFIXES)}")
@@ -65,29 +83,27 @@ def _law_kind(raw: str) -> str:
     return KIND.get(low, "lege")
 
 
-def citations(line: str, jurisdiction: str) -> list[tuple[str, str | None]]:
+def citations(line: str, jurisdiction: str, codes: dict[tuple[str, str], str] | None = None
+              ) -> list[tuple[str, str | None]]:
     """(act id, provision) pairs cited in one line; the jurisdiction decides the prefix of national acts."""
     pre = jurisdiction.lower()
     arts = [m.group("a") + (f" alin. ({m.group('p')})" if m.group("p") else "") for m in ARTICLE_RE.finditer(line)]
     prov = f"art. {arts[0]}" if len(arts) == 1 else None
     found: list[tuple[str, str | None]] = []
-    for m in LAW_RE.finditer(line):
+    for m in [*LAW_RE.finditer(line), *LAW_DIN_RE.finditer(line)]:
         kind = _law_kind(m.group("k"))
-        kind = "lege" if pre == "md" and kind not in ("hg",) else kind
+        kind = "lege" if pre == "md" and kind != "hg" else kind
         found.append((f"{pre}.{kind}.{m.group('n')}-{m.group('y')}", prov))
     for m in EU_RE.finditer(line):
-        a, b = m.group("a"), m.group("b")
-        year, num = (a, b) if len(a) == 4 else (b, a)
         kind = "reg" if m.group("k").lower().startswith("reg") else "dir"
-        found.append((f"eu.{kind}.{year}-{num}", prov))
+        found.append((f"eu.{kind}.{m.group('a')}-{m.group('b')}", prov))
     for m in CODE_RE.finditer(line):
-        key = re.sub(r"\s+", "", m.group("c").lower())
-        if key in CODE_IDS:
-            found.append((f"{pre}.{CODE_IDS[key]}", prov))
+        slug = code_slug(m.group("c"))
+        found.append(((codes or {}).get((jurisdiction, slug)) or f"{pre}.cod.{slug}", prov))
     return list(dict.fromkeys(found))
 
 
-def scan(path: Path, jurisdiction: str) -> dict:
+def scan(path: Path, jurisdiction: str, codes: dict[tuple[str, str], str] | None = None) -> dict:
     """A draft index from the citations in the text; the agent completes it with `inferred` links."""
     if jurisdiction.upper() not in ("MD", "RO"):
         raise lib.WatchError("jurisdiction of the contract must be MD or RO (EU acts are found in both)")
@@ -96,8 +112,8 @@ def scan(path: Path, jurisdiction: str) -> dict:
     for line in contract_text(path):
         m = CLAUSE_RE.match(line)
         if m:
-            clause = m.group("c")
-        for act_id, prov in citations(line, jurisdiction.upper()):
+            clause = m.group("a") or m.group("c") or m.group("d")
+        for act_id, prov in citations(line, jurisdiction.upper(), codes):
             key = clause or "-"
             row = rows.setdefault(key, {"clause": key, "topic": None, "acts": [], "source": "cited",
                                         "needs_reverify": False, "reverify": []})

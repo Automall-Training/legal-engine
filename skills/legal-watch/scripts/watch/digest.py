@@ -24,7 +24,10 @@ T = {
             "parse_failed": "the page could not be read reliably", "stale_fallback": "only an archived copy was read",
             "parser_uncalibrated": "the reader of this site is not yet calibrated",
             "no_source": "no official source configured", "adapter_crashed": "the reader failed",
-            "gazette_scan_incomplete": "the Official Gazette scan did not finish"},
+            "gazette_scan_incomplete": "the Official Gazette scan did not finish",
+            "host_only": "engine 'host' only: check by hand",
+            "gazette_signal": "the Official Gazette published something about it that the page does not show yet"},
+        "rest": "{n} not verified",
         "byhand": "Ask me to check these by hand (the agent opens the official page and records a version card).",
         "baselines": "First reading recorded (baseline)", "signals": "Official Gazette (MD): issues mentioning watched acts",
         "health": "Last complete run", "overdue": "overdue: the scheduled run has not completed for {d} days",
@@ -43,7 +46,10 @@ T = {
             "parse_failed": "pagina nu a putut fi citită sigur", "stale_fallback": "s-a citit doar o copie arhivată",
             "parser_uncalibrated": "cititorul acestui site nu este încă calibrat",
             "no_source": "nu există sursă oficială configurată", "adapter_crashed": "cititorul a eșuat",
-            "gazette_scan_incomplete": "scanarea Monitorului Oficial nu s-a încheiat"},
+            "gazette_scan_incomplete": "scanarea Monitorului Oficial nu s-a încheiat",
+            "host_only": "doar verificare manuală (motorul host)",
+            "gazette_signal": "Monitorul Oficial a publicat ceva despre act ce pagina nu arată încă"},
+        "rest": "{n} neverificate",
         "byhand": "Cereți-mi să le verific manual (agentul deschide pagina oficială și înregistrează fișa redacției).",
         "baselines": "Prima citire înregistrată (punct de referință)",
         "signals": "Monitorul Oficial (MD): numere care menționează acte urmărite",
@@ -63,7 +69,10 @@ T = {
             "parse_failed": "страницу не удалось надёжно прочитать", "stale_fallback": "прочитана только архивная копия",
             "parser_uncalibrated": "чтение этого сайта ещё не сверено",
             "no_source": "нет официального источника", "adapter_crashed": "чтение сломалось",
-            "gazette_scan_incomplete": "просмотр Monitorul Oficial не закончен"},
+            "gazette_scan_incomplete": "просмотр Monitorul Oficial не закончен",
+            "host_only": "только ручная проверка (движок host)",
+            "gazette_signal": "в Monitorul Oficial вышло что-то об акте, чего ещё нет на странице"},
+        "rest": "не проверено: {n}",
         "byhand": "Попросите меня проверить их вручную (агент откроет официальную страницу и запишет карточку редакции).",
         "baselines": "Первое чтение записано (исходная редакция)",
         "signals": "Monitorul Oficial (MD): номера, где упомянуты отслеживаемые акты",
@@ -74,11 +83,14 @@ T = {
 
 def health(state: dict, today: _dt.date, schedule: str | None) -> dict:
     """When the last run that checked every p1 act happened, and whether a scheduled run is overdue."""
-    good = [r["date"] for r in state.get("runs", []) if r.get("result") in ("OK", "CHANGES")]
+    # Only a run of all acts counts: a run of some acts or a hand record must not hide a missed weekly run.
+    runs = state.get("runs", [])
+    good = [r["date"] for r in runs if r.get("result") in ("OK", "CHANGES") and r.get("full", True)]
     last = max(good) if good else None
     days = (today - _dt.date.fromisoformat(last)).days if last else None
     limit = MAX_DAYS.get(schedule or "")
-    overdue = limit is not None and (days is None or days > limit) and bool(state.get("runs"))
+    earlier = [r for r in runs if r.get("date") != today.isoformat()]   # the first run is never "overdue"
+    overdue = limit is not None and (days is None or days > limit) and bool(earlier)
     return {"last_complete": last, "days_since": days, "overdue": overdue}
 
 
@@ -90,7 +102,8 @@ def render(run: dict, language: str = "en") -> str:
     t = T.get(language, T["en"])
     s = run["summary"]
     lines = [f"# {t['title']} — {run['date']}", "",
-             f"**{t['result'][run['result']]}** · {t['checked']} {s['checked']} {t['of']} {s['acts']}", ""]
+             f"**{t['result'][run['result']]}** · {t['checked']} {s['checked']} {t['of']} {s['acts']}"
+             + (f" · {t['rest'].format(n=s['unverified'])}" if s.get("unverified") else ""), ""]
     changes = sorted(run.get("changes") or [], key=lambda c: (not c["confirmed"], c.get("priority") or "p9"))
     if changes:
         lines += [f"## {t['changes']}", ""]
@@ -126,7 +139,7 @@ def render(run: dict, language: str = "en") -> str:
             lines.append(f"- `{sig['act_id']}`: MO {sig.get('edition_number') or sig['edition_id']} "
                          f"({sig.get('edition_date') or '?'}) — {sig['item'][:160]} <{sig['url']}>")
         lines.append("")
-    if run["result"] == "OK" and not changes:
+    if run.get("phrase_no_changes_allowed"):
         lines += [t["nochanges"], ""]
     h = run.get("health") or {}
     lines.append(f"{t['health']}: {h.get('last_complete') or t['never']}")

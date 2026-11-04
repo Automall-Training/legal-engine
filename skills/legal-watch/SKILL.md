@@ -34,7 +34,8 @@ document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scri
 
 ## Route of a monitoring request
 
-1. **Run** — `watch run` (all acts, or `--acts p1` / ids). Exit 0 OK, 1 changes, 2 incomplete.
+1. **Run** — `watch run` (all acts, or `--acts p1` / ids). Exit 0 OK, 1 changes, 2 incomplete or bad input,
+   3 unexpected error.
 2. **Close the gaps** — every act listed "not verified" is checked by hand when the user wants it now:
    open the official page with the host's web tools or the user's browser, fill a version card
    (`<legal-research>/references/version-check.md`, `scope: "text"` is enough for monitoring), save the text read,

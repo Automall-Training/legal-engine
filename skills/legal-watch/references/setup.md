@@ -23,15 +23,17 @@ Skipped → no watchlist; the step `laws` is skipped too and monitoring stays of
 Three questions, in this order:
 
 1. **Which acts.** Options: all acts of the chosen categories (recommended) · only the main ones (`p1`) · choose
-   from the list (`watch catalog acts --countries …`). An act the catalog lacks is added by id with title,
+   from the whole catalog (`watch catalog acts --countries …`, then `--acts id,id`; an unknown id is refused). An act the catalog lacks is added by id with title,
    jurisdiction and its official source (watchlist format below).
 2. **How often.** Weekly on this computer (recommended: Monday morning, local job) · only when I ask · a weekly
    Claude scheduled task. See [engines.md](engines.md) for what each needs.
 3. **How to read the sites.** Free automatic reading with a check by hand of what the sites block (recommended:
    `urllib,host`) · plus a local browser (`urllib,playwright,host`; installs Playwright) · plus the user's own
    command for a paid reading service (`command`; the user writes the command, the engine never sees a key) ·
-   only by hand (`host`). Say plainly that several official portals block automatic reading, so some acts
-   will need a check by hand in any case.
+   only by hand (`host`). Say plainly that several official portals block automatic reading: with the free
+   engines most Moldovan and Romanian acts end "not verified" and are checked by hand (the agent opens the official
+   page in a conversation), and a run stays "incomplete" while a main (`p1`) act is not checked. EU acts are read
+   automatically.
 
 Then: `watch init --niches … --categories … --acts all|p1|<ids> [--b2c] --countries … --language <digest language
 from context/language.md> --engines … [--fetch-command …] --schedule …` (add `--force` when replacing a watchlist:
@@ -61,7 +63,8 @@ settings:
 niches: [online-courses]
 categories: [civil, tax, accounting, company, data, consumer, digital-content]
 acts:
-  - id: ro.lege.287-2009         # from the catalog: the id is enough
+  - id: ro.lege.287-2009         # from the catalog: the id is enough (ids follow the official citation:
+                                 # eu.reg.2016-679, eu.reg.593-2008, eu.dir.93-13; RO codes under their law)
   - id: md.lege.1-2026           # own act, not in the catalog (invented example)
     title: Legea nr. 1/2026 cu privire la exemplu
     jurisdiction: MD

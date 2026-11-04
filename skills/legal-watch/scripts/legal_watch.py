@@ -16,7 +16,7 @@
     legal_watch.py schedule plan|install|remove [--kind launchd|cron|claude-schedule]
 
 Global: --profile <dir> (default: the profile of legal-workflow's config.json).
-Exit codes: 0 ok (run: OK), 1 run: CHANGES / check: errors, 2 bad input or run: INCOMPLETE.
+Exit codes: 0 ok (run: OK), 1 run: CHANGES / check: errors, 2 bad input or run: INCOMPLETE, 3 unexpected error.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from watch import clauses, library as lib, manual, runner, schedule  # noqa: E402
-from watch.fetchers import FetchConfigError, HostOnly, build_chain  # noqa: E402
+from watch.fetchers import BrowserBusy, FetchConfigError, HostOnly, build_chain  # noqa: E402
 
 WORKFLOW_SCRIPTS = lib.SKILL.parent / "legal-workflow" / "scripts"
 
@@ -99,9 +99,14 @@ def cmd_init(a) -> int:
     if a.acts == "p1":
         ids = [i for i in ids if acts[i].get("priority") == "p1"]
     elif a.acts != "all":
-        wanted = set(_csv(a.acts))
-        ids = [i for i in ids if i in wanted]
-    ids += [i for i in _csv(a.add) if i not in ids]
+        # Chosen from the whole catalog (`catalog acts`), not only from the chosen categories.
+        ids = [i for i in _csv(a.acts) if i != "none"]
+    extra = [i for i in _csv(a.add) if i not in ids]
+    unknown = [i for i in ids + extra if i not in acts]
+    if unknown:
+        raise lib.WatchError(f"not in the catalog: {', '.join(unknown)}; an own act is added to the watchlist by "
+                             "hand with title, jurisdiction and sources (setup.md)")
+    ids += extra
     data = {"schema_version": 1,
             "settings": {"countries": countries, "language": a.language, "engines": _csv(a.engines),
                          "fetch_command": a.fetch_command, "schedule": a.schedule},
@@ -137,7 +142,7 @@ def cmd_run(a) -> int:
             fetcher = HostOnly()
         out = runner.run(profile, acts, fetcher, today, selector=a.acts, dry_run=a.dry_run,
                          language=s["language"], schedule=s["schedule"], scan_gazette=not a.no_gazette and bool(engines),
-                         mode="live" if engines else "host")
+                         direct_http="urllib" in engines, mode="live" if engines else "host")
     sm = out["summary"]
     print(f"{out['result']} · checked {sm['checked']}/{sm['acts']} · not verified (p1): {sm['unverified_p1']} · "
           f"changes: {sm['changes']} · {lib.laws_dir(profile) / 'runs' / out['date'] / 'digest.md'}")
@@ -171,17 +176,16 @@ def cmd_index(a) -> int:
     if a.op == "scan":
         if not a.contract or not a.jurisdiction:
             raise lib.WatchError("index scan needs <contract> and --jurisdiction MD|RO")
-        draft = clauses.scan(Path(a.contract), a.jurisdiction)
+        catalog, _ = lib.load_catalog()
+        draft = clauses.scan(Path(a.contract), a.jurisdiction, clauses.catalog_codes(catalog))
         if a.write:
             _print({"written": str(clauses.save(profile, draft, force=a.force)), "clauses": len(draft["clauses"])})
         else:
             _print(draft)
         return 0
     if a.op == "check":
-        catalog, _ = lib.load_catalog()
-        known = set(catalog)
-        with contextlib.suppress(lib.WatchError):
-            known |= {x["id"] for x in lib.load_watchlist(lib.laws_dir(profile) / "watchlist.yaml")["acts"]}
+        # Only watched acts reach a clause: an act merely in the catalog is never monitored.
+        known = {x["id"] for x in lib.load_watchlist(lib.laws_dir(profile) / "watchlist.yaml")["acts"]}
         report = {p.name: clauses.validate(ix, known) for p, ix in clauses.load_all(profile).items()}
         _print(report)
         return 1 if any(report.values()) else 0
@@ -264,9 +268,16 @@ def main(argv: list[str] | None = None) -> int:
     a = parser().parse_args(argv)
     try:
         return COMMANDS[a.cmd](a)
-    except (lib.WatchError, FetchConfigError) as e:
+    except (lib.WatchError, FetchConfigError, BrowserBusy) as e:
         print(f"legal_watch: {e}", file=sys.stderr)
         return 2
+    except ImportError as e:
+        print(f"legal_watch: a package is missing ({e.name}); run with the engine's .venv/bin/python, and for the "
+              "playwright engine install it with `WITH_PLAYWRIGHT=1 ./install.sh`", file=sys.stderr)
+        return 2
+    except Exception as e:  # noqa: BLE001 — exit 1 means "changes found": a crash must never look like it
+        print(f"legal_watch: unexpected error {type(e).__name__}: {e}", file=sys.stderr)
+        return 3
 
 
 if __name__ == "__main__":

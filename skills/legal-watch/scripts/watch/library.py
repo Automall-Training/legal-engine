@@ -190,6 +190,7 @@ def resolve_acts(watchlist: dict, catalog: dict[str, dict], state: dict) -> list
         held = (state.get("acts") or {}).get(act["id"]) or {}
         act["current"] = held.get("current")
         act["next"] = held.get("next")
+        act["repealed"] = held.get("repealed")
         out.append(act)
     return out
 
