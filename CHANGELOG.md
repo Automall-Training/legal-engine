@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `legal-workflow-setup` wizard: creates the private profile and fills it one question at a time (firms, whom they
+  sell to → suggested modules, modules on/off, languages, side and risk threshold, own samples and contracts with
+  house style, local tools after one approval); quick or full depth, resumes from `integration-status.md`, never
+  overwrites an answer silently; law-library steps wait for `legal-watch`. Context file templates.
+- `legal-workflow-update` skill (human-invoked only): changes the profile after feedback, after a "yes" to the exact
+  change; engine-level problems become a drafted issue, never an edit of the engine folder; migration rules.
+- `legal_profile.py`: `profile init` (folders and `config.json`, `--switch` to repoint, `--create` for a configured
+  folder that is missing; refuses the home folder and any folder inside or around the engine), `modules set` (a
+  skipped modules step reads as all off), atomic writes for every profile file, `where` reports the engine folder. The router
+  checks that a module is installed before running the wizard for it.
 - `legal-research` skill: legal question with quotes from the version in force (lawful path first, labelled
   conclusions, weighed risk, sources and "not verified" blocks) and the current-version check of an act in seven
   points (consolidation, amendments incl. the official journal, delayed entry, secondary acts, case law, repeal,

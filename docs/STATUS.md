@@ -7,9 +7,9 @@ Version: v0 (in development). Updated: 2026-11-04.
 | 1 | Skeleton: install.sh, doctor, leak check + tests, licence, disclaimer, README | done |
 | 2 | `legal-workflow`: router, profile, matters, working norms | done (branch `phase-1/legal-workflow`) |
 | 3 | `legal-contracts` (draft / audit / redline, MD-RO-EU) | done (branch `phase-1/legal-contracts` on top of step 2) |
-| 4 | `legal-research` (question with citations, current-version check) | done (branch `phase-1/legal-research` on top of step 3; merge to `main` only after the owner's «да») |
-| 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | next |
-| 6 | modules `legal-privacy`, `legal-consumer` | — |
+| 4 | `legal-research` (question with citations, current-version check) | done (branch `phase-1/legal-research` on top of step 3) |
+| 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | done (branch `phase-1/legal-workflow-setup` on top of step 4; merge to `main` only after the owner's «да») |
+| 6 | modules `legal-privacy`, `legal-consumer` | next |
 | 7 | module `legal-trademark` | — |
 | 8 | module `legal-employment` | — |
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | — |
@@ -18,7 +18,8 @@ Version: v0 (in development). Updated: 2026-11-04.
 
 Checks: `python3 tools/check.py` · `python3 -m unittest discover -s tools/tests` ·
 `.venv/bin/python -m unittest discover -s skills/<skill>/tests` (the pre-commit hook runs all of them; contract tools
-need `.venv` from `./install.sh`).
+need `.venv` from `./install.sh`). Coverage: `COVERAGE_FILE=<temp> uvx coverage run -m unittest discover -s
+<tests>` (keep the data file outside the repo: a `.coverage` in it fails the leak check).
 
 Contracts later steps must follow (in `skills/legal-workflow/references/`): `profile.md` (profile layout,
 `modules.json`, setup steps written only via `legal_profile.py step set`), `matters.md` (matter folder,
@@ -34,8 +35,9 @@ Minor, later: `check_register.py` stops at the first malformed source or finding
 would list all errors at once.
 Minor, later: no script yet checks that a register source's status matches its version card (the table in
 `version-check.md` is applied by hand). Live run against real official sites: step 10 (`legal-research/tests/scenarios.md`).
-Open for step 5: script commands `profile init` (folder + config.json) and `modules set`, so the wizard never
-writes these files by hand. Rollout: until step 5 do not install the engine next to a personal contracts skill with
-overlapping trigger phrases.
+Rollout: do not install the engine next to a personal contracts skill with overlapping trigger phrases.
+Open for step 9: the wizard steps `niches`, `laws`, `first-run` are run by `legal-watch/references/setup.md` (to be
+written with the module, including the `laws/watchlist.yaml` format); until then they stay `pending` with a note, and
+the step `documents` only copies contracts into `contracts/` (the clause index comes with `legal-watch`).
 Open for step 6: privacy substance (checklist for notices, DPA, cookies, transfers; Romanian privacy templates)
 comes with `legal-privacy`; it reuses the contract tools and model cards M06–M10.
