@@ -1,0 +1,17 @@
+{
+  "author": "Legal review",
+  "changes": [
+    {
+      "paragraph": 2,
+      "expected_paragraph": "1. Plata se efectuează în 10 zile de la primirea facturii.",
+      "old": "10 zile",
+      "new": "15 zile"
+    },
+    {
+      "paragraph": 4,
+      "expected_paragraph": "3. Comunicările se transmit în scris. Text provizoriu.",
+      "old": " Text provizoriu.",
+      "new": ""
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "accept_equals_clean": true,
+  "reject_equals_original": true,
+  "revisions": 3,
+  "changed_parts": [
+    "word/document.xml",
+    "word/settings.xml"
+  ],
+  "scope": "OOXML structural checks; not Word UI or legal validation",
+  "source_sha256": "45b2cae69d290e0d531c459cb916d6d43ec8f06c6db625a0f62609001a598444",
+  "author": "Legal review",
+  "created_at": "2026-09-08T10:32:07Z",
+  "changes": [
+    {
+      "paragraph": 2,
+      "expected_paragraph": "1. Plata se efectuează în 10 zile de la primirea facturii.",
+      "old": "10 zile",
+      "new": "15 zile"
+    },
+    {
+      "paragraph": 4,
+      "expected_paragraph": "3. Comunicările se transmit în scris. Text provizoriu.",
+      "old": " Text provizoriu.",
+      "new": ""
+    }
+  ]
+}
