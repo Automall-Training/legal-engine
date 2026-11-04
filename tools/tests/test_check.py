@@ -1,0 +1,107 @@
+"""Tests of tools/check.py. Fake values are assembled at runtime so this file passes the check itself."""
+
+from __future__ import annotations
+
+import sys
+import tempfile
+import unittest
+import zipfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import check  # noqa: E402
+
+FAKE_HOME = "/" + "Users" + "/somebody/project"
+FAKE_CODE = "2" + "0" * 12
+FAKE_IBAN = "MD" + "24" + "AG" + "0" * 18
+FAKE_MAIL = "ion" + "@" + "firma.md"
+FAKE_PHONE = "+" + "373 69 123 456"
+FAKE_KEY = "sk-" + "a" * 24
+
+
+def write(base: Path, rel: str, text: str) -> None:
+    p = base / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+
+
+def make_docx(path: Path, text: str) -> None:
+    with zipfile.ZipFile(path, "w") as z:
+        z.writestr("word/document.xml", f"<w:document><w:p><w:r><w:t>{text}</w:t></w:r></w:p></w:document>")
+
+
+class ScanLines(unittest.TestCase):
+    def fails(self, line: str, deny: list[str] | None = None) -> list[str]:
+        return check.scan_lines("f.md", line, deny or [])[0]
+
+    def test_clean_line_passes(self):
+        self.assertEqual(self.fails("Contract de prestări servicii, art. 2.1"), [])
+
+    def test_each_pattern_fails(self):
+        for value in (FAKE_HOME, FAKE_CODE, FAKE_IBAN, FAKE_MAIL, FAKE_PHONE, FAKE_KEY):
+            with self.subTest(value=value):
+                self.assertEqual(len(self.fails(f"x {value} y")), 1, value)
+
+    def test_placeholders_and_example_mail_pass(self):
+        for value in ("/" + "Users/you/legal-profile", "/home/user/x", "ana@example.md",
+                      "noreply@anthropic.com", "~/legal-profile"):
+            with self.subTest(value=value):
+                self.assertEqual(self.fails(value), [])
+
+    def test_allow_marker_skips_patterns_but_not_private_marker(self):
+        self.assertEqual(self.fails(f"{FAKE_CODE} leak-ok"), [])
+        self.assertEqual(len(self.fails("<!-- " + "private:start --> leak-ok")), 1)
+
+    def test_denylist_is_case_insensitive(self):
+        self.assertEqual(len(self.fails("Semnat de ACME Grup", ["acme grup"])), 1)
+        self.assertEqual(self.fails("github.com/xacme/repo", ["acme"]), [])
+
+    def test_decision_number_is_a_warning(self):
+        fails, warns = check.scan_lines("f.md", "conform D" + "249", [])
+        self.assertEqual(fails, [])
+        self.assertEqual(len(warns), 1)
+
+    def test_twelve_and_fourteen_digits_are_not_codes(self):
+        self.assertEqual(self.fails("1" * 12), [])
+        self.assertEqual(self.fails("1" * 14), [])
+
+
+class Scan(unittest.TestCase):
+    def test_tree_scan_skips_owner_docs_and_reads_docx(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            write(base, "docs/owner/PLAN.md", FAKE_MAIL)
+            write(base, ".venv/lib/x.py", FAKE_MAIL)
+            write(base, "skills/a/SKILL.md", "ok")
+            make_docx(base / "skills/a/model.docx", f"Administrator {FAKE_CODE}")
+            fails, _ = check.scan(base, deny=["x-firm"])
+            self.assertEqual(len(fails), 1)
+            self.assertIn("model.docx", fails[0])
+
+    def test_env_file_fails_and_bad_docx_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            write(base, ".env", "A=1")
+            write(base, "x.docx", "not a zip")
+            fails, _ = check.scan(base, deny=["x"])
+            self.assertEqual(len(fails), 2)
+
+    def test_missing_denylist_warns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, warns = check.scan(Path(tmp), deny=[])
+            self.assertTrue(any("denylist" in w for w in warns))
+
+    def test_load_denylist_ignores_comments(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            p = Path(tmp) / "d.txt"
+            p.write_text("# names\n\nAcme SRL\n", encoding="utf-8")
+            self.assertEqual(check.load_denylist(p), ["acme srl"])
+            self.assertEqual(check.load_denylist(Path(tmp) / "none.txt"), [])
+
+    def test_repo_itself_is_clean(self):
+        fails, _ = check.scan()
+        self.assertEqual(fails, [])
+
+
+if __name__ == "__main__":
+    unittest.main()

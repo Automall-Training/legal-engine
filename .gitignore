@@ -1,0 +1,16 @@
+# local environments and caches
+.venv/
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+.DS_Store
+
+# owner-only notes and the local leak denylist (names of real firms and people): never published
+docs/owner/
+tools/denylist.local.txt
+
+# a user's profile must never be inside the engine
+legal-profile/
+.env
+.env.*
