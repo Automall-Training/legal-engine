@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "task_id": "<matter-id>@<YYYY-MM-DD of the check>",
+  "started_at": null,
+  "checked_at": null,
+  "analysis_date": null,
+  "completion": "partial",
+  "sources": [
+    {
+      "id": "S001",
+      "title": null,
+      "number": null,
+      "jurisdiction": null,
+      "authority_type": null,
+      "legal_force": null,
+      "provision": null,
+      "version": null,
+      "adopted_on": null,
+      "published_on": null,
+      "in_force_from": null,
+      "applies_from": null,
+      "version_from": null,
+      "version_to": null,
+      "url": null,
+      "opened_at": null,
+      "official_text": false,
+      "status": "unavailable",
+      "applicability": null,
+      "unverified_impact": "[What is not verified and which finding depends on it]",
+      "related_findings": [
+        "F001"
+      ],
+      "checks": {
+        "full_text": {
+          "done": false,
+          "note": null
+        },
+        "amendments": {
+          "done": false,
+          "note": null
+        },
+        "repeal": {
+          "done": false,
+          "note": null
+        },
+        "renumbering": {
+          "done": false,
+          "note": null
+        },
+        "entry_into_force": {
+          "done": false,
+          "note": null
+        },
+        "application_date": {
+          "done": false,
+          "note": null
+        },
+        "transitional": {
+          "done": false,
+          "note": null
+        }
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "F001",
+      "clause": null,
+      "kind": "risk_recommendation",
+      "basis_kind": "law",
+      "material": true,
+      "status": "unverified",
+      "conclusion": null,
+      "source_ids": [
+        "S001"
+      ],
+      "proposed_text": null,
+      "unverified_impact": null
+    }
+  ]
+}

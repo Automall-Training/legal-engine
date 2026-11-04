@@ -10,7 +10,7 @@ matter stays in its folder inside the profile, never inside the engine.
   log.md                       append-only journal of all matters
   YYYY-MM-DD-slug/             one matter (a clash gets -02, -03, …)
     intake.json                created by legal_profile.py
-    source-register.json       created by the module that cites law
+    source-register.json       law the module cites (law-check.md); older checks: source-register.<date>.json
     input/                     files the user gave (originals, never edited)
     output/                    files the engine produced (drafts, clean and tracked DOCX, reports)
 ```
@@ -60,6 +60,7 @@ the module id, and the language pair from `context/language.md`. The module then
 
 - keeps the user's files in `input/` unchanged and writes everything it produces to `output/`;
 - fills its part of `intake.json` (`module_data`) and the core fields it learns;
-- keeps law it cites in `source-register.json` in the matter folder (one shared format, introduced with `legal-contracts`);
+- keeps law it cites in `source-register.json` in the matter folder, in the one shared format of
+  `law-check.md` (template `assets/source-register.json`, checked by `scripts/check_register.py`);
 - logs `waiting` / `done` / `dropped` through the script and reports working links to `output/` files;
 - follows `norms.md` by reference and the approval boundaries of `SKILL.md`; it never copies them.
