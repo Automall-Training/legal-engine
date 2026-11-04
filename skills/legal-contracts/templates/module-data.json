@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "action": null,
+  "document_type": null,
+  "commercial_goal": null,
+  "parties": [],
+  "confirmed_facts": [],
+  "assumptions": [],
+  "governing_law": null,
+  "forum": null,
+  "cross_border_factors": [],
+  "execution_date": null,
+  "performance_period": null,
+  "analysis_date": null,
+  "checked_at": null,
+  "agreed_constraints": [],
+  "language_reason": null,
+  "structure_sources": []
+}

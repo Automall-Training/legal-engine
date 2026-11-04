@@ -10,7 +10,7 @@ A row in the register never replaces reading the rule.
    dates of the events and the period of performance. A re-audit, a new substantive edit or a new day is a new
    check.
 2. List the legal questions and links. Give each material question a finding id (`F001`, …) and candidate acts.
-   Search by the subject of the rule, without the client's details (see `norms.md` § "Facts never invented" and
+   Search by the subject of the rule, without the client's details (see `norms.md` §13 and
    the search rule in `SKILL.md`).
 3. Open the **full official texts**: the act, the amendments you need, corrections, repealing acts, transitional
    provisions. A snippet, a results page, an empty HTTP 200/202, a CAPTCHA, a press release or the model's memory

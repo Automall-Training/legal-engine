@@ -1,0 +1,348 @@
+{
+  "schema_version": 1,
+  "researched_on": "2026-09-08",
+  "purpose": "Modele structurale și proveniență; nu registru al normelor actuale pentru o speță.",
+  "model_selection_required": true,
+  "source_root": "skills/legal-contracts/references/models",
+  "sources": [
+    {
+      "id": "S01",
+      "publisher": "Agenția Achiziții Publice / Ministerul Finanțelor, Republica Moldova",
+      "title": "Documentația standard bunuri și servicii, Anexa nr. 24",
+      "url": "https://tender.gov.md/ro/documents-terms/modele-de-documente-achizitii-publice",
+      "edition_observed": "OMF 115 din 15.09.2021",
+      "source_type": "official_public_procurement_form",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Anexa 24: preambul, clauze 1–12, semnături și anexele tehnică/de preț; nu toate formularele documentației.",
+      "selection_status": "selected_structural",
+      "limits": "Formă de achiziție publică; consolidarea actuală neconfirmată. Nu se transferă regimul procedurii într-un contract privat.",
+      "reuse": "Original nedistribuit în motor; se descarcă la nevoie; atribuire AAP/MF și sursă directă.",
+      "assets": [
+        {
+          "source_id": "S01",
+          "download_url": "https://tender.gov.md/sites/default/files/document/attachments/ds_bunuri_servicii_omf_115_15_09_2021.docx",
+          "accessed_on": "2026-09-08",
+          "bytes": 180442,
+          "sha256": "ecd593002a2efd5f1cd824a08494be5546fed453b6fbe65a9f89b5009f8e381f",
+          "modified_from_download": false,
+          "file_name": "S01-md-aap-2021.docx",
+          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+        }
+      ],
+      "current_law_verified": false
+    },
+    {
+      "id": "S02",
+      "publisher": "Guvernul României; reproducere consultată pe LegeAZ",
+      "title": "HG 522/2003, anexa nr. 2 la norme — contract de formare",
+      "url": "https://legislatie.just.ro/Public/DetaliiDocument/169927",
+      "edition_observed": "Norme istorice; Portalul afișează consolidare 2015, legătură către 2022; actualitatea anexei neconfirmată.",
+      "source_type": "normative_form_secondary_copy_reviewed",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Art. 9 din pagina oficială consultată; anexa 2 integral în reproducerea LegeAZ.",
+      "selection_status": "selected_comparative_limited",
+      "limits": "Textul integral al anexei oficiale nu a fost accesibil. Model destinat regimului formării cu recunoaștere națională; nu este implicit pentru cursuri neformale.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false,
+      "secondary_text_url": "https://legeaz.net/hg-522-2003-norme-og-129-2000/anexa-nr-2-la-normele-metodologice"
+    },
+    {
+      "id": "S03",
+      "publisher": "University of Cambridge, Professional and Continuing Education",
+      "title": "Standard cancellations and refunds information",
+      "url": "https://www.pace.cam.ac.uk/sites/default/files/2025-06/Cancellation%20and%20Refunds%20Terms%20and%20Conditions%202025.pdf",
+      "edition_observed": "În interior: Last updated 10 December 2021. Directorul URL: 2025-06.",
+      "source_type": "institutional_policy",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Pagina de politici și ambele pagini ale PDF-ului.",
+      "selection_status": "selected_comparative_limited",
+      "limits": "Se folosește separarea situațiilor și a regulilor generale/de curs; clauzele britanice și efectele financiare nu sunt importate.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false
+    },
+    {
+      "id": "S04",
+      "publisher": "UK Intellectual Property Office",
+      "title": "Example One-way non-disclosure agreement",
+      "url": "https://www.gov.uk/government/publications/non-disclosure-agreements",
+      "edition_observed": "Pagina publicată 12.03.2015; PDF fără ediție distinctă confirmată.",
+      "source_type": "government_example",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Ambele pagini PDF.",
+      "selection_status": "selected_structural",
+      "limits": "Nu este lege sau formular obligatoriu MD/RO; forma deed și instanțele engleze nu se preiau.",
+      "reuse": "© Crown copyright / UK IPO. Pagina indică Open Government Licence v3.0, exceptând mențiunile contrare. Original nedistribuit în motor; se descarcă la nevoie, cu atribuire; fără susținere de aprobare a adaptării.",
+      "assets": [
+        {
+          "source_id": "S04",
+          "download_url": "https://assets.publishing.service.gov.uk/media/5a74d42140f0b65c0e844ccb/Example-One-Way-Non-Disclosure-Agreement.pdf",
+          "accessed_on": "2026-09-08",
+          "bytes": 18790,
+          "sha256": "77823dcf8702d10508e2b079b837003e060c063acdf08d7ae01c29cbb668a620",
+          "modified_from_download": false,
+          "file_name": "S04-ipo-nda-unilateral.pdf",
+          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+        }
+      ],
+      "current_law_verified": false
+    },
+    {
+      "id": "S05",
+      "publisher": "UK Intellectual Property Office",
+      "title": "Example Mutual non-disclosure agreement",
+      "url": "https://www.gov.uk/government/publications/non-disclosure-agreements",
+      "edition_observed": "Pagina publicată 12.03.2015; PDF fără ediție distinctă confirmată.",
+      "source_type": "government_example",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Ambele pagini PDF.",
+      "selection_status": "selected_structural",
+      "limits": "Se selectează numai când divulgarea este reciprocă; legea și formalitățile locale se verifică separat.",
+      "reuse": "© Crown copyright / UK IPO. Pagina indică Open Government Licence v3.0, exceptând mențiunile contrare. Original nedistribuit în motor; se descarcă la nevoie, cu atribuire; fără susținere de aprobare a adaptării.",
+      "assets": [
+        {
+          "source_id": "S05",
+          "download_url": "https://assets.publishing.service.gov.uk/media/5a8188fd40f0b62302697d5e/Example-Mutual-Non-Disclosure-Agreement.pdf",
+          "accessed_on": "2026-09-08",
+          "bytes": 17771,
+          "sha256": "bbec9c3638a4cdf8f2bb9da889057d94e6da9481d7ed202bfcab2bcde37b32bb",
+          "modified_from_download": false,
+          "file_name": "S05-ipo-nda-mutual.pdf",
+          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+        }
+      ],
+      "current_law_verified": false
+    },
+    {
+      "id": "S06",
+      "publisher": "UK IPO, Lambert toolkit — ancillary sample",
+      "title": "Sample patent and know-how licence",
+      "url": "https://assets.publishing.service.gov.uk/media/5a80b10540f0b62305b8c9b2/lambert-sample-patent-knowhow-licence.doc",
+      "edition_observed": "Fișierul nu oferă o ediție juridică actuală verificată.",
+      "source_type": "unapproved_comparative_sample",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Avertisment, definiții, arhitectura clauzelor și trimiterea 9.12 către 10.11.",
+      "selection_status": "selected_comparative_limited",
+      "limits": "Exemplul declară lipsa aprobării grupului Lambert. Trimitere internă greșită. Brevete/know-how, nu model validat pentru marcă ori cursuri.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false
+    },
+    {
+      "id": "S07",
+      "publisher": "Comisia Europeană",
+      "title": "Decizia (UE) 2021/915 — clauze standard operator–persoană împuternicită",
+      "url": "https://commission.europa.eu/publications/publications-standard-contractual-clauses-sccs_en",
+      "edition_observed": "04.06.2021; versiunea română din arhiva oficială.",
+      "source_type": "official_standard_clauses",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Decizia și anexa RO: clauzele 1–10, anexele I–IV.",
+      "selection_status": "selected_official_instrument",
+      "limits": "Nu asigură singure conformitatea transferurilor internaționale. Text fix, completări și opțiuni în limitele instrumentului; statut de reverificat la utilizare.",
+      "reuse": "Texte oficiale ale deciziei și anexei; originale nedistribuite în motor, descărcate la nevoie, cu atribuire și identificarea intrărilor ZIP.",
+      "assets": [
+        {
+          "source_id": "S07",
+          "download_url": "https://commission.europa.eu/document/download/a53e88fe-3b08-4e83-8587-4e3869ebb1c3_en?filename=strandard_contractual_clauses_eu-eea.zip&prefLang=es",
+          "accessed_on": "2026-09-08",
+          "bytes": 67673,
+          "sha256": "4527fe58a3cdbb48b7e5dcebd6e749c51abcff0a2c1720221a14718de8225750",
+          "modified_from_download": false,
+          "archive_entry": "RO Standard Contractual Clauses EU-EEA.docx",
+          "archive_sha256": "88602c413cde795e64315cf829d0e6fa8718af61617b9ba848ad461aee676e42",
+          "file_name": "S07-ec-dpa-decision-ro.docx",
+          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+        },
+        {
+          "source_id": "S07",
+          "download_url": "https://commission.europa.eu/document/download/a53e88fe-3b08-4e83-8587-4e3869ebb1c3_en?filename=strandard_contractual_clauses_eu-eea.zip&prefLang=es",
+          "accessed_on": "2026-09-08",
+          "bytes": 78590,
+          "sha256": "e0b7033d33bcdf082d38c36e517b0044e0e2dafcd7aae4f12105f4da3c32415d",
+          "modified_from_download": false,
+          "archive_entry": "RO Annex Standard Contractual Clauses EU-EEA.docx",
+          "archive_sha256": "88602c413cde795e64315cf829d0e6fa8718af61617b9ba848ad461aee676e42",
+          "file_name": "S07-ec-dpa-clauses-ro.docx",
+          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+        }
+      ],
+      "current_law_verified": false
+    },
+    {
+      "id": "S08",
+      "publisher": "Comisia Europeană",
+      "title": "Decizia (UE) 2021/914 — anexa cu clauze de transfer",
+      "url": "https://commission.europa.eu/publications/publications-standard-contractual-clauses-sccs_en",
+      "edition_observed": "04.06.2021; anexă în limba română.",
+      "source_type": "official_standard_clauses",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Clauzele 1–2; arhitectura și identificarea modulelor; clauzele 14–15; apendice și anexele I–III. Analiză structurală, nu audit exhaustiv al tuturor modulelor.",
+      "selection_status": "selected_official_instrument",
+      "limits": "Decizia și întregul modul ales trebuie citite la utilizare. Domeniul importatorului, actualitatea instrumentului și condițiile fluxului se verifică separat.",
+      "reuse": "Text oficial al anexei; original nedistribuit în motor, descărcat la nevoie, cu atribuire Comisia Europeană.",
+      "assets": [
+        {
+          "source_id": "S08",
+          "download_url": "https://commission.europa.eu/document/download/e60b1cd4-d802-44d5-9cac-ddd3c943a5ef_ro?filename=RO%20Annex%20Standard%20Contractual%20Clauses.docx",
+          "accessed_on": "2026-09-08",
+          "bytes": 114493,
+          "sha256": "f0ee9e1c82443cb41aa0cf0f993aaf6c16195fd6830589db435a004e4d778728",
+          "modified_from_download": false,
+          "file_name": "S08-ec-transfer-clauses-ro.docx",
+          "local_copy": "not shipped: download into the matter (input/sources/) and compare sha256"
+        }
+      ],
+      "current_law_verified": false
+    },
+    {
+      "id": "S09",
+      "publisher": "CNIL",
+      "title": "Exemples de formulaire de collecte de données à caractère personnel",
+      "url": "https://cnil.fr/fr/exemples-de-formulaire-de-collecte-de-donnees-caractere-personnel",
+      "edition_observed": "26.07.2019, conform paginii.",
+      "source_type": "regulator_illustration",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Exemplele 1 și 2: informare integrată și pe două niveluri.",
+      "selection_status": "selected_structural",
+      "limits": "Exemple fictive franceze; fără copierea contactelor, autorității și consimțămintelor; nu model de cookies.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false
+    },
+    {
+      "id": "S10",
+      "publisher": "CNIL",
+      "title": "Le registre des activités de traitement",
+      "url": "https://www.cnil.fr/fr/RGPD-le-registre-des-activites-de-traitement",
+      "edition_observed": "Pagina afișează 13.04.2018; accesată 08.09.2026.",
+      "source_type": "regulator_guidance_with_unread_attachment",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Pagina HTML și câmpurile descrise pentru operator/împuternicit; nu conținutul fișierului ODS.",
+      "selection_status": "selected_guidance_attachment_unavailable",
+      "limits": "Descărcarea ODS: HTTP 403; vechile RTF/PDF sunt declarate neactualizate de pagină. Structura proprie nu pretinde reproducerea fișierului.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false,
+      "unread_attachment_url": "https://www.cnil.fr/sites/default/files/atoms/files/registre-traitement-simplifie.ods"
+    },
+    {
+      "id": "S11",
+      "publisher": "European Data Protection Board",
+      "title": "Guidelines 07/2020 on controller and processor",
+      "url": "https://www.edpb.europa.eu/system/files/2023-10/EDPB_guidelines_202007_controllerprocessor_final_en.pdf",
+      "edition_observed": "Versiunea 2.1, 20.09.2022; v2.0 adoptată 07.07.2021.",
+      "source_type": "regulator_guidance_not_contract_template",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Identificarea ediției, sumarul rolurilor, partea II secțiunea 2, pp. 43–48.",
+      "selection_status": "selected_guidance",
+      "limits": "M10 este structură proprie. EDPB nu a emis prin această sursă un model de contract.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false
+    },
+    {
+      "id": "S12",
+      "publisher": "UK IPO, Lambert toolkit — ancillary sample",
+      "title": "Sample consultancy agreement",
+      "url": "https://assets.publishing.service.gov.uk/media/5a8055d7ed915d74e33f9d64/lambert-sample-consultancy-agreement.doc",
+      "edition_observed": "Fără ediție juridică actuală verificată.",
+      "source_type": "unapproved_comparative_sample",
+      "accessed_on": "2026-09-08",
+      "reviewed_scope": "Documentul extras în text, inclusiv avertismentul, clauzele comerciale, protecția datelor și încheierea.",
+      "selection_status": "excluded_default",
+      "limits": "Scrisoare la persoana I; avertisment de neaprobare; nu este reper implicit pentru redactarea actuală MD/RO.",
+      "reuse": "Link și structură proprie; fără copie integrală în motor.",
+      "assets": [],
+      "current_law_verified": false
+    }
+  ],
+  "models": [
+    {
+      "id": "M01",
+      "path": "01-servicii.ro.md",
+      "source_ids": [
+        "S01"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M02",
+      "path": "02-formare.ro.md",
+      "source_ids": [
+        "S02",
+        "S01"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M03",
+      "path": "03-termeni.ro.md",
+      "source_ids": [
+        "S03"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M04",
+      "path": "04-nda.ro.md",
+      "source_ids": [
+        "S04",
+        "S05"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M05",
+      "path": "05-licenta.ro.md",
+      "source_ids": [
+        "S06"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M06",
+      "path": "06-dpa.ro.md",
+      "source_ids": [
+        "S07"
+      ],
+      "type": "official_instrument_completion_guide"
+    },
+    {
+      "id": "M07",
+      "path": "07-transfer.ro.md",
+      "source_ids": [
+        "S08"
+      ],
+      "type": "official_instrument_completion_guide"
+    },
+    {
+      "id": "M08",
+      "path": "08-informare.ro.md",
+      "source_ids": [
+        "S09"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M09",
+      "path": "09-registru.ro.md",
+      "source_ids": [
+        "S10"
+      ],
+      "type": "own_structural_outline"
+    },
+    {
+      "id": "M10",
+      "path": "10-operatori-asociati.ro.md",
+      "source_ids": [
+        "S11"
+      ],
+      "type": "own_structural_outline"
+    }
+  ],
+  "licence_links": {
+    "UK_IPO_OGL_v3": "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+  },
+  "originals_policy": "Originalele nu sunt incluse în motor. Se descarcă de la download_url în dosarul cauzei (input/sources/); un sha256 diferit înseamnă altă ediție: se citește și se notează."
+}

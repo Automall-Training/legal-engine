@@ -1,0 +1,20 @@
+{
+  "title": "Proiect de document",
+  "language": "ro-RO",
+  "author": "",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "[DE COMPLETAT: text verificat pentru situația concretă]"
+    },
+    {
+      "type": "heading",
+      "text": "Obiectul",
+      "level": 1
+    },
+    {
+      "type": "paragraph",
+      "text": "[DE COMPLETAT: clauza convenită și verificată]"
+    }
+  ]
+}

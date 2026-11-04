@@ -32,7 +32,7 @@ merges the keys of `module_data`:
 
 ```bash
 python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data '{"represented_party": "…", "module_data": {"action": "audit"}}'
-python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data @<matter>/output/intake-update.json
+python3 <skill>/scripts/legal_profile.py matter update <matter-id> --data @/tmp/intake-update.json   # long texts: a temporary JSON file
 ```
 
 ## log.md
