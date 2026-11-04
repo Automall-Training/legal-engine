@@ -53,6 +53,10 @@ Romanian style check and the tracked changes are made with the contract tools.
 
 ## Rules of this module
 
+- **A lawful way to process first.** The question is how the firm can use the data it needs: the right lawful
+  basis, a lighter option (aggregated or pseudonymised data, a provider in the EEA or with an adequacy decision,
+  no tracker where a server-side count is enough), and its cost against the residual risk
+  (`<legal-workflow>/references/norms.md` §2, §15). "Do not collect" is the answer only when no basis exists.
 - **Law-required first, extra labelled.** A notice holds what the law asks of that text; anything more is marked
   `recomandare` and added only when it removes a real risk. No list of laws, no own deadlines shorter than the
   law's, no promise the firm cannot keep.

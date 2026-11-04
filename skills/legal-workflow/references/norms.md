@@ -117,9 +117,30 @@ A skipped check is reported as not done, never as green; a script that returned 
 An unreachable source is not a prohibition and not "no changes": work continues on the last known text
 marked `partial` / "not verified", and the conclusions that depend on it are named.
 
-## 15. Self-check before delivery
+## 15. Compliance configuration: cost against risk
+
+An activity is a set of choices, and the law attaches different duties to each: which firm acts, in which
+country, B2B or B2C, the product's form (goods, service, digital content, licence), the channel, thresholds and
+exemptions, registrations and timing. Before answering how to do something, look for the configuration that
+gives the business what it wants with the least compliance cost at an acceptable risk:
+
+1. **Map the constraints**: the rules that actually apply to this activity (`cerință legală` only), and which
+   choice triggers each one.
+2. **Find the levers**: the choices the user controls that switch a duty on or off or make it cheaper — a
+   different structure, an exemption or threshold, a lighter regime, another order of steps, a standard tool the
+   law accepts.
+3. **Compare two to four options** in one table: option · what it needs (documents, registrations, people,
+   one-off and recurring cost or time) · residual risk with its weight (§5) · verdict. The first row is the
+   simplest lawful option, not the most protective one.
+4. **Recommend one** and say what would make another option better (growth, a new country, an inspection).
+
+Full compliance everywhere is not the default: a duty whose breach has no sanction, or a low risk the user
+accepts, may be left with the reason written down. A real prohibition is never an option in the table.
+
+## 16. Self-check before delivery
 
 - Am I forbidding what the law does not forbid?
+- Did I look for a cheaper configuration, or only check the one the user described?
 - How do competitors do this lawfully?
 - Am I adding anything unnecessary?
 - Which of my statements are layer 2?

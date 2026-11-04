@@ -50,5 +50,5 @@ assistant, not a lawyer, and suggest a licensed lawyer for the final decision.
 
 ## Self-check before delivery
 
-`norms.md` §15, plus: is every quote from the version in force on the analysis date? Is any future version,
+`norms.md` §16, plus: is every quote from the version in force on the analysis date? Is any future version,
 draft or guidance presented as law? Does any conclusion rest on an act whose card is `outdated`?

@@ -11,6 +11,7 @@ SKILL = Path(__file__).resolve().parent.parent
 TEXT = (SKILL / "SKILL.md").read_text(encoding="utf-8")
 CHECKPOINTS = (SKILL / "references" / "checkpoints.md").read_text(encoding="utf-8")
 LAW_MAP = (SKILL / "references" / "law-map.md").read_text(encoding="utf-8")
+TERMS = (SKILL / "references" / "terms-structure.md").read_text(encoding="utf-8")
 TEMPLATE = json.loads((SKILL / "templates" / "module-data.json").read_text(encoding="utf-8"))
 
 
@@ -46,6 +47,31 @@ class LawMap(unittest.TestCase):
 
     def test_three_jurisdictions(self):
         self.assertEqual(re.findall(r"^## (.+)$", LAW_MAP, flags=re.M), ["European Union", "Romania", "Moldova"])
+
+
+class TermsStructure(unittest.TestCase):
+    """The module is generic: every product type of the template has a block, and blocks cite real checkpoints."""
+
+    BLOCK_FOR = {"goods": "Goods (", "goods-digital": "Goods with digital", "service": "Service (",
+                 "digital-content": "Digital content", "digital-service": "Digital content or service",
+                 "subscription": "Subscription", "course-or-event": "Course, event", "bundle": "Bundle"}
+
+    def test_every_product_type_has_a_block(self):
+        products = TEMPLATE["module_data"]["products"][0].split(" | ")
+        self.assertEqual(set(products), set(self.BLOCK_FOR))
+        for product, label in self.BLOCK_FOR.items():
+            with self.subTest(product=product):
+                self.assertIn(f"| {label}", TERMS)
+
+    def test_cited_checkpoints_exist(self):
+        known = set(re.findall(r"^\| (C\d+) \|", CHECKPOINTS, flags=re.M))
+        for cid in set(re.findall(r"\bC\d+\b", TERMS)):
+            with self.subTest(checkpoint=cid):
+                self.assertIn(cid, known)
+
+    def test_route_has_a_configuration_step(self):
+        self.assertIn("**Configuration**", TEXT)
+        self.assertIn("§15", TEXT)
 
 
 class Scope(unittest.TestCase):

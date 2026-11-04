@@ -57,7 +57,7 @@ python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
 | "can I…", "is it legal…", which rule applies, deadlines, a sanction, an authority | `research` | `legal-research` |
 | which laws concern my business, download laws, what changed in the law, re-check my contracts after a change | `watch` | `legal-watch` |
 | privacy policy, cookies, processing agreement, record of processing, data request, data breach, transfer abroad | `privacy` | `legal-privacy` |
-| terms of a shop or a course site, offer, withdrawal and refund, digital content, consumer complaint | `consumer` | `legal-consumer` |
+| terms of sale to consumers (shop, services, app or subscription, digital content, courses), offer, delivery, withdrawal and refund, consumer complaint | `consumer` | `legal-consumer` |
 | a brand name check, trademark filing, fees and deadlines, an infringer | `trademark` | `legal-trademark` |
 | hiring, an employment contract or its amendment, dismissal, internal rules | `employment` | `legal-employment` |
 

@@ -2,11 +2,12 @@
   "represented_party": "[the firm from context/company.md]",
   "unknowns": [],
   "module_data": {
-    "action": "terms | audit | withdrawal | complaint | question",
-    "products": ["goods | service | digital-content | digital-service | course-live | course-recorded | subscription"],
-    "channels": ["website | app | marketplace | social | phone"],
+    "action": "terms | audit | configuration | withdrawal | complaint | question",
+    "products": ["goods | goods-digital | service | digital-content | digital-service | subscription | course-or-event | bundle"],
+    "channels": ["website | app | marketplace | social | phone | off-premises | shop"],
     "buyer_countries": ["MD", "RO"],
     "access_starts": "[on payment | on a date | on delivery]",
+    "options": [{"option": null, "needs": null, "risk": null, "verdict": "se poate | se poate cu condiție | risc | interzis"}],
     "checkpoints": [
       {"id": "C1", "status": "met | missing | not-applicable | not-verified", "rule": null, "fix": null}
     ],
