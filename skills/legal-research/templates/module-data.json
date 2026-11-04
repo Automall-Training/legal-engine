@@ -1,0 +1,22 @@
+{
+  "module_data": {
+    "action": "answer | version_check",
+    "question": "[the user's question as asked]",
+    "question_restated": "[who acts, what, where, on what date]",
+    "jurisdictions": [
+      "MD",
+      "RO",
+      "EU"
+    ],
+    "confirmed_facts": [],
+    "assumptions": [],
+    "acts": [
+      {
+        "id": "<jurisdiction>.<kind>.<number>-<year>",
+        "card": "work/versions/<act-id>.json",
+        "result": null
+      }
+    ],
+    "verdict": "se poate | se poate cu condiție | risc | interzis"
+  }
+}

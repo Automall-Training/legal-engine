@@ -24,7 +24,9 @@ A row in the register never replaces reading the rule.
    renumbering record the old number, the date and the confirmed new address, or that it is unresolved.
 7. Check the official history of amendments up to `checked_at`. For a consolidated text establish its date and
    coverage; if it lags, compare with the official publications. Do not call a consolidation authentic unless the
-   source says so.
+   source says so. For each act a material conclusion rests on, the full current-version check (seven points, one
+   card per act, `check_version.py`) is `<legal-workflow>/../legal-research/references/version-check.md`; every
+   module uses it, none copies it.
 8. For a court decision: court, date, number/ECLI, relevant paragraphs, finality/appeal and its effect in that
    system. For an authority's decision: addressees, competence and binding force. For guidance or practice say
    plainly that it is not law.
