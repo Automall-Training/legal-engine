@@ -15,8 +15,9 @@ refuses a profile inside it). The engine never commits, uploads or shares it.
 A broken config is an error to show the user, never a reason to guess another folder.
 
 The setup wizard creates the folders and writes the config with `legal_profile.py profile init [--dir <folder>]`
-(idempotent; refuses the home folder itself, a path inside the engine and, without `--switch`, a second folder
-when the config already names one; nothing is ever moved or deleted). `where` also reports the engine folder.
+(idempotent; refuses the home folder itself, a folder inside the engine or containing it and, without
+`--switch`, a second folder when the config already names one; a configured folder that is missing, for example on
+a disk that is not connected, is recreated only with `--create`; nothing is ever moved or deleted). `where` also reports the engine folder.
 
 ## Layout
 
@@ -82,9 +83,9 @@ Every module needs `firms`, `modules`, `language`, `side-risk` (`base_needs`); a
 | Skipped step | Default |
 |---|---|
 | firms | ask for the party in each matter; unknown details go in as `[DE COMPLETAT: …]` |
-| modules | all optional modules off |
+| modules | all optional modules off (`status` reports them `off`, not `unset`) |
 | language | the language of the user's message; legal text in the language of the governing law |
-| side-risk | the user's firm is the represented party; threshold of `norms.md` §6 |
+| side-risk | the represented party is asked once in each matter (the user's firm is the recommended answer); threshold of `norms.md` §6 |
 
 ## Versions
 

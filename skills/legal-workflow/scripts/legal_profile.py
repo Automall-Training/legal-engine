@@ -2,7 +2,7 @@
 """Profile, modules and matters of the legal engine (stdlib only). Prints JSON for the agent.
 
     legal_profile.py where                                  # profile folder and where the path came from
-    legal_profile.py profile init [--dir D] [--switch]      # the wizard creates the profile folders and config.json
+    legal_profile.py profile init [--dir D] [--switch] [--create]   # the wizard creates the profile and config.json
     legal_profile.py modules set ID=on|off [ID=on|off …]    # the wizard switches optional modules
     legal_profile.py status [--module M]                    # setup steps, missing steps, module states
     legal_profile.py module M                               # core | on | off | unset | not-installed
@@ -91,14 +91,18 @@ class SetupError(LegalProfileError):
 
 def _write_atomic(path: Path, text: str, error: type[LegalProfileError]) -> None:
     """Write via a unique temp file and an atomic replace: a crash never leaves a half-written user file."""
-    fd, name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}-", suffix=".tmp")
-    tmp = Path(name)
+    # why: a symlinked file (e.g. a dotfiles-managed config.json) is written through, not replaced by a copy.
+    real = path.resolve()
+    tmp: Path | None = None
     try:
+        fd, name = tempfile.mkstemp(dir=real.parent, prefix=f".{real.name}-", suffix=".tmp")
+        tmp = Path(name)
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
             handle.write(text)
-        tmp.replace(path)
+        tmp.replace(real)
     except OSError as exc:
-        tmp.unlink(missing_ok=True)
+        if tmp is not None:
+            tmp.unlink(missing_ok=True)
         raise error(f"cannot write {path}: {exc}") from exc
 
 
@@ -129,21 +133,31 @@ def resolve_profile(config: Path = CONFIG) -> tuple[Path, str]:
 
 
 def _check_location(path: Path) -> None:
-    engine = ENGINE_ROOT.resolve()
-    if path.resolve() == engine or engine in path.resolve().parents:
+    engine, real = ENGINE_ROOT.resolve(), path.resolve()
+    if real == engine or engine in real.parents:
         raise ProfileLocationError(
             f"profile {path} is inside the engine folder {engine}; a profile holds private data and must live "
             "outside it (default ~/legal-profile)")
+    # why: a profile folder that contains the engine would mix private files with the public checkout and
+    # with every neighbouring project; a backup or clean-up of "the profile" would take them all.
+    if real in engine.parents:
+        raise ProfileLocationError(f"profile {path} contains the engine folder {engine}; use a folder of its own, "
+                                   "e.g. ~/legal-profile")
 
 
 PROFILE_DIRS = ("context", "templates", "matters", "laws", "contracts")
 
 
-def profile_init(raw: str | None, config: Path = CONFIG, switch: bool = False) -> dict:
+def profile_init(raw: str | None, config: Path = CONFIG, switch: bool = False, create: bool = False) -> dict:
     """Create the profile folders and point config.json at them. Idempotent; never deletes or moves anything."""
     current, _source = resolve_profile(config)
     if raw is None:
         target = current
+        # why: a configured profile that is gone is usually a disk that is not connected; creating an empty one
+        # in its place would hide the real profile and later split the user's files between two folders.
+        if config.is_file() and not current.is_dir() and not create:
+            raise SetupError(f"the profile named in {config}, {current}, does not exist (disk not connected?); "
+                             "connect it and run again, or pass --create to start an empty profile there")
     else:
         target = Path(os.path.expanduser(raw.strip()))
         if not raw.strip() or not target.is_absolute():
@@ -151,7 +165,7 @@ def profile_init(raw: str | None, config: Path = CONFIG, switch: bool = False) -
     target = Path(os.path.normpath(target))
     # why: the profile gets five folders of its own; at the home folder or the root they would mix with
     # unrelated files and a later backup or clean-up of "the profile" would take everything.
-    if target in (Path.home(), Path(target.anchor)):
+    if target.resolve() in (Path.home().resolve(), Path(target.anchor)):
         raise SetupError(f"{target} cannot be the profile itself; use a folder of its own, e.g. ~/legal-profile")
     _check_location(target)
     if config.is_file() and target != Path(os.path.normpath(current)) and not switch:
@@ -329,7 +343,10 @@ def step_set(profile: Path, step: str, state: str, catalog: dict, note: str = ""
             lines += STATUS_HEADER.rstrip("\n").split("\n")
         lines.append(row)
     path = profile / STATUS_FILE
-    path.parent.mkdir(exist_ok=True)
+    try:
+        path.parent.mkdir(exist_ok=True)
+    except OSError as exc:
+        raise StatusFileError(f"cannot create {path.parent}: {exc}") from exc
     _write_atomic(path, "\n".join(lines) + "\n", StatusFileError)
     return {"step": step, "status": state, "date": day}
 
@@ -347,11 +364,19 @@ def module_state(mid: str, catalog: dict, switches: dict[str, bool] | None, sibl
     return "on" if switches.get(mid) else "off"
 
 
+def effective_switches(profile: Path, catalog: dict, steps: dict[str, str]) -> dict[str, bool] | None:
+    """modules.json, or all off when the user skipped the modules step (profile.md defaults), else None."""
+    switches = read_modules(profile, catalog) if profile.is_dir() else None
+    if switches is None and steps.get("modules") == "skipped":
+        return {mid: False for mid in optional_ids(catalog)}  # why: "unset" would make the router ask again
+    return switches
+
+
 def status(profile: Path, source: str, catalog: dict, module: str | None = None,
            siblings: Path = SIBLINGS) -> dict:
     exists = profile.is_dir()
     steps = read_steps(profile, catalog) if exists else {s: "pending" for s in catalog["steps"]}
-    switches = read_modules(profile, catalog) if exists else None
+    switches = effective_switches(profile, catalog, steps)
     needs = list(catalog.get("base_needs", []))
     if module is not None:
         state = module_state(module, catalog, switches, siblings)  # also validates the id
@@ -572,6 +597,7 @@ def main(argv: list[str] | None = None) -> int:
     pi = psub.add_parser("init")
     pi.add_argument("--dir")
     pi.add_argument("--switch", action="store_true")
+    pi.add_argument("--create", action="store_true")
     md = sub.add_parser("modules")
     mdsub = md.add_subparsers(dest="action", required=True)
     mds = mdsub.add_parser("set")
@@ -609,7 +635,7 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     try:
         if a.cmd == "profile":  # why: before resolve_profile, so init can also run where no profile exists yet
-            print(json.dumps(profile_init(a.dir, CONFIG, a.switch), ensure_ascii=False, indent=2))
+            print(json.dumps(profile_init(a.dir, CONFIG, a.switch, a.create), ensure_ascii=False, indent=2))
             return 0
         # why: globals are read at call time so tests (and LEGAL_ENGINE_CONFIG) can point elsewhere.
         profile, source = resolve_profile(CONFIG)
@@ -622,7 +648,8 @@ def main(argv: list[str] | None = None) -> int:
             if a.cmd == "status":
                 out = status(profile, source, catalog, a.module, SIBLINGS)
             elif a.cmd == "module":
-                switches = read_modules(profile, catalog) if profile.is_dir() else None
+                steps = read_steps(profile, catalog) if profile.is_dir() else {}
+                switches = effective_switches(profile, catalog, steps)
                 out = {"module": a.module, "state": module_state(a.module, catalog, switches, SIBLINGS),
                        "skill": catalog["modules"][a.module]["skill"]}
             elif a.cmd == "step":

@@ -424,6 +424,33 @@ class ProfileInit(TmpCase):
         self.assertEqual([p.name for p in self.root.iterdir() if p.name.endswith(".tmp")], [])
 
 
+    def test_refuses_a_folder_that_contains_the_engine(self):
+        with self.assertRaises(lp.ProfileLocationError):
+            lp.profile_init(str(lp.ENGINE_ROOT.parent), self.root / "config.json")
+        with self.assertRaises(lp.SetupError):  # home reached through "..": compared after resolving
+            lp.profile_init(str(Path.home() / "x" / ".."), self.root / "config.json")
+
+    def test_missing_configured_folder_is_not_recreated_silently(self):
+        cfg = self.root / "config.json"
+        gone = self.root / "volume" / "legal-profile"
+        cfg.write_text(json.dumps({"profile_dir": str(gone)}), encoding="utf-8")
+        with self.assertRaises(lp.SetupError) as ctx:
+            lp.profile_init(None, cfg)
+        self.assertIn("disk not connected", str(ctx.exception))
+        self.assertFalse(gone.exists())
+        self.assertEqual(lp.profile_init(None, cfg, create=True)["profile"], str(gone))
+
+    def test_symlinked_config_is_written_through(self):
+        real = self.root / "dotfiles" / "config.json"
+        real.parent.mkdir()
+        real.write_text(json.dumps({"profile_dir": str(self.root / "a")}), encoding="utf-8")
+        link = self.root / "config.json"
+        link.symlink_to(real)
+        lp.profile_init(str(self.root / "b"), link, switch=True)
+        self.assertTrue(link.is_symlink())
+        self.assertEqual(json.loads(real.read_text(encoding="utf-8"))["profile_dir"], str(self.root / "b"))
+
+
 class ModulesSet(TmpCase):
     def test_new_file_lists_every_optional_module(self):
         prof = self.root / "p"
@@ -453,6 +480,30 @@ class ModulesSet(TmpCase):
         with self.assertRaises(lp.ModulesFileError):
             lp.modules_set(prof, CATALOG, ["privacy=on"])
         self.assertEqual(json.loads((prof / "modules.json").read_text(encoding="utf-8")), {"schema_version": 0})
+
+
+    def test_read_only_profile_gives_typed_errors(self):
+        prof = make_profile(self.root)
+        with mock.patch.object(lp.tempfile, "mkstemp", side_effect=PermissionError("read-only")):
+            with self.assertRaises(lp.SetupError):
+                lp.modules_set(prof, CATALOG, ["privacy=off"])
+            with self.assertRaises(lp.StatusFileError):
+                lp.step_set(prof, "tools", "done", CATALOG)
+        with mock.patch.object(Path, "mkdir", side_effect=PermissionError("read-only")), \
+                self.assertRaises(lp.StatusFileError) as ctx:
+            lp.step_set(prof, "tools", "done", CATALOG)
+        self.assertIn("cannot create", str(ctx.exception))
+
+
+class SkippedModules(TmpCase):
+    def test_skipped_modules_step_means_off_not_unset(self):
+        prof = make_profile(self.root)
+        (prof / "modules.json").unlink()
+        sib = make_siblings(self.root, "legal-privacy")
+        self.assertEqual(lp.status(prof, "test", CATALOG, "privacy", sib)["module_state"], "unset")
+        lp.step_set(prof, "modules", "skipped", CATALOG)
+        out = lp.status(prof, "test", CATALOG, "privacy", sib)
+        self.assertEqual((out["module_state"], out["missing_steps"]), ("off", []))
 
 
 class Cli(TmpCase):

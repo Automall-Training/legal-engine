@@ -9,7 +9,11 @@ written as `[DE COMPLETAT: …]`.
 
 ## 0. Where the profile lives (before any step)
 
-Run `legal_profile.py where`. If `exists` is false, ask:
+Run `legal_profile.py where`. If `exists` is false and `source` is a config, the profile was set up before and
+its folder is missing (often a disk that is not connected): say so and ask — connect it and try again (recommended:
+nothing changes) · start an empty profile in that place (`profile init --create`) · use another folder
+(`profile init --dir <folder> --switch`). Never create it without that answer. If `exists` is false and there is
+no config, ask:
 
 - `~/legal-profile` (recommended) — a private folder in the home folder, outside the engine; back it up like any
   documents folder;
@@ -23,7 +27,9 @@ folder stays as it is).
 
 Ask once: **quick** (recommended for a first try, about 5 minutes: steps 1–3; language taken from the user's
 messages, side and risk by default, the rest later) or **full** (about 15 minutes, every step). Quick still writes
-the files of steps 4 and 5 with their defaults and marks them `done` with the note `default`.
+the files of steps 4 and 5 and marks them `done` with the note `default`: conversation in the language of the
+user's messages, documents in Romanian; risk threshold default; represented party the firm of step 1 when there is
+exactly one, otherwise "ask in each matter".
 
 ## Steps
 
@@ -80,7 +86,8 @@ matter, not here.
 
 "When a choice carries little risk, may I decide it myself?" Options: default (recommended: low risk decided by the
 engine and listed in the summary; medium or high risk, money or the business model asked, `norms.md` §6) ·
-stricter (ask about every choice beyond wording) · looser (also decide medium risk without money). Then the default
+stricter (ask about every choice beyond wording) · looser (also decide medium risks that involve no money: no
+price, payment, penalty or liability amount). Then the default
 represented party: the firm from step 1 (recommended when there is one firm) or "ask in each matter".
 
 ### 6, 7, 10. `niches`, `laws`, `first-run` (law library and monitoring)
@@ -96,7 +103,8 @@ the law library and monitoring come with an engine update; every answer still ch
 "Do you have your own contract samples or contracts in force that the engine should know?" Options: not now
 (recommended for a first try) · samples · contracts in force · both. Copy (never move) each file the user names:
 samples into `templates/`, contracts in force into `contracts/`; the originals stay untouched. Name the copies
-with short latin words (`supply-contract-2025.docx`). The clause index of contracts in force is built by
+with short latin words (`supply-contract-2025.docx`); a name already taken gets `-02`, `-03`, … (never overwrite
+an earlier copy). The clause index of contracts in force is built by
 `legal-watch`; until it is installed the files just wait there.
 
 Then, optional (skip by default): default forum for disputes and any preferred clauses → `context/house-style.md`
