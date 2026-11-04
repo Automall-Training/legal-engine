@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "act": {
+    "id": "<jurisdiction>.<kind>.<number>-<year>",
+    "title": null,
+    "jurisdiction": "MD | RO | EU",
+    "official_record_url": null
+  },
+  "checked_at": null,
+  "analysis_date": null,
+  "scope": "full",
+  "held_version": {
+    "label": null,
+    "version_from": null,
+    "snapshot_date": null,
+    "sha256": null
+  },
+  "cited_provisions": [
+    "<art. N alin. (M)>"
+  ],
+  "points": {
+    "consolidation": {
+      "status": "not_verified",
+      "note": null,
+      "evidence": [
+        {
+          "url": null,
+          "opened_at": null,
+          "official": true,
+          "archived_on": null,
+          "quote": null,
+          "text_file": null,
+          "text_sha256": null
+        }
+      ],
+      "reason": "[why it could not be checked]",
+      "depends": "[which conclusion depends on it]"
+    },
+    "amendments": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
+    "deferred_entry": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
+    "secondary_acts": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
+    "case_law": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
+    "repeal": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null},
+    "status_of_changes": {"status": "not_verified", "note": null, "evidence": [], "reason": null, "depends": null}
+  },
+  "latest_in_force": {
+    "label": null,
+    "version_from": null
+  },
+  "next_versions": [],
+  "changes": [
+    {
+      "act": null,
+      "published": null,
+      "in_force_from": null,
+      "applies_from": null,
+      "provisions": [],
+      "status": "in_force | published_not_in_force | draft",
+      "affects_conclusion": false,
+      "url": null
+    }
+  ],
+  "related": [
+    {
+      "id": null,
+      "kind": "government_decision | order | authority_decision | constitutional_court | supreme_court | cjeu | guidance",
+      "title": null,
+      "published": null,
+      "applies_from": null,
+      "effect": "amends | details | suspends | declares_unconstitutional | interprets",
+      "binding": false,
+      "provisions": [],
+      "url": null
+    }
+  ],
+  "result": "not_verified",
+  "outdated_reason": null,
+  "working_conclusion": "[last known text, its date, what stays open]"
+}
