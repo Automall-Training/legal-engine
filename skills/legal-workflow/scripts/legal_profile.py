@@ -196,10 +196,15 @@ def step_set(profile: Path, step: str, state: str, catalog: dict, note: str = ""
     """Write one step row (replace it if present). Only the wizard and the update skill call this."""
     if step not in catalog["steps"]:
         raise StatusFileError(f"unknown step {step!r}; steps: {', '.join(catalog['steps'])}")
+    state = state.lower()  # why: the reader accepts any case, so the writer does too
     if state not in STEP_STATES:
         raise StatusFileError(f"status must be one of {', '.join(STEP_STATES)}, got {state!r}")
     if not profile.is_dir():
         raise StatusFileError(f"profile {profile} does not exist; create it first (setup wizard)")
+    rel = catalog["steps"][step]
+    # why: the reader downgrades such a row to pending, so the wizard would loop without knowing why.
+    if state == "done" and rel and not (profile / rel).is_file():
+        raise StatusFileError(f"step {step} cannot be done: write {profile / rel} first")
     day = _date(date, StatusFileError)
     row = f"| {step} | {state} | {day} | {_cell(note)} |"
     lines = _status_lines(profile) or ["# Integration status", ""]

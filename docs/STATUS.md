@@ -23,3 +23,5 @@ Contracts later steps must follow (in `skills/legal-workflow/references/`): `pro
 `modules.json`, setup steps written only via `legal_profile.py step set`), `matters.md` (matter folder,
 `intake.json` core + `module_data`, `log.md`, handoff to a module), `norms.md`.
 Open for step 3: one shared `source-register.json` format (from legal-md-ro).
+Open for step 5: script commands `profile init` (folder + config.json) and `modules set`, so the wizard never
+writes these files by hand.

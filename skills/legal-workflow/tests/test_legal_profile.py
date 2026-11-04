@@ -172,7 +172,9 @@ class StepSet(TmpCase):
     def test_creates_replaces_and_appends(self):
         prof = self.root / "p"
         prof.mkdir()
-        lp.step_set(prof, "firms", "done", CATALOG, "two firms", "2026-11-04")
+        (prof / "context").mkdir()
+        (prof / "context" / "company.md").write_text("x\n", encoding="utf-8")
+        lp.step_set(prof, "firms", "DONE", CATALOG, "two firms", "2026-11-04")
         lp.step_set(prof, "language", "skipped", CATALOG, date="2026-11-04")
         lp.step_set(prof, "firms", "pending", CATALOG, "redo | later", "2026-11-05")
         text = (prof / "context" / "integration-status.md").read_text(encoding="utf-8")
@@ -192,6 +194,8 @@ class StepSet(TmpCase):
                 lp.step_set(prof, args[0], args[1], CATALOG, date=args[2])
         with self.assertRaises(lp.StatusFileError):
             lp.step_set(self.root / "nope", "firms", "done", CATALOG)
+        with self.assertRaises(lp.StatusFileError):
+            lp.step_set(prof, "laws", "done", CATALOG)  # no laws/watchlist.yaml yet
 
 
 class Status(TmpCase):
