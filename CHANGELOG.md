@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `legal-trademark` module: name check with a verdict on the norms scale (never "available") and ways around a
+  conflict, filing strategy by cost and risk (territory, route, priority, sign, classes, owner, representation),
+  portfolio deadlines from the profile with `tm_deadlines.py` (raw dates, rule and article, check on the task
+  date), office letters, oppositions, a five-rung enforcement ladder, claims against the user, licences.
+- `norms.md` §15: compliance configuration — map the constraints, find the levers, compare options by cost and
+  residual risk, recommend one. Modules point to it.
+- `legal-consumer` made generic: any product and channel, `terms-structure.md` (common core plus a block per
+  product), goods exceptions to withdrawal, checkpoints for delivery and risk, subscriptions, marketplaces and
+  sales that are not at a distance.
 - `legal-privacy` module: GDPR, Moldovan Law 195/2024, Romanian Law 190/2018. Six procedures (website or form,
   processor or DPA, transfer abroad incl. a non-EU controller, DPIA screening, data request, breach with the
   72-hour deadline first), the minimum content of each document with model cards M06–M10, law map as navigation.

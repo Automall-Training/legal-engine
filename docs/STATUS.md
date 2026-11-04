@@ -10,8 +10,8 @@ Version: v0 (in development). Updated: 2026-11-04.
 | 4 | `legal-research` (question with citations, current-version check) | done (branch `phase-1/legal-research` on top of step 3) |
 | 5 | `legal-workflow-setup` wizard + `legal-workflow-update` | done (branch `phase-1/legal-workflow-setup` on top of step 4; merge to `main` only after the owner's «да») |
 | 6 | modules `legal-privacy`, `legal-consumer` | done (branch `phase-1/legal-privacy-consumer` on top of step 5; merge only after «да») |
-| 7 | module `legal-trademark` | next |
-| 8 | module `legal-employment` | — |
+| 7 | module `legal-trademark`; norms §15 (cost against risk); `legal-consumer` made generic | done (branch `phase-1/legal-trademark` on top of step 6; merge only after «да») |
+| 8 | module `legal-employment` | next |
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | — |
 | 10 | end-to-end check, cross-model review, v1.0.0 | — |
 | 11 | public GitHub repository and first push (owner's «да» first) | — |
@@ -45,3 +45,10 @@ JSON, module templates against `matter update`, the switch check). A data breach
 Open, live run (step 10): the Moldovan consumer part (withdrawal period and its exceptions in the Civil Code, which
 e-commerce law is in force) and the cookie rule in Moldova are found per matter; the library has no cookie-notice
 model yet.
+Every module follows `norms.md` §15: for "how do I do X" it compares two to four configurations (what each needs,
+cost, residual risk, verdict), the simplest lawful one first. `legal-consumer` covers any product (goods, services,
+apps and subscriptions, marketplaces, shop sales; courses are one block of `terms-structure.md`).
+`legal-trademark` keeps the user's marks in `<profile>/trademarks/portfolio.json`; `tm_deadlines.py` prints raw
+dates, every rule `reported` or `not-read`. Open, live run (step 10): which Moldovan trademark law applies on the
+task date (Law 38/2008 or Law 25/2024), the AGEPI terms and the representation rule; current fees of the three
+offices; no trademark licence model in the library (M05 is a structure for licences in general).
