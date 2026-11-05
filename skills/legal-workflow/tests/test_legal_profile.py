@@ -96,6 +96,14 @@ class ResolveProfile(TmpCase):
         with self.assertRaises(lp.SetupError):
             lp._write_atomic(self.root / "matters" / "x.json", "{}", lp.SetupError)
 
+    def test_log_link_into_engine_is_refused(self):
+        (self.root / "matters").mkdir()
+        target = lp.ENGINE_ROOT / "skills" / "never-log.md"
+        (self.root / "matters" / "log.md").symlink_to(target)
+        with self.assertRaises(lp.MatterError):
+            lp._append_log(self.root / "matters", "2026-11-05", "m", "contracts", "new", "note")
+        self.assertFalse(target.exists())
+
 
 class Catalog(TmpCase):
     def test_shipped_catalog_is_valid(self):

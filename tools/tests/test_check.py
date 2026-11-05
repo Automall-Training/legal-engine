@@ -103,6 +103,19 @@ class Scan(unittest.TestCase):
                 fails, _ = check.scan(Path(tmp), deny=["ion fictiv"])
                 self.assertEqual(len(fails), 1, fails)
 
+    def test_docx_entities_decoded_and_embeddings_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "m.docx"
+            with zipfile.ZipFile(path, "w") as z:
+                z.writestr("word/document.xml",
+                           "<w:document><w:p><w:r><w:t>Example &amp; Partners</w:t></w:r></w:p></w:document>")
+            self.assertEqual(len(check.scan(Path(tmp), deny=["example & partners"])[0]), 1)
+            with zipfile.ZipFile(path, "w") as z:
+                z.writestr("word/document.xml", "<w:document/>")
+                z.writestr("word/embeddings/sheet1.xlsx", b"PK")
+            fails, _ = check.scan(Path(tmp), deny=["x"])
+            self.assertTrue(any("embedded" in f for f in fails), fails)
+
     def test_staged_content_is_scanned_not_the_working_tree(self):
         """Codex review: data staged and then cleaned only in the working tree passed the hook."""
         with tempfile.TemporaryDirectory() as tmp:
@@ -113,11 +126,13 @@ class Scan(unittest.TestCase):
             write(base, "docs/owner/PLAN.md", "private")
             git("add", "a.md")
             git("add", "-f", "docs/owner/PLAN.md")
+            write(base, "legal-profile/context/company.md", "private but no pattern")
+            git("add", "-f", "legal-profile/context/company.md")
             write(base, "a.md", "clean now")
             self.assertEqual(check.scan(base, deny=["x"])[0], [])
             fails, _, n = check.scan_staged(base, deny=["x"])
-            self.assertEqual(n, 2)
-            self.assertEqual(len(fails), 2, fails)
+            self.assertEqual(n, 3)
+            self.assertEqual(len(fails), 3, fails)
             self.assertTrue(any("docs/owner/PLAN.md" in f for f in fails))
 
     def test_missing_denylist_warns(self):

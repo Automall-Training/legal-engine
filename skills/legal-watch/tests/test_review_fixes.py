@@ -86,6 +86,16 @@ class HandCheckNeedsClosedLivePoints(Base):
                           card, TODAY, root=self.matter)
         self.assertFalse((self.profile / "laws" / "state.json").exists())
 
+    def test_card_about_another_date_or_part_is_refused(self):
+        """Codex round 2: a card analysing an earlier date, or some articles, must not mark the act checked."""
+        for change in ({"analysis_date": "2026-01-01"}, {"cited_provisions": ["art. 5"]}):
+            card = live_card(self.matter, "ro.lege.1-2020")
+            data = json.loads(card.read_text(encoding="utf-8"))
+            data.update(change)
+            card.write_text(json.dumps(data), encoding="utf-8")
+            with self.subTest(change=change), self.assertRaises(lib.WatchError):
+                manual.record(self.profile, [act()], card, TODAY, root=self.matter)
+
     def test_open_points_refused(self):
         card = {"points": {"consolidation": {"status": "not_verified", "evidence": []}}}
         self.assertEqual(manual.open_points(card)[0], "consolidation")
@@ -265,6 +275,8 @@ class DayRuns(Base):
         out2 = self.run_with([act(p="p2")], adapter([], fail="fetch_failed"), selector="ro.lege.1-2020")
         self.assertFalse(out2["phrase_no_changes_allowed"])
         self.assertIn("not verified", digest.render(out2, "en"))
+        none = dict(out2, summary={**out2["summary"], "checked": 0})              # nothing was checked at all
+        self.assertIn(digest.T["en"]["result"]["NONE"], digest.render(none, "en"))
         forbidden = {"en": "**no changes**", "ro": "**fără modificări**", "ru": "**без изменений**"}
         for lang, phrase in forbidden.items():
             text = digest.render(out2, lang)

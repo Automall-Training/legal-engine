@@ -434,6 +434,7 @@ def _matters_dir(profile: Path) -> Path:
 
 def _append_log(matters: Path, date: str, matter_id: str, module: str, event: str, note: str) -> None:
     log = matters / "log.md"
+    _check_write(log.resolve(), MatterError)   # why: log.md may be a link into the engine checkout
     try:
         with log.open("x", encoding="utf-8") as fh:  # why: exclusive create, two writers never both write a header
             fh.write(LOG_HEADER)

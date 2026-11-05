@@ -24,6 +24,7 @@ WARN (reported, does not block): decision numbers like `D` + 3 digits (private d
 from __future__ import annotations
 
 import argparse
+import html
 import io
 import re
 import subprocess
@@ -89,6 +90,10 @@ def docx_text(path: Path | bytes) -> str:
     name = path.name if isinstance(path, Path) else "file"
     try:
         with zipfile.ZipFile(path if isinstance(path, Path) else io.BytesIO(path)) as z:
+            embedded = [n for n in z.namelist() if n.startswith("word/embeddings/")]
+            if embedded:
+                # an embedded workbook or document is a file of its own that this scan cannot read
+                raise ValueError(f"{name}: embedded objects are not scanned ({', '.join(embedded[:3])}); remove them")
             parts = [n for n in z.namelist() if n.endswith((".xml", ".rels"))
                      and (n.startswith(("word/", "docProps/", "customXml/")) or n == "_rels/.rels")]
             xml = "\n".join(z.read(n).decode("utf-8", errors="replace") for n in parts)
@@ -96,7 +101,8 @@ def docx_text(path: Path | bytes) -> str:
         raise ValueError(f"{name}: not a valid .docx ({exc})") from exc
     attrs = "\n".join(m.group(1) for m in DOCX_ATTRS.finditer(xml))
     text = re.sub(r"</w:p>|</(?:dc|cp|dcterms):[^>]+>", "\n", xml)
-    return re.sub(r"<[^>]+>", "", text) + "\n" + attrs
+    # why: XML stores "&" as "&amp;": a denylisted "Example & Partners" must match after decoding
+    return html.unescape(re.sub(r"<[^>]+>", "", text) + "\n" + attrs)
 
 
 def scan_lines(rel: str, text: str, deny: list[str]) -> tuple[list[str], list[str]]:
@@ -172,7 +178,8 @@ def scan_staged(base: Path = ROOT, deny: list[str] | None = None) -> tuple[list[
              .decode("utf-8").split("\0") if n]
     for rel in names:
         parts = set(Path(rel).parts)
-        if rel.startswith(SKIP_PREFIXES) or rel in SKIP_FILES or ".venv" in parts or ".coverage" in parts:
+        if (rel.startswith(SKIP_PREFIXES + ("legal-profile/",)) or rel in SKIP_FILES
+                or parts & {".venv", ".coverage", "legal-profile"}):
             # git-ignored private paths, force-added or not: never committed
             fails.append(f"{rel}: личный файл (git-ignored) добавлен в коммит")
             continue

@@ -100,6 +100,13 @@ def record(profile: Path, acts: list[dict], card_path: Path, today: _dt.date, *,
     check = checker.validate(card, _dt.datetime.now().astimezone(), root)
     if check["errors"]:
         raise lib.WatchError("the version card fails its checker: " + "; ".join(check["errors"]))
+    # why: monitoring asks "which version is in force today for the whole act"; a card about an earlier date or
+    # about some articles answers another question and must not mark the act checked or clear its signals.
+    if card.get("analysis_date") != today.isoformat():
+        raise lib.WatchError(f"the card analyses {card.get('analysis_date')}, not today ({today}); monitoring needs "
+                             "today's version")
+    if card.get("scope") != "text" or "whole act" not in (card.get("cited_provisions") or []):
+        raise lib.WatchError('a hand check for monitoring needs scope "text" and cited_provisions ["whole act"]')
     gaps = open_points(card)
     if gaps:
         raise lib.WatchError("a hand check counts only when these points are closed from a live official page: "
@@ -117,6 +124,13 @@ def record(profile: Path, acts: list[dict], card_path: Path, today: _dt.date, *,
                                 "jurisdiction": act.get("jurisdiction"), "priority": act.get("priority"),
                                 **res, "reasons": []}, repeal_held=bool(act.get("repealed")))
     state = lib.load_state(profile)
+    # The amendments the automatic reader listed today are the ones this check by hand has just reviewed.
+    day_run = lib.laws_dir(profile) / "runs" / today.isoformat() / "run.json"
+    if day_run.is_file():
+        earlier = next((x for x in lib.read_json(day_run, "run of the day").get("acts", [])
+                        if x.get("act_id") == act["id"] and x.get("related") is not None), None)
+        if earlier is not None:
+            r["related_reviewed"] = earlier["related"]
     snap = None
     if r.get("checked") and text:
         snap = lib.save_snapshot(profile, act["id"], text, (r.get("evidence") or {}).get("sha256"), today.isoformat())

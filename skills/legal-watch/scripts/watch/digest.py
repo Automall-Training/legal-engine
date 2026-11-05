@@ -13,7 +13,8 @@ T = {
     "en": {
         "title": "Law monitoring", "result": {"OK": "no changes", "CHANGES": "changes found",
                                               "INCOMPLETE": "incomplete: not every key act was checked",
-                                              "PARTLY": "no changes in the acts checked; some were not verified"},
+                                              "PARTLY": "no changes in the acts checked; some were not verified",
+                                              "NONE": "nothing verified: no act could be checked"},
         "checked": "checked", "of": "of", "changes": "Changes", "kind": {"in_force": "new version in force",
                                                                          "future": "future version (not yet in force)",
                                                                          "repealed": "repealed"},
@@ -36,7 +37,8 @@ T = {
     "ro": {
         "title": "Monitorizarea legislației", "result": {"OK": "fără modificări", "CHANGES": "modificări găsite",
                                                          "INCOMPLETE": "incomplet: nu toate actele principale au fost verificate",
-                                                         "PARTLY": "fără modificări în actele verificate; unele nu au fost verificate"},
+                                                         "PARTLY": "fără modificări în actele verificate; unele nu au fost verificate",
+                                                         "NONE": "nimic verificat: niciun act nu a putut fi verificat"},
         "checked": "verificate", "of": "din", "changes": "Modificări", "kind": {"in_force": "redacție nouă în vigoare",
                                                                                "future": "redacție viitoare (încă nu în vigoare)",
                                                                                "repealed": "abrogat"},
@@ -60,7 +62,8 @@ T = {
     "ru": {
         "title": "Мониторинг законов", "result": {"OK": "без изменений", "CHANGES": "есть изменения",
                                                   "INCOMPLETE": "неполно: проверены не все главные акты",
-                                                  "PARTLY": "в проверенных актах изменений нет; часть не проверена"},
+                                                  "PARTLY": "в проверенных актах изменений нет; часть не проверена",
+                                                  "NONE": "ничего не проверено: ни один акт проверить не удалось"},
         "checked": "проверено", "of": "из", "changes": "Изменения", "kind": {"in_force": "новая редакция действует",
                                                                             "future": "будущая редакция (ещё не действует)",
                                                                             "repealed": "отменён"},
@@ -107,7 +110,7 @@ def render(run: dict, language: str = "en") -> str:
     # why: "no changes" only when nothing is left unverified, even if the run is OK (a p2 act not verified)
     head = run["result"]
     if head == "OK" and not run.get("phrase_no_changes_allowed"):
-        head = "PARTLY"
+        head = "PARTLY" if s.get("checked") else "NONE"
     lines = [f"# {t['title']} — {run['date']}", "",
              f"**{t['result'][head]}** · {t['checked']} {s['checked']} {t['of']} {s['acts']}"
              + (f" · {t['rest'].format(n=s['unverified'])}" if s.get("unverified") else ""), ""]

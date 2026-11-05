@@ -56,7 +56,7 @@ For each act left not verified that the user wants closed now:
    refused too (legis.md 403, legislatie.just.ro dropped the connection); the user's browser opened legis.md, while
    legislatie.just.ro did not open even in a browser that day. A site that does not open leaves the act "not
    verified", never "no changes".
-2. Fill a version card as in `<legal-research>/references/version-check.md`, `scope: "text"`, `held_version` =
+2. Fill a version card as in `<legal-research>/references/version-check.md`, `scope: "text"`, `analysis_date` = today, `held_version` =
    the version in `watch show`, `cited_provisions: ["whole act"]`. The points `consolidation`, `amendments`,
    `deferred_entry`, `repeal`, `status_of_changes` must be `done` from a live official page (an archived copy does
    not count). Save the text read next to the card and give `text_file`; without it the act cannot be `unchanged`.
@@ -64,7 +64,7 @@ For each act left not verified that the user wants closed now:
    `watch record --card <card> --root <folder>`. The act joins today's run as checked by hand (`via: host`); the
    digest is rewritten.
 
-A card that is not from today, fails its checker, is `not_verified`, or leaves one of those points open changes
+A card that is not from today or not about today, not about the whole act, fails its checker, is `not_verified`, or leaves one of those points open changes
 nothing.
 
 ## The digest

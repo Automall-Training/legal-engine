@@ -153,9 +153,13 @@ def update_state(state: dict, r: dict, day: str, snapshot: str | None) -> None:
     ev = r.get("evidence") or {}
     held.update({"sha256": ev.get("sha256"), "url": ev.get("url"), "via": ev.get("via"),
                  "checked_on": day, "snapshot": snapshot or held.get("snapshot")})
-    # why: a check by hand answers the amendments the reader listed, so the next automatic reading starts its
-    # list afresh; otherwise an amendment listed once would keep the act "not verified" for ever
-    held["related"] = None if ev.get("via") == "host" else r.get("related")
+    # why: the list of amending acts and corrigenda is the baseline for spotting a new one. A check by hand
+    # resolves the ones the reader listed today; a reader without such a list (not Cellar) keeps the old one.
+    if ev.get("via") == "host":
+        if r.get("related_reviewed") is not None:
+            held["related"] = sorted(set(held.get("related") or []) | set(r["related_reviewed"]))
+    elif r.get("related") is not None:
+        held["related"] = r["related"]
     # A checked reading (a new version, or a check by hand) answers the Gazette's signals for this act.
     if r["status"] in CHANGE_KIND or ev.get("via") == "host":
         state.setdefault("signals", {}).pop(r["act_id"], None)

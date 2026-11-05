@@ -102,15 +102,20 @@ class CellarAmendments(unittest.TestCase):
         self.assertEqual(r.status, PARSE_FAILED)
         self.assertIn("not in force", r.error)
 
-    def test_host_check_resets_the_list(self):
-        state = {"acts": {}, "signals": {}}
-        r = {"act_id": "eu.reg.2016-679", "checked": True, "status": "unchanged", "current": {}, "next": None,
-             "related": ["x"], "evidence": {"via": "host"}}
-        runner.update_state(state, r, "2026-11-05", None)
-        self.assertIsNone(state["acts"]["eu.reg.2016-679"]["related"])
-        r["evidence"] = {"via": "urllib"}
-        runner.update_state(state, r, "2026-11-05", None)
-        self.assertEqual(state["acts"]["eu.reg.2016-679"]["related"], ["x"])
+    def test_list_history_is_kept(self):
+        """Codex round 2: a hand check or a non-Cellar reading erased the list, so a new item passed unseen."""
+        state = {"acts": {"eu.reg.2016-679": {"related": ["a"]}}, "signals": {}}
+        base = {"act_id": "eu.reg.2016-679", "checked": True, "status": "unchanged", "current": {}, "next": None}
+        runner.update_state(state, {**base, "related": None, "evidence": {"via": "urllib"}}, "2026-11-05", None)
+        self.assertEqual(state["acts"]["eu.reg.2016-679"]["related"], ["a"])        # no list read: kept
+        runner.update_state(state, {**base, "evidence": {"via": "host"}}, "2026-11-05", None)
+        self.assertEqual(state["acts"]["eu.reg.2016-679"]["related"], ["a"])        # nothing reviewed: kept
+        runner.update_state(state, {**base, "related_reviewed": ["a", "b"], "evidence": {"via": "host"}},
+                            "2026-11-05", None)
+        self.assertEqual(state["acts"]["eu.reg.2016-679"]["related"], ["a", "b"])   # reviewed by hand: resolved
+        runner.update_state(state, {**base, "related": ["a", "b", "c"], "evidence": {"via": "urllib"}},
+                            "2026-11-05", None)
+        self.assertEqual(state["acts"]["eu.reg.2016-679"]["related"], ["a", "b", "c"])
 
 
 class CardAmendmentsCount(unittest.TestCase):

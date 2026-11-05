@@ -226,6 +226,14 @@ class StructureCliTests(Base):
         voice.write_text("Restituim prețul.\n", encoding="utf-8")
         self.assertEqual(run(T.main, str(voice), "--report", str(voice))[0], 2)
         self.assertEqual(voice.read_text(encoding="utf-8"), "Restituim prețul.\n")
+        signed = self.dir / "signed.json"
+        signed.write_text("not json: a signed contract exported by mistake", encoding="utf-8")
+        self.assertEqual(run(S.main, str(doc), "--report", str(signed))[0], 2)
+        self.assertIn("signed contract", signed.read_text(encoding="utf-8"))
+        self.assertEqual(run(S.main, str(doc), "--report", str(self.dir / "other.docx"))[0], 2)
+        report = self.dir / "again.json"
+        self.assertEqual(run(S.main, str(doc), "--report", str(report))[0], 0)
+        self.assertEqual(run(S.main, str(doc), "--report", str(report))[0], 0)   # an earlier report is replaced
 
 
 class StyleCliTests(Base):

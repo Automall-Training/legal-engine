@@ -233,7 +233,8 @@ def card(act_id="ro.lege.1-2020", *, result="current", latest=("v2", "2026-10-01
             "points": {"consolidation": {"status": "done", "evidence": [{"url": URL, "text_sha256": sha}]},
                        **{n: {"status": "done", "evidence": [{"url": URL}]}
                           for n in ("amendments", "deferred_entry", "repeal", "status_of_changes")}},
-            "checked_at": "2026-11-04T10:00:00+02:00"}
+            "checked_at": "2026-11-04T10:00:00+02:00", "analysis_date": "2026-11-04", "scope": "text",
+            "cited_provisions": ["whole act"]}
 
 
 class HostEngine(RunnerBase):

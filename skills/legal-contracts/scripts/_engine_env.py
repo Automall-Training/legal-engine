@@ -51,10 +51,17 @@ def _same(a: Path, b: Path) -> bool:
 
 
 def write_report(path: str | Path, text: str, inputs, error: type[Exception] = ValueError) -> Path:
-    """Write a check report atomically, never over one of the files checked.
-    why: `--report contract.md` (or a link to it) replaced the contract with JSON. A report from an earlier run
-    is replaced on purpose: reports in work/ are rewritten after each fix."""
+    """Write a check report atomically: a `.json` file, never over one of the files checked, and over an existing
+    file only when that file is itself JSON (an earlier report: reports in work/ are rewritten after each fix).
+    why: `--report contract.md` replaced the contract, `--report signed.docx` would replace any document."""
     target = refuse_inside_engine(path, error)
+    if target.suffix.lower() != ".json":
+        raise error(f"a report is a .json file, got {path}")
+    if target.exists():
+        try:
+            json.loads(target.read_text(encoding="utf-8"))
+        except (OSError, ValueError) as exc:
+            raise error(f"refusing to replace {path}: it exists and is not an earlier JSON report") from exc
     for src in inputs:
         if src is not None and (_same(target, Path(src)) or target == Path(src).expanduser().resolve()):
             raise error(f"refusing to write the report over an input file: {src}")
