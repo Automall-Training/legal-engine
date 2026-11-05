@@ -29,6 +29,7 @@ import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Protocol
+from urllib.parse import urlparse
 
 USER_AGENT = "Mozilla/5.0 (compatible; legal-engine-watch/1.0)"
 PAUSE_RANGE_S = (5.0, 15.0)   # politeness between requests to the same portals
@@ -264,23 +265,48 @@ class PlaywrightFetcher(_Paced):
 
 
 class ChainFetcher:
-    """Engines in order; the next one is tried when a page failed or was an anti-bot page."""
+    """Engines in order; the next one is tried when a page failed or was an anti-bot page.
 
-    def __init__(self, fetchers: list[Fetcher]):
+    `demote`: site → engines to try last there (from the error log: they kept failing on that site, so waiting
+    for them first on every act only costs time). A demoted engine still runs when nothing before it worked.
+    Every engine tried is kept in `attempts` for the error log.
+    """
+
+    def __init__(self, fetchers: list[Fetcher], *, names: list[str] | None = None,
+                 demote: dict[str, set[str]] | None = None):
         if not fetchers:
             raise FetchConfigError("no fetch engine configured")
         self.fetchers = fetchers
+        self.names = names or [getattr(f, "via", f"engine{i}") for i, f in enumerate(fetchers)]
+        self.demote = demote or {}
+        self.attempts: list[dict] = []
+
+    def _order(self, host: str | None) -> tuple[list[tuple[str, Fetcher]], list[str]]:
+        pairs = list(zip(self.names, self.fetchers))
+        late = self.demote.get(host or "", set())
+        if not late or len(pairs) < 2:
+            return pairs, []
+        first = [p for p in pairs if p[0] not in late]
+        return first + [p for p in pairs if p[0] in late], [n for n, _ in pairs if n in late]
 
     def get(self, url: str) -> FetchResult:
+        host = urlparse(url).hostname
+        pairs, moved = self._order(host)
         tried: list[str] = []
         res = None
-        for f in self.fetchers:
+        for name, f in pairs:
             res = f.get(url)
-            if not res.error and not res.blocked and res.status is not None and res.status < 400:
+            ok = not res.error and not res.blocked and res.status is not None and res.status < 400
+            self.attempts.append({"host": host, "via": res.via or name, "ok": ok, "http_status": res.status,
+                                  "error": None if ok else (res.error or res.blocked_reason or f"HTTP {res.status}")})
+            if ok:
                 break
             tried.append(f"{res.via}: {res.error or res.blocked_reason or f'HTTP {res.status}'}")
         if tried and res is not None:
             res.notes = [f"engine failed, next tried: {t}" for t in tried if not t.startswith(res.via + ":")] \
+                + list(res.notes)
+        if moved and res is not None:
+            res.notes = [f"tried last on {host}: {', '.join(moved)} (refused there in recent runs, see the error log)"] \
                 + list(res.notes)
         return res
 
@@ -322,7 +348,7 @@ def fixture_result(url: str, html: str, *, status: int = 200, title: str | None 
 
 
 def build_chain(engines: list[str], *, command: str | None = None, browser_dir: Path | None = None,
-                stack=None, pause_range=PAUSE_RANGE_S) -> ChainFetcher:
+                stack=None, pause_range=PAUSE_RANGE_S, demote: dict[str, set[str]] | None = None) -> ChainFetcher:
     """Engines named in the watchlist → a ChainFetcher. `stack` is an ExitStack that owns the browser."""
     out: list[Fetcher] = []
     for name in engines:
@@ -338,4 +364,4 @@ def build_chain(engines: list[str], *, command: str | None = None, browser_dir: 
             out.append(stack.enter_context(PlaywrightFetcher(browser_dir, pause_range=pause_range)))
         else:
             raise FetchConfigError(f"unknown engine {name!r}; allowed: {', '.join(ENGINES)}")
-    return ChainFetcher(out)
+    return ChainFetcher(out, names=list(engines), demote=demote)

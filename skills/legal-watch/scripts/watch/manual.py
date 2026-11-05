@@ -141,4 +141,4 @@ def record(profile: Path, acts: list[dict], card_path: Path, today: _dt.date, *,
            "dry_run": False, "selector": act["id"], "full": False, "language": language, "schedule": schedule,
            "acts": [r], "monitorul": None}
     out = runner.merge_day(profile, out)
-    return runner.finish(profile, out, state, dry_run=False, flag_ids={act["id"]})
+    return runner.finish(profile, out, state, dry_run=False, flag_ids={act["id"]}, by_hand=True)

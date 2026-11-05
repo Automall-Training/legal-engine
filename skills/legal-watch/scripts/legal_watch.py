@@ -29,7 +29,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from watch import clauses, library as lib, manual, runner, schedule  # noqa: E402
+from watch import clauses, issues, library as lib, manual, runner, schedule  # noqa: E402
 from watch.fetchers import BrowserBusy, FetchConfigError, HostOnly, build_chain  # noqa: E402
 
 WORKFLOW_SCRIPTS = lib.SKILL.parent / "legal-workflow" / "scripts"
@@ -138,8 +138,10 @@ def cmd_run(a) -> int:
     engines = [e for e in s["engines"] if e != "host"]
     with contextlib.ExitStack() as stack:
         if engines:
+            # why: an engine a site kept refusing in recent runs goes last there (error log, issues.py)
             fetcher = build_chain(engines, command=s.get("fetch_command"),
-                                  browser_dir=lib.laws_dir(profile) / ".browser", stack=stack)
+                                  browser_dir=lib.laws_dir(profile) / ".browser", stack=stack,
+                                  demote=issues.demoted(issues.load(profile), today))
         else:  # host only: nothing is fetched; every act is listed for the agent to check by hand
             fetcher = HostOnly()
         out = runner.run(profile, acts, fetcher, today, selector=a.acts, dry_run=a.dry_run,

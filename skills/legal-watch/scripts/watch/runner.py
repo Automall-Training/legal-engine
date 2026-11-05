@@ -23,6 +23,7 @@ from pathlib import Path
 
 from . import clauses as _clauses
 from . import digest as _digest
+from . import issues as _issues
 from . import library as lib
 from .adapters import adapter_for, cellar, monitorul_md
 from .contract import (FETCH_FAILED, NEW_FUTURE, NEW_IN_FORCE, PARSE_FAILED, REPEALED, SCAN_COMPLETE, UNCHANGED,
@@ -43,11 +44,25 @@ class RecordingFetcher:
     def __init__(self, inner):
         self.inner = inner
         self.pages: dict[str, FetchResult] = {}
+        self._own: list[dict] = []
 
     def get(self, url: str) -> FetchResult:
         r = self.inner.get(url)
         self.pages[url] = r
+        self._own.append(attempt_of(url, r))
         return r
+
+    @property
+    def attempts(self) -> list[dict]:
+        """Every engine tried, for the error log: the chain's own list when there is one (it sees each engine)."""
+        inner = getattr(self.inner, "attempts", None)
+        return list(inner) if isinstance(inner, list) else list(self._own)
+
+
+def attempt_of(url: str, r: FetchResult) -> dict:
+    ok = not r.error and not r.blocked and r.status is not None and r.status < 400
+    return {"host": _issues.host_of(url), "via": r.via, "ok": ok, "http_status": r.status,
+            "error": None if ok else (r.error or r.blocked_reason or f"HTTP {r.status}")}
 
 
 class PacedCellarGet(_Paced):
@@ -165,21 +180,28 @@ def update_state(state: dict, r: dict, day: str, snapshot: str | None) -> None:
         state.setdefault("signals", {}).pop(r["act_id"], None)
 
 
-def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: set[str] | None = None) -> dict:
+def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: set[str] | None = None,
+           gazette_now: bool = False, by_hand: bool = False) -> dict:
     """Shared tail of `run` and `record`: result, exit code, contract flags, digest, files.
 
     `flag_ids` limits the contract flags to the acts read now (a hand record must not re-flag the clauses of
     other acts of today's run that the user may already have cleared).
     """
     records = out["acts"]
+    # why: url, engine and HTTP code too, so the error log and the report can say what exactly failed
     unverified = [{"act_id": r["act_id"], "title": r.get("title"), "priority": r.get("priority"),
                    "status": r["status"], "reasons": list(r.get("reasons") or []) or [r["status"]],
-                   "error": r.get("error")} for r in records if not r.get("checked")]
+                   "error": r.get("error"), "url": (r.get("evidence") or {}).get("url"),
+                   "via": (r.get("evidence") or {}).get("via"),
+                   "http_status": (r.get("evidence") or {}).get("http_status"),
+                   "notes": list(r.get("notes") or [])[:5]} for r in records if not r.get("checked")]
     mon = out.get("monitorul")
     if mon is not None and mon.get("status") != SCAN_COMPLETE:
         unverified.append({"act_id": "monitorul_md", "title": "Monitorul Oficial (MD)", "priority": "p2",
                            "status": mon.get("status"), "reasons": ["gazette_scan_incomplete"],
-                           "error": mon.get("error")})
+                           "error": mon.get("error"), "url": (mon.get("evidence") or {}).get("url"),
+                           "via": (mon.get("evidence") or {}).get("via"),
+                           "http_status": (mon.get("evidence") or {}).get("http_status"), "notes": []})
     changes = [c for c in (change_of(r, out["date"]) for r in records) if c]
     if any(u["priority"] == "p1" for u in unverified):
         result = "INCOMPLETE"
@@ -205,6 +227,10 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
         state["runs"] = runs + [{"date": out["date"], "result": result, "full": bool(out.get("full")),
                                  "at": now_iso()}]
         lib.save_state(profile, state)
+        # why: from the acts read now, before anything else reads the merged day: a second run of the same day
+        # adds an attempt to the log instead of wiping the first failure's detail
+        read = set(flag_ids if flag_ids is not None else (r["act_id"] for r in records))
+        _issues.record_run(profile, out, read | ({"monitorul_md"} if gazette_now else set()), by_hand=by_hand)
     out["health"] = _digest.health(state, _dt.date.fromisoformat(out["date"]), out.get("schedule"))
     run_dir = lib.laws_dir(profile) / "runs" / out["date"]
     if dry_run:
@@ -285,7 +311,8 @@ def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: 
 
     out = {"schema_version": 1, "date": day, "generated_at": now_iso(), "mode": mode, "dry_run": dry_run,
            "selector": selector, "full": selector == "all", "language": language, "schedule": schedule,
-           "acts": records, "monitorul": mon}
+           "acts": records, "monitorul": mon, "engine_attempts": rec.attempts}
     if not dry_run:
         out = merge_day(profile, out)
-    return finish(profile, out, state, dry_run=dry_run, flag_ids={a["id"] for a in chosen})
+    return finish(profile, out, state, dry_run=dry_run, flag_ids={a["id"] for a in chosen},
+                  gazette_now=mon is not None)
