@@ -15,8 +15,10 @@ and the approval boundaries live there and are followed by reference, never copi
    directly without it → load `<legal-workflow>/SKILL.md`, follow its Start, then come back. A quick factual reply
    needs no matter; it still names its sources and what was not verified.
 2. **Scope.** A pure question inside another module's area (a contract, privacy, consumer sales, trademarks,
-   employment) belongs to that module if it is on; this module answers general questions and runs version checks
-   for every module that asks for one.
+   employment) belongs to that module; if the module is off, go back to the router (`<legal-workflow>/SKILL.md`,
+   Start step 6: say so and offer to turn it on), never answer it here. The only exception is the one the router
+   documents (a personal-data breach). This module answers general questions and runs version checks for every
+   module that asks for one.
 3. **Norms.** Read `<legal-workflow>/references/norms.md` once per session, and [traps.md](references/traps.md)
    before the first check.
 

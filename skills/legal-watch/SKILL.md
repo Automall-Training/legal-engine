@@ -45,8 +45,8 @@ document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scri
    contracts), what to do now and what can wait. A future version is announced with its date, never as law in force.
 4. **Contracts** — a confirmed change that flags clauses → propose one matter per contract, "re-review
    contract X" (`legal_profile.py matter new --slug … --title … --module contracts`); the audit and the Word
-   redline follow `<legal-contracts>/SKILL.md`. Clear the flags only when that matter is delivered
-   (`watch index clear --contract X --matter <id>`).
+   redline follow `<legal-contracts>/SKILL.md`. Clear a flag only when its clause is re-reviewed with the law
+   verified on the date (`watch index clear --contract X --clause N --matter <id>`); a partial report keeps open flags.
 
 ## Rules
 

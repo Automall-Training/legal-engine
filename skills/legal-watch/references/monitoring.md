@@ -52,7 +52,10 @@ verified".
 For each act left not verified that the user wants closed now:
 
 1. Open the official page (from the catalog's `official_url` or the act's source) with the host's web tools; if
-   they are blocked, the user's own browser through the browser tools.
+   they are blocked, the user's own browser through the browser tools. Live run of 2026-11-05: the web tools were
+   refused too (legis.md 403, legislatie.just.ro dropped the connection); the user's browser opened legis.md, while
+   legislatie.just.ro did not open even in a browser that day. A site that does not open leaves the act "not
+   verified", never "no changes".
 2. Fill a version card as in `<legal-research>/references/version-check.md`, `scope: "text"`, `held_version` =
    the version in `watch show`, `cited_provisions: ["whole act"]`. The points `consolidation`, `amendments`,
    `deferred_entry`, `repeal`, `status_of_changes` must be `done` from a live official page (an archived copy does

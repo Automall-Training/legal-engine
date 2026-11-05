@@ -8,8 +8,8 @@ Invented firms only. Each line: the request → what the module does.
 - "Este în vigoare art. 1166 din Codul civil al României în redacția pe care o citez?" → version check: one card,
   `scope: full`, result and sources block; no answer document.
 - "Какой штраф в Молдове за сайт без политики конфиденциальности?" → the privacy module is on → it answers and
-  asks this module for the version check of the cited acts; the module is off → this module answers in general
-  and says the privacy module can draft the documents.
+  asks this module for the version check of the cited acts; the module is off → back to the router: say the
+  privacy module is off and offer to turn it on; this module does not answer it.
 - "Is a supplier in Romania allowed to change prices in a signed B2B contract?" → answer with the contract
   question kept general; a review of the actual contract goes to `legal-contracts`.
 - "Проверь, не поменялся ли закон, на который ссылается наш договор" → version check for the cited acts; the

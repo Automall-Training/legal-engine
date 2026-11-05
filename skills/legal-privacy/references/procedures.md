@@ -15,8 +15,13 @@ on the task date before they carry a conclusion.
       recipient's role (procedure 2) and country (procedure 3).
 - [ ] Trackers before consent: load the page and each embedded frame with plain GET requests only (never submit a
       form, never click the banner) and look for tag managers, analytics and advertising scripts. Non-essential
-      ones need consent first (Romania: Law 506/2004; Moldova: the rule found per the law map).
-- [ ] The banner: accept and refuse equally easy, no pre-ticked boxes, the choice can be changed later.
+      ones need consent first (Romania: Law 506/2004; Moldova: the rule found per the law map). This is a static
+      screening: a script in the source may be blocked by the consent logic, and one loaded later by JavaScript
+      is not seen. What really loads before consent, and whether refusal and withdrawal work, stays "not
+      verified" unless the user gives evidence (screenshots, the browser's network log) or runs, or lets the agent
+      run, a check in their own browser in a fresh session with no real data.
+- [ ] The banner: accept and refuse equally easy, no pre-ticked boxes, the choice can be changed later (runtime
+      behaviour: same evidence rule as above).
 - [ ] A working link to the firm's current privacy notice near each form.
 
 **Outcome:** D (notice, cookie text, banner wording) · M (remove a tracker, block scripts until consent; the user

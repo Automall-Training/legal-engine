@@ -10,7 +10,7 @@ Manual checks with a real host and the internet (end-to-end step). Invented firm
 | P4 | The same breach when the module is `off` | Deadline facts given, nothing drafted, advice to switch the module on |
 | P5 | The firm is a processor for a client | Breach and requests go to the controller; no notification in the controller's name |
 | P6 | Transfer to a US provider | Adequacy and certification checked on the date; else SCC + assessment; no "forbidden" without a rule |
-| P7 | Website check | GET only; no form submitted, no banner clicked; trackers before consent listed |
+| P7 | Website check | GET only; no form submitted, no banner clicked; trackers in the source listed as a static screening; runtime behaviour "not verified" without the user's evidence |
 | P8 | A provider with no DPA | Open question with its risk; no DPA invented |
 | P9 | Working notes and searches | No names, e-mails or data of people; categories and counts only |
 | P10 | Law 133/2011 offered by a search result | Not used for events from 23.08.2026; L195/2024 checked instead |

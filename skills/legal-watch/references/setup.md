@@ -13,8 +13,9 @@ shows the current choice first and changes only what the user changes.
 3. Show what the choice means: `watch suggest --niches a,b [--b2c] --countries MD,RO,EU`. General categories come
    for every business (civil, tax, accounting, company, personal data), consumer law when the user sells to
    people, the niche categories after them. The user ticks the categories to keep; recommended: all suggested.
-4. Write nothing yet if step 7 follows in the same session; otherwise write the watchlist with the defaults of
-   step 7 (`watch init … --acts all`).
+4. Write the watchlist now with the defaults of step 7 (`watch init --niches … --categories … --acts all …`), then
+   mark the step: `step set niches --status done` refuses while `laws/watchlist.yaml` does not exist, and the file
+   keeps the answers if the session stops here. Step 7 rewrites it with `--force`.
 
 Skipped → no watchlist; the step `laws` is skipped too and monitoring stays off until the user asks for it.
 
@@ -36,14 +37,15 @@ Three questions, in this order:
    automatically.
 
 Then: `watch init --niches … --categories … --acts all|p1|<ids> [--b2c] --countries … --language <digest language
-from context/language.md> --engines … [--fetch-command …] --schedule …` (add `--force` when replacing a watchlist:
-the state and the stored texts are kept).
+from context/language.md> --engines … [--fetch-command …] --schedule … --force` (`--force` replaces the watchlist
+of step 6; the state and the stored texts are kept), then `step set laws --status done`.
 
 ## 10. `first-run` — first download and a trial run
 
 1. `watch run` (the first run records every act's baseline and stores its official text).
 2. Read the digest with the user: how many acts were read, which stayed "not verified" and why. Offer to check the
-   p1 ones by hand now (monitoring.md, "Host check"); the user may postpone.
+   p1 ones by hand now (monitoring.md, "Host check", which uses the user's browser when the sites refuse the web
+   tools); the user may postpone.
 3. If contracts in force were copied into `contracts/` (step 8), build their indexes now ([contracts.md](contracts.md)).
 4. Schedule: if the user chose weekly local runs, show `watch schedule plan` and, after their yes,
    `watch schedule install` (macOS) or give the cron line ([engines.md](engines.md)).

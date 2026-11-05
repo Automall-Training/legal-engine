@@ -53,7 +53,7 @@ class TermsStructure(unittest.TestCase):
     """The module is generic: every product type of the template has a block, and blocks cite real checkpoints."""
 
     BLOCK_FOR = {"goods": "Goods (", "goods-digital": "Goods with digital", "service": "Service (",
-                 "digital-content": "Digital content", "digital-service": "Digital content or service",
+                 "digital-content": "Digital content", "digital-service": "Digital or online service",
                  "subscription": "Subscription", "course-or-event": "Course, event", "bundle": "Bundle"}
 
     def test_every_product_type_has_a_block(self):

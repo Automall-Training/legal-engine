@@ -41,6 +41,8 @@ python3 <legal-workflow>/scripts/legal_profile.py matter new --slug reverify-<fi
 
 The matter audits the flagged clauses against the new version (read on the task date through `legal-research`),
 proposes a Word redline or an addendum through `legal-contracts`, and the user decides. A future change is
-prepared before its start date; nothing is sent to the other party by the engine. When the matter is delivered:
-`watch index clear --contract <file> [--clause N] --matter <matter-id>`; the flag moves to `reviewed` with the
-matter id.
+prepared before its start date; nothing is sent to the other party by the engine. Clear a flag clause by clause,
+only once that clause is re-reviewed against the law verified on the task date:
+`watch index clear --contract <file> --clause N --matter <matter-id>`; the flag moves to `reviewed` with the
+matter id. Without `--clause` every flag of the contract is cleared: only when all of them are re-reviewed. A partial
+report (a source not verified, a clause left open) keeps the open flags; note the matter id in the report.

@@ -46,7 +46,9 @@ Every risk states:
 - market practice.
 
 The result is one verdict: `se poate` / `se poate cu condiție` / `risc` / `interzis`.
-A risk without a rule and a sanction is at most **low**.
+A risk without a rule and a sanction is at most **low** as a *regulatory* risk. A risk that is not a sanction
+(lost money, a lost right, weak proof, a contract remedy of the other side) is weighed by that real consequence
+and its likelihood. A sanction that is only unverified is "not verified", not "none": it never lowers the risk.
 
 ## 6. Threshold: decide or ask
 

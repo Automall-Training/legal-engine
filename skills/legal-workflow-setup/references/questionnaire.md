@@ -133,4 +133,6 @@ written in the step note (`--note "no LibreOffice: visual check off"`); the work
 
 Run `legal_profile.py status`. Tell the user in a few lines: the profile folder, the files written (each can be
 edited by hand), the modules on and off, steps still pending and why, and that `legal-workflow-update` changes any
-of it later. Nothing is sent anywhere: the profile stays on this computer.
+of it later. The profile files stay on this computer and never go into the engine repository; what is said in
+the conversation and the documents the agent reads are processed by the AI host the user chose, under its
+provider's terms. The engine itself sends nothing anywhere.

@@ -3,7 +3,9 @@
 > [!WARNING]
 > Это не юридическая консультация. / Nu este consultanță juridică. → [DISCLAIMER.md](DISCLAIMER.md)
 
-**Status: v0 — в разработке.** Готов каркас (установка, проверки). Модули добавляются по плану ниже.
+**Status: v1.0.0.** Все модули ниже готовы. Известные ограничения (например, часть официальных сайтов закрыта для
+автоматического чтения) — в [docs/STATUS.md](docs/STATUS.md). / Toate modulele sunt gata; limitele cunoscute — în
+[docs/STATUS.md](docs/STATUS.md).
 
 ---
 
@@ -11,7 +13,9 @@
 
 Набор скиллов для [Claude Code](https://claude.com/claude-code): юрист по праву **Молдовы, Румынии и ЕС**,
 который настраивается под ваш бизнес коротким интервью. Сам движок без чьих-либо данных; всё ваше
-(фирмы, ниши, договоры, скачанные законы) лежит в вашем **профиле** на вашем компьютере и никуда не уходит.
+(фирмы, ниши, договоры, скачанные законы) хранится в вашем **профиле** на вашем компьютере и никогда не попадает
+в этот репозиторий. То, что вы пишете в разговоре, и документы, которые читает агент, обрабатывает выбранный вами
+AI-сервис (например, Claude) по условиям его поставщика.
 
 ### Что умеет
 
@@ -55,7 +59,9 @@
 Un set de skill-uri pentru [Claude Code](https://claude.com/claude-code): jurist pentru dreptul
 **Republicii Moldova, României și UE**, configurat pentru afacerea dumneavoastră printr-un interviu scurt.
 Motorul nu conține datele nimănui; tot ce este al dumneavoastră (firme, nișe, contracte, legi descărcate)
-stă în **profilul** de pe calculatorul dumneavoastră.
+stă în **profilul** de pe calculatorul dumneavoastră și nu ajunge niciodată în acest depozit. Ce scrieți în
+conversație și documentele citite de agent sunt prelucrate de serviciul AI ales (de exemplu, Claude), conform
+condițiilor furnizorului său.
 
 **Module:** contracte, întrebări juridice cu surse oficiale, biblioteca și monitorizarea legilor (de bază);
 date personale, vânzări online către consumatori, mărci, resurse umane (se activează în asistent).
