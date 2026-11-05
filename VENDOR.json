@@ -2,7 +2,7 @@
   "name": "legal-engine",
   "version": "1.1.0",
   "released": "2026-11-05",
-  "license": {"code": "MIT", "texts": "CC BY 4.0"},
+  "license": "MIT",
   "python": ">=3.10",
   "requirements": "requirements.txt",
   "origin": "Written for this repository. Working procedures were adapted from the author's own private skills and rewritten generic: no firm, person or decision of the author is included.",

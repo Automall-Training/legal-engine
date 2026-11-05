@@ -73,4 +73,7 @@ Actualizare: `git pull && ./install.sh`.
 
 ## License
 
-Code: MIT. Texts: CC BY 4.0. Official legal texts keep their own status. See [LICENSE](LICENSE).
+MIT, for the code and the texts (skills, references, catalogs, clause modules): see [LICENSE](LICENSE).
+Not covered: official legal texts (laws, EU acts, standard contractual clauses) quoted or downloaded by the
+engine keep their own status and the rules of their publisher; third-party sample documents named in the clause
+library are only linked, under their own licences. This is not legal advice: [DISCLAIMER.md](DISCLAIMER.md).

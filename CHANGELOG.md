@@ -2,7 +2,8 @@
 
 ## 1.1.0 — 2026-11-05
 
-Law monitoring learns from its failures, and the law library is described.
+Law monitoring learns from its failures, and the law library is described. The whole repository is now under
+the MIT License (the texts were CC BY 4.0); official legal texts keep their own status.
 
 - **Error log** `laws/issues.json` in the profile: every act that could not be verified, with each attempt (site,
   engine, HTTP code, error), kept across runs and closed when the act is checked by a run or by hand. A second
