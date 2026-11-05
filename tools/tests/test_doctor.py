@@ -59,6 +59,19 @@ class EngineSkills(unittest.TestCase):
             self.assertFalse(doctor.playwright_ready(Path(sys.executable), (Path(tmp) / "none",)))
 
 
+class WatchIssues(unittest.TestCase):
+    def test_counts_open_problems_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prof = Path(tmp)
+            self.assertEqual(doctor.open_watch_issues(prof), 0)
+            (prof / "laws").mkdir()
+            (prof / "laws" / "issues.json").write_text("not json")
+            self.assertEqual(doctor.open_watch_issues(prof), 0)
+            (prof / "laws" / "issues.json").write_text(json.dumps(
+                {"acts": {"a": {"state": "open"}, "b": {"state": "resolved"}, "c": {"state": "open"}}}))
+            self.assertEqual(doctor.open_watch_issues(prof), 2)
+
+
 class Vendor(unittest.TestCase):
     """VENDOR.json says which release is installed and which hosts the scripts read: it must stay true."""
 

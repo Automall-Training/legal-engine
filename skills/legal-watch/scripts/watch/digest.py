@@ -30,6 +30,7 @@ T = {
             "host_only": "engine 'host' only: check by hand",
             "gazette_signal": "the Official Gazette published something about it that the page does not show yet"},
         "rest": "{n} not verified",
+        "page": "Details and what to do: laws/report.html in your profile.",
         "byhand": "Ask me to check these by hand (the agent opens the official page and records a version card).",
         "baselines": "First reading recorded (baseline)", "signals": "Official Gazette (MD): issues mentioning watched acts",
         "health": "Last run with every main act checked", "overdue": "overdue: the scheduled run has not completed for {d} days",
@@ -54,6 +55,7 @@ T = {
             "host_only": "doar verificare manuală (motorul host)",
             "gazette_signal": "Monitorul Oficial a publicat ceva despre act ce pagina nu arată încă"},
         "rest": "{n} neverificate",
+        "page": "Detalii și ce e de făcut: laws/report.html din profilul dvs.",
         "byhand": "Cereți-mi să le verific manual (agentul deschide pagina oficială și înregistrează fișa redacției).",
         "baselines": "Prima citire înregistrată (punct de referință)",
         "signals": "Monitorul Oficial (MD): numere care menționează acte urmărite",
@@ -79,6 +81,7 @@ T = {
             "host_only": "только ручная проверка (движок host)",
             "gazette_signal": "в Monitorul Oficial вышло что-то об акте, чего ещё нет на странице"},
         "rest": "не проверено: {n}",
+        "page": "Подробности и что делать: laws/report.html в вашем профиле.",
         "byhand": "Попросите меня проверить их вручную (агент откроет официальную страницу и запишет карточку редакции).",
         "baselines": "Первое чтение записано (исходная редакция)",
         "signals": "Monitorul Oficial (MD): номера, где упомянуты отслеживаемые акты",
@@ -134,7 +137,7 @@ def render(run: dict, language: str = "en") -> str:
         for u in run["unverified"]:
             why = "; ".join(t["why"].get(r, r) for r in u["reasons"])
             lines.append(f"- {_name(u)} [{u.get('priority')}]: {why}")
-        lines += ["", t["byhand"], ""]
+        lines += ["", t["byhand"], t["page"], ""]
     baselines = [r for r in run.get("acts") or [] if r["status"] == "baseline"]
     if baselines:
         lines += [f"## {t['baselines']}", ""]

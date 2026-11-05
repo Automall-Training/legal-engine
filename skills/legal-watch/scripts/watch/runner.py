@@ -25,6 +25,7 @@ from . import clauses as _clauses
 from . import digest as _digest
 from . import issues as _issues
 from . import library as lib
+from . import report as _report
 from .adapters import adapter_for, cellar, monitorul_md
 from .contract import (FETCH_FAILED, NEW_FUTURE, NEW_IN_FORCE, PARSE_FAILED, REPEALED, SCAN_COMPLETE, UNCHANGED,
                        AdapterResult, ContractError)
@@ -237,6 +238,8 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
         run_dir = run_dir / "dry-run"   # a rehearsal never replaces the real run of the day
     lib.write_json(run_dir / "run.json", out)
     lib.write_atomic(run_dir / "digest.md", _digest.render(out, out.get("language", "en")))
+    if not dry_run:
+        _report.write(profile, out.get("language", "en"), _dt.date.fromisoformat(out["date"]))
     return out
 
 

@@ -70,6 +70,15 @@ def playwright_ready(py: Path = VENV_PY, caches: tuple[Path, ...] = PLAYWRIGHT_C
     return subprocess.run([str(py), "-c", "import playwright"], capture_output=True).returncode == 0
 
 
+def open_watch_issues(profile: Path) -> int:
+    """Open problems in the monitoring error log (legal-watch issues.json); 0 when there is none or it is broken."""
+    try:
+        log = json.loads((profile / "laws" / "issues.json").read_text(encoding="utf-8"))
+        return sum(1 for e in (log.get("acts") or {}).values() if e.get("state") == "open")
+    except (OSError, ValueError, AttributeError):
+        return 0
+
+
 def engine_version(root: Path = ROOT) -> str:
     """Name and version from VENDOR.json, so a bug report can say which release is installed."""
     try:
@@ -107,6 +116,9 @@ def main() -> int:
     prof, source = profile_dir()
     ready = (prof / "context" / "integration-status.md").is_file()
     line(True if ready else None, f"profile {prof}", source if ready else f"{source}; the setup wizard creates it")
+    n = open_watch_issues(prof)
+    if n:   # informational: a site that refuses access does not make the engine "not ready"
+        line(None, f"law monitoring: {n} open problem(s)", f"see {prof / 'laws' / 'report.html'}")
     print("READY" if not missing else f"NOT READY: {missing} required part(s) missing")
     return 0 if not missing else 1
 

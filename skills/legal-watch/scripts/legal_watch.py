@@ -7,6 +7,10 @@
                         [--countries …] [--language ru|ro|en] [--engines urllib,playwright,command,host]
                         [--fetch-command CMD] [--schedule on-request|weekly|claude-schedule] [--force]
     legal_watch.py show
+    legal_watch.py issues [--all]           the error log (open problems; --all with solved and per-site engines)
+    legal_watch.py report                   write laws/report.html (also written after every run)
+    legal_watch.py source add <act> (--doc-id ID | --celex CELEX) [--kind legis_md|just_ro|eurlex]
+    legal_watch.py prune --runs-older DAYS [--apply]   list (or, with --apply, delete) old run folders
     legal_watch.py run [--acts all|p1|id,…] [--today YYYY-MM-DD] [--dry-run] [--no-gazette]
     legal_watch.py record --card <version-card.json> [--root <matter>]
     legal_watch.py digest [--date YYYY-MM-DD]
@@ -29,7 +33,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from watch import clauses, issues, library as lib, manual, runner, schedule  # noqa: E402
+import shutil  # noqa: E402
+
+from watch import clauses, issues, library as lib, manual, report, runner, schedule  # noqa: E402
 from watch.fetchers import BrowserBusy, FetchConfigError, HostOnly, build_chain  # noqa: E402
 
 WORKFLOW_SCRIPTS = lib.SKILL.parent / "legal-workflow" / "scripts"
@@ -123,10 +129,82 @@ def cmd_show(a) -> int:
     profile = resolve_profile(a.profile)
     wl, acts = _watch(profile)
     state = lib.load_state(profile)
+    laws = lib.laws_dir(profile)
     _print({"settings": wl["settings"], "acts": [
         {"id": x["id"], "priority": x.get("priority"), "held": (x.get("current") or {}).get("label"),
-         "checked_on": (state["acts"].get(x["id"]) or {}).get("checked_on")} for x in acts],
+         "next": (x.get("next") or {}).get("label"),
+         "checked_on": (state["acts"].get(x["id"]) or {}).get("checked_on"),
+         "sha256": (state["acts"].get(x["id"]) or {}).get("sha256"),
+         # why: the copies are evidence of what was read and when; a task re-reads the official text anyway
+         "texts": [f"texts/{x['id']}/{n}" for n in report._texts(laws, x["id"])]} for x in acts],
         "last_runs": state["runs"][-5:], "contracts_to_review": clauses.pending(profile)})
+    return 0
+
+
+def cmd_issues(a) -> int:
+    log = issues.load(resolve_profile(a.profile))
+    if a.all:
+        _print(log)
+    else:
+        _print({"open": issues.open_issues(log), "sites": issues.site_issues(log)})
+    return 0
+
+
+def cmd_report(a) -> int:
+    profile = resolve_profile(a.profile)
+    wl = lib.load_watchlist(lib.laws_dir(profile) / "watchlist.yaml")
+    print(report.write(profile, wl["settings"]["language"]))
+    return 0
+
+
+SOURCE_GUESS = {"MD": "legis_md", "RO": "just_ro", "EU": "eurlex"}
+
+
+def cmd_source(a) -> int:
+    """Give an act its official source in the watchlist (the recipe for a `no_source` issue)."""
+    profile = resolve_profile(a.profile)
+    path = lib.laws_dir(profile) / "watchlist.yaml"
+    wl = lib.load_watchlist(path)
+    catalog, _ = lib.load_catalog()
+    entry = next((x for x in wl["acts"] if x["id"] == a.act), None)
+    if entry is None:
+        raise lib.WatchError(f"{a.act} is not in the watchlist")
+    jur = entry.get("jurisdiction") or (catalog.get(a.act) or {}).get("jurisdiction")
+    kind = a.kind or SOURCE_GUESS.get(jur or "")
+    if kind not in lib.SOURCE_KINDS:
+        raise lib.WatchError(f"give --kind ({', '.join(sorted(lib.SOURCE_KINDS))})")
+    key = lib.SOURCE_KINDS[kind]
+    value = a.celex if key == "celex" else a.doc_id
+    if not value:
+        raise lib.WatchError(f"a {kind} source needs --{'celex' if key == 'celex' else 'doc-id'}")
+    entry["sources"] = [x for x in entry.get("sources") or [] if x.get("kind") != kind] + [{"kind": kind, key: value}]
+    data = {"schema_version": wl["schema_version"], "settings": wl["settings"], "niches": wl["niches"],
+            "categories": wl["categories"], "acts": wl["acts"]}
+    lib.validate_watchlist(json.loads(json.dumps(data)))
+    lib.write_atomic(path, lib.dump_watchlist(data))
+    _print({"act": a.act, "sources": entry["sources"], "next": f"legal_watch.py run --acts {a.act}"})
+    return 0
+
+
+def cmd_prune(a) -> int:
+    """Old run folders only; the state, the error log and the text copies are never removed here."""
+    profile = resolve_profile(a.profile)
+    runs = lib.laws_dir(profile) / "runs"
+    if a.runs_older < 30:
+        raise lib.WatchError("--runs-older must be at least 30 days: the health line reads recent runs")
+    limit = dt.date.today() - dt.timedelta(days=a.runs_older)
+    old = []
+    for p in sorted(runs.iterdir()) if runs.is_dir() else []:
+        try:
+            if p.is_dir() and dt.date.fromisoformat(p.name) < limit:
+                old.append(p)
+        except ValueError:
+            continue   # not a run folder (schedule.log and the like)
+    if a.apply:
+        for p in old:
+            lib.refuse_engine(p)
+            shutil.rmtree(p)
+    _print({"older_than": limit.isoformat(), "removed" if a.apply else "would_remove": [p.name for p in old]})
     return 0
 
 
@@ -149,7 +227,8 @@ def cmd_run(a) -> int:
                          direct_http="urllib" in engines, mode="live" if engines else "host")
     sm = out["summary"]
     print(f"{out['result']} · checked {sm['checked']}/{sm['acts']} · not verified (p1): {sm['unverified_p1']} · "
-          f"changes: {sm['changes']} · {lib.laws_dir(profile) / 'runs' / out['date'] / 'digest.md'}")
+          f"changes: {sm['changes']} · {lib.laws_dir(profile) / 'runs' / out['date'] / 'digest.md'}"
+          + ("" if a.dry_run else f" · {report.path(profile)}"))
     return out["exit_code"]
 
 
@@ -239,6 +318,18 @@ def parser() -> argparse.ArgumentParser:
     i.add_argument("--schedule", default="weekly", choices=lib.SCHEDULES)
     i.add_argument("--force", action="store_true")
     sub.add_parser("show")
+    iss = sub.add_parser("issues")
+    iss.add_argument("--all", action="store_true")
+    sub.add_parser("report")
+    so = sub.add_parser("source")
+    so.add_argument("op", choices=("add",))
+    so.add_argument("act")
+    so.add_argument("--doc-id")
+    so.add_argument("--celex")
+    so.add_argument("--kind", choices=sorted(lib.SOURCE_KINDS))
+    pr = sub.add_parser("prune")
+    pr.add_argument("--runs-older", type=int, required=True)
+    pr.add_argument("--apply", action="store_true")
     r = sub.add_parser("run")
     r.add_argument("--acts", default="all")
     r.add_argument("--today")
@@ -265,6 +356,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 COMMANDS = {"catalog": cmd_catalog, "suggest": cmd_suggest, "init": cmd_init, "show": cmd_show, "run": cmd_run,
+            "issues": cmd_issues, "report": cmd_report, "source": cmd_source, "prune": cmd_prune,
             "record": cmd_record, "digest": cmd_digest, "index": cmd_index, "schedule": cmd_schedule}
 
 
