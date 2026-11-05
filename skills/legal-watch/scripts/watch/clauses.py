@@ -57,6 +57,38 @@ def index_dir(profile: Path) -> Path:
     return Path(profile) / "contracts" / "index"
 
 
+def _docx_paragraphs(doc) -> list[str]:
+    """Paragraphs in document order, tables included, each cell paragraph on its own.
+    why: contracts keep clauses in tables (annexes, price lists); reading tables after the body, or a cell as one
+    string, gave a law cited in clause 5.3 to clause 5.2 or to the last clause before the table."""
+    from docx.table import Table
+    from docx.text.paragraph import Paragraph
+
+    out: list[str] = []
+
+    def walk(parent, element) -> None:
+        for child in element.iterchildren():
+            tag = child.tag.rsplit("}", 1)[-1]
+            if tag == "p":
+                out.append(Paragraph(child, parent).text)
+            elif tag == "tbl":
+                table = Table(child, parent)
+                for row in table.rows:
+                    seen = set()
+                    for cell in row.cells:
+                        if id(cell._tc) in seen:   # a merged cell is returned once per grid column
+                            continue
+                        seen.add(id(cell._tc))
+                        walk(cell, cell._tc)
+            elif tag == "sdt":   # content controls wrap paragraphs and tables
+                content = child.find("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}sdtContent")
+                if content is not None:
+                    walk(parent, content)
+
+    walk(doc, doc.element.body)
+    return out
+
+
 def contract_text(path: Path) -> list[str]:
     """Paragraphs of a contract (DOCX through python-docx, otherwise plain text)."""
     path = Path(path)
@@ -66,9 +98,7 @@ def contract_text(path: Path) -> list[str]:
         except ImportError as e:
             raise lib.WatchError("python-docx is missing: run with the engine's .venv/bin/python") from e
         doc = docx.Document(str(path))
-        # Contracts often keep clauses in tables (annexes, price lists): read their cells too.
-        cells = [c.text for t in doc.tables for row in t.rows for c in row.cells]
-        return [p.text for p in doc.paragraphs] + cells
+        return _docx_paragraphs(doc)
     if path.suffix.lower() in (".txt", ".md"):
         return path.read_text(encoding="utf-8").splitlines()
     raise lib.WatchError(f"unsupported contract format {path.suffix!r}; use {', '.join(CONTRACT_SUFFIXES)}")

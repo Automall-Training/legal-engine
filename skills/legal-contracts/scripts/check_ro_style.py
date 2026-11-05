@@ -15,7 +15,7 @@ from xml.etree import ElementTree as ET
 from zipfile import ZipFile, BadZipFile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _engine_env import refuse_inside_engine  # noqa: E402
+from _engine_env import write_report  # noqa: E402
 
 
 class StyleInputError(ValueError):
@@ -140,7 +140,7 @@ def main(argv=None):
         if any(not x.is_file() for x in a.paths):raise StyleInputError('Pass existing files, not directories; enumerate the intended scope explicitly')
         r=analyze(a.paths,a.root.resolve() if a.root else None,a.profile,json.loads(a.review.read_text(encoding='utf-8')) if a.review else None)
         output=json.dumps(r,ensure_ascii=False,indent=2)+'\n'
-        if a.report:refuse_inside_engine(a.report,StyleInputError).write_text(output,encoding='utf-8')
+        if a.report:write_report(a.report,output,[*a.paths,a.review],StyleInputError)
         else:print(output,end='')
         return 2 if r['errors'] else 1 if r['unresolved'] or r['coverage_gaps'] else 0
     except (ValueError,OSError,ET.ParseError,BadZipFile) as e:

@@ -12,7 +12,8 @@ MAX_DAYS = {"weekly": 9, "claude-schedule": 9}   # a weekly run that has not suc
 T = {
     "en": {
         "title": "Law monitoring", "result": {"OK": "no changes", "CHANGES": "changes found",
-                                              "INCOMPLETE": "incomplete: not every key act was checked"},
+                                              "INCOMPLETE": "incomplete: not every key act was checked",
+                                              "PARTLY": "no changes in the acts checked; some were not verified"},
         "checked": "checked", "of": "of", "changes": "Changes", "kind": {"in_force": "new version in force",
                                                                          "future": "future version (not yet in force)",
                                                                          "repealed": "repealed"},
@@ -30,11 +31,12 @@ T = {
         "rest": "{n} not verified",
         "byhand": "Ask me to check these by hand (the agent opens the official page and records a version card).",
         "baselines": "First reading recorded (baseline)", "signals": "Official Gazette (MD): issues mentioning watched acts",
-        "health": "Last complete run", "overdue": "overdue: the scheduled run has not completed for {d} days",
+        "health": "Last run with every main act checked", "overdue": "overdue: the scheduled run has not completed for {d} days",
         "never": "none yet", "nochanges": "No changes in the acts checked."},
     "ro": {
         "title": "Monitorizarea legislației", "result": {"OK": "fără modificări", "CHANGES": "modificări găsite",
-                                                         "INCOMPLETE": "incomplet: nu toate actele principale au fost verificate"},
+                                                         "INCOMPLETE": "incomplet: nu toate actele principale au fost verificate",
+                                                         "PARTLY": "fără modificări în actele verificate; unele nu au fost verificate"},
         "checked": "verificate", "of": "din", "changes": "Modificări", "kind": {"in_force": "redacție nouă în vigoare",
                                                                                "future": "redacție viitoare (încă nu în vigoare)",
                                                                                "repealed": "abrogat"},
@@ -53,11 +55,12 @@ T = {
         "byhand": "Cereți-mi să le verific manual (agentul deschide pagina oficială și înregistrează fișa redacției).",
         "baselines": "Prima citire înregistrată (punct de referință)",
         "signals": "Monitorul Oficial (MD): numere care menționează acte urmărite",
-        "health": "Ultima rulare completă", "overdue": "întârziere: rularea programată nu s-a încheiat de {d} zile",
+        "health": "Ultima rulare cu toate actele principale verificate", "overdue": "întârziere: rularea programată nu s-a încheiat de {d} zile",
         "never": "încă niciuna", "nochanges": "Nicio modificare în actele verificate."},
     "ru": {
         "title": "Мониторинг законов", "result": {"OK": "без изменений", "CHANGES": "есть изменения",
-                                                  "INCOMPLETE": "неполно: проверены не все главные акты"},
+                                                  "INCOMPLETE": "неполно: проверены не все главные акты",
+                                                  "PARTLY": "в проверенных актах изменений нет; часть не проверена"},
         "checked": "проверено", "of": "из", "changes": "Изменения", "kind": {"in_force": "новая редакция действует",
                                                                             "future": "будущая редакция (ещё не действует)",
                                                                             "repealed": "отменён"},
@@ -76,7 +79,7 @@ T = {
         "byhand": "Попросите меня проверить их вручную (агент откроет официальную страницу и запишет карточку редакции).",
         "baselines": "Первое чтение записано (исходная редакция)",
         "signals": "Monitorul Oficial (MD): номера, где упомянуты отслеживаемые акты",
-        "health": "Последний полный прогон", "overdue": "просрочено: плановый прогон не завершался {d} дн.",
+        "health": "Последний прогон, где проверены все главные акты", "overdue": "просрочено: плановый прогон не завершался {d} дн.",
         "never": "ещё не было", "nochanges": "В проверенных актах изменений нет."},
 }
 
@@ -101,8 +104,12 @@ def _name(x: dict) -> str:
 def render(run: dict, language: str = "en") -> str:
     t = T.get(language, T["en"])
     s = run["summary"]
+    # why: "no changes" only when nothing is left unverified, even if the run is OK (a p2 act not verified)
+    head = run["result"]
+    if head == "OK" and not run.get("phrase_no_changes_allowed"):
+        head = "PARTLY"
     lines = [f"# {t['title']} — {run['date']}", "",
-             f"**{t['result'][run['result']]}** · {t['checked']} {s['checked']} {t['of']} {s['acts']}"
+             f"**{t['result'][head]}** · {t['checked']} {s['checked']} {t['of']} {s['acts']}"
              + (f" · {t['rest'].format(n=s['unverified'])}" if s.get("unverified") else ""), ""]
     changes = sorted(run.get("changes") or [], key=lambda c: (not c["confirmed"], c.get("priority") or "p9"))
     if changes:

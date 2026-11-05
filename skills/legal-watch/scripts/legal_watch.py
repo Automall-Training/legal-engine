@@ -37,7 +37,9 @@ WORKFLOW_SCRIPTS = lib.SKILL.parent / "legal-workflow" / "scripts"
 
 def resolve_profile(raw: str | None) -> Path:
     if raw:
-        return Path(raw).expanduser()
+        path = Path(raw).expanduser()
+        lib.refuse_engine(path / "laws")
+        return path
     sys.path.insert(0, str(WORKFLOW_SCRIPTS))
     try:
         import legal_profile

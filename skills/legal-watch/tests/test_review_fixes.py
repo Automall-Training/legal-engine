@@ -210,6 +210,23 @@ class GazetteSignal(Base):
         self.assertTrue(out["acts"][0]["checked"])
         self.assertEqual(lib.load_state(self.profile)["signals"], {})
 
+    def test_partial_run_scans_for_every_watched_act(self):
+        """Codex review: a run of act A moved the scan point past an issue naming act B, losing B's signal."""
+        a = act("md.lege.2-2020", current={"label": "v1", "in_force_from": "2026-01-01"}, jurisdiction="MD")
+        b = act("md.lege.1-2020", current={"label": "v1", "in_force_from": "2026-01-01"}, jurisdiction="MD")
+        seen = []
+        def scan(acts, *rest):
+            seen.append(sorted(x["id"] for x in acts))
+            return self.scan()
+        with mock.patch.object(runner, "adapter_for", adapter([V1])), \
+                mock.patch.object(runner.monitorul_md, "scan", scan):
+            runner.run(self.profile, [a, b], Pages(), TODAY, selector="md.lege.2-2020")
+        self.assertEqual(seen, [["md.lege.1-2020", "md.lege.2-2020"]])
+        self.assertIn("md.lege.1-2020", lib.load_state(self.profile)["signals"])
+        out = self.run_with([a, b], adapter([V1]), today=TODAY + dt.timedelta(days=7))
+        reasons = {r["act_id"]: r.get("reasons") for r in out["acts"]}
+        self.assertEqual(reasons["md.lege.1-2020"], ["gazette_signal"])
+
 
 class DayRuns(Base):
     """Findings 11, 13, 17: partial runs merge into the day, records do not count as complete runs."""
@@ -248,6 +265,11 @@ class DayRuns(Base):
         out2 = self.run_with([act(p="p2")], adapter([], fail="fetch_failed"), selector="ro.lege.1-2020")
         self.assertFalse(out2["phrase_no_changes_allowed"])
         self.assertIn("not verified", digest.render(out2, "en"))
+        forbidden = {"en": "**no changes**", "ro": "**fără modificări**", "ru": "**без изменений**"}
+        for lang, phrase in forbidden.items():
+            text = digest.render(out2, lang)
+            self.assertNotIn(phrase, text)
+            self.assertNotIn(digest.T[lang]["nochanges"], text)
 
 
 class CliErrors(unittest.TestCase):

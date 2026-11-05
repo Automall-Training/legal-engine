@@ -3,6 +3,7 @@
 
     python3 tools/check.py            # scan the repo; exit 1 on any FAIL
     python3 tools/check.py --quiet    # only the summary line and FAILs
+    python3 tools/check.py --staged   # the exact staged content (the pre-commit hook), private paths refused
 
 FAIL (blocks a commit and a push):
 - an absolute home path (`/Users/<name>/`, `/home/<name>/`) other than the placeholders `you` / `user`;
@@ -14,7 +15,8 @@ FAIL (blocks a commit and a push):
 - a word from the owner's local denylist (`tools/denylist.local.txt`, git-ignored: names of real firms,
   people and brands that must never be published);
 - a private-block marker (`<!-` + `- private:`).
-Text inside .docx files is scanned too (contracts are where real names hide).
+Text inside .docx files is scanned too (contracts are where real names hide), with their metadata (author,
+last editor), comment and revision authors and link targets.
 A line that must keep a pattern on purpose (a fake value in a test) carries `leak-ok`.
 WARN (reported, does not block): decision numbers like `D` + 3 digits (private decision log), and a missing denylist.
 """
@@ -22,7 +24,9 @@ WARN (reported, does not block): decision numbers like `D` + 3 digits (private d
 from __future__ import annotations
 
 import argparse
+import io
 import re
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -74,16 +78,25 @@ def files(base: Path) -> list[Path]:
     return out
 
 
-def docx_text(path: Path) -> str:
-    """Visible text of a .docx (body, headers, footers, comments), one paragraph per line."""
+# why: a name can sit only in metadata or attributes: the author of a comment or a tracked change (w:author),
+# the document's creator (docProps), or a link target (mailto:, a personal site) in the relationships.
+DOCX_ATTRS = re.compile(r'\b(?:w:author|w:initials|Target)="([^"]*)"')
+
+
+def docx_text(path: Path | bytes) -> str:
+    """Text of a .docx for the scan: visible text (body, headers, footers, comments), one paragraph per line,
+    then metadata, authors and link targets."""
+    name = path.name if isinstance(path, Path) else "file"
     try:
-        with zipfile.ZipFile(path) as z:
-            parts = [n for n in z.namelist() if n.startswith("word/") and n.endswith(".xml")]
+        with zipfile.ZipFile(path if isinstance(path, Path) else io.BytesIO(path)) as z:
+            parts = [n for n in z.namelist() if n.endswith((".xml", ".rels"))
+                     and (n.startswith(("word/", "docProps/", "customXml/")) or n == "_rels/.rels")]
             xml = "\n".join(z.read(n).decode("utf-8", errors="replace") for n in parts)
     except zipfile.BadZipFile as exc:
-        raise ValueError(f"{path.name}: not a valid .docx ({exc})") from exc
-    xml = re.sub(r"</w:p>", "\n", xml)
-    return re.sub(r"<[^>]+>", "", xml)
+        raise ValueError(f"{name}: not a valid .docx ({exc})") from exc
+    attrs = "\n".join(m.group(1) for m in DOCX_ATTRS.finditer(xml))
+    text = re.sub(r"</w:p>|</(?:dc|cp|dcterms):[^>]+>", "\n", xml)
+    return re.sub(r"<[^>]+>", "", text) + "\n" + attrs
 
 
 def scan_lines(rel: str, text: str, deny: list[str]) -> tuple[list[str], list[str]]:
@@ -116,43 +129,75 @@ def scan_lines(rel: str, text: str, deny: list[str]) -> tuple[list[str], list[st
     return fails, warns
 
 
+def scan_file(rel: str, data: bytes, deny: list[str]) -> tuple[list[str], list[str]]:
+    name = rel.rsplit("/", 1)[-1]
+    if name == ".env" or name.startswith(".env."):
+        return [f"{rel}: файл .env в репозитории"], []
+    suffix = Path(rel).suffix
+    if suffix == ".docx":
+        try:
+            text = docx_text(data)
+        except ValueError as exc:
+            return [f"{rel}: {exc}"], []
+    elif suffix in TEXT_SUFFIXES:
+        text = data.decode("utf-8", errors="replace")
+    else:
+        return [], []
+    return scan_lines(rel, text, deny)
+
+
 def scan(base: Path = ROOT, deny: list[str] | None = None) -> tuple[list[str], list[str]]:
     """(fails, warns) for every file under `base`; paths are shown relative to `base`."""
     deny = load_denylist() if deny is None else deny
     fails: list[str] = []
     warns: list[str] = [] if deny else ["нет tools/denylist.local.txt: имена реальных фирм и людей не проверены"]
     for path in files(base):
-        rel = path.relative_to(base).as_posix()
-        if path.name == ".env" or path.name.startswith(".env."):
-            fails.append(f"{rel}: файл .env в репозитории")
-            continue
-        if path.suffix == ".docx":
-            try:
-                text = docx_text(path)
-            except ValueError as exc:
-                fails.append(f"{rel}: {exc}")
-                continue
-        elif path.suffix in TEXT_SUFFIXES:
-            text = path.read_text(encoding="utf-8", errors="replace")
-        else:
-            continue
-        f, w = scan_lines(rel, text, deny)
+        f, w = scan_file(path.relative_to(base).as_posix(), path.read_bytes(), deny)
         fails += f
         warns += w
     return fails, warns
 
 
+def _git(base: Path, *args: str) -> bytes:
+    return subprocess.run(["git", "-C", str(base), *args], capture_output=True, check=True).stdout
+
+
+def scan_staged(base: Path = ROOT, deny: list[str] | None = None) -> tuple[list[str], list[str], int]:
+    """(fails, warns, files) for the content staged for the commit, read from the index, not the working tree.
+    why: a file staged with personal data and cleaned only in the working tree would pass a working-tree scan."""
+    deny = load_denylist() if deny is None else deny
+    fails: list[str] = []
+    warns: list[str] = [] if deny else ["нет tools/denylist.local.txt: имена реальных фирм и людей не проверены"]
+    names = [n for n in _git(base, "diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z")
+             .decode("utf-8").split("\0") if n]
+    for rel in names:
+        parts = set(Path(rel).parts)
+        if rel.startswith(SKIP_PREFIXES) or rel in SKIP_FILES or ".venv" in parts or ".coverage" in parts:
+            # git-ignored private paths, force-added or not: never committed
+            fails.append(f"{rel}: личный файл (git-ignored) добавлен в коммит")
+            continue
+        f, w = scan_file(rel, _git(base, "show", f":{rel}"), deny)
+        fails += f
+        warns += w
+    return fails, warns, len(names)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--quiet", action="store_true", help="без списка предупреждений")
+    ap.add_argument("--staged", action="store_true", help="проверить то, что добавлено в коммит (git index)")
     a = ap.parse_args(argv)
-    fails, warns = scan()
+    if a.staged:
+        fails, warns, n = scan_staged()
+    else:
+        fails, warns = scan()
+        n = len(files(ROOT))
     for line in fails:
         print("FAIL ", line)
     if not a.quiet:
         for line in warns:
             print("WARN ", line)
-    print(f"check: {len(fails)} FAIL, {len(warns)} WARN, файлов {len(files(ROOT))}")
+    print(f"check: {len(fails)} FAIL, {len(warns)} WARN, файлов {n}")
     return 1 if fails else 0
 
 

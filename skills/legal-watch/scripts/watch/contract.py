@@ -69,6 +69,8 @@ class AdapterResult:
     evidence: Evidence | None = None
     error: str | None = None
     notes: list[str] = field(default_factory=list)
+    # Identifiers of amending acts and corrigenda the source lists (Cellar); None when the reader has none.
+    related: list[str] | None = None
 
     def validate(self) -> "AdapterResult":
         if self.status not in STATUSES:
@@ -211,7 +213,9 @@ def classify(*, act: dict, parsed: list[Redaction], today: _dt.date, repealed: b
     reg_d = parse_date(reg_cur.get("in_force_from"))
 
     same = False
-    if reg_cur.get("label") and norm_label(reg_cur.get("label")) == norm_label(cur.label):
+    if reg_d is None and reg_cur.get("label") and norm_label(reg_cur.get("label")) == norm_label(cur.label):
+        # A label decides only when the held version has no date: labels can stay the same across versions
+        # ("forma de bază", a hand-written card), so a date always wins over a label.
         same = True
     elif reg_d is not None and reg_d == cur_d:
         # Same start date = same version. Readers label versions differently (an amending act, a consolidation

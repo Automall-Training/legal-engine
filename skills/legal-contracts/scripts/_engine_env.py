@@ -48,3 +48,18 @@ def _same(a: Path, b: Path) -> bool:
         return os.path.samefile(a, b)
     except OSError:
         return False
+
+
+def write_report(path: str | Path, text: str, inputs, error: type[Exception] = ValueError) -> Path:
+    """Write a check report atomically, never over one of the files checked.
+    why: `--report contract.md` (or a link to it) replaced the contract with JSON. A report from an earlier run
+    is replaced on purpose: reports in work/ are rewritten after each fix."""
+    target = refuse_inside_engine(path, error)
+    for src in inputs:
+        if src is not None and (_same(target, Path(src)) or target == Path(src).expanduser().resolve()):
+            raise error(f"refusing to write the report over an input file: {src}")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_name(f".{target.name}.tmp-{os.getpid()}")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, target)
+    return target

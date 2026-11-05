@@ -55,9 +55,27 @@ class PacedCellarGet(_Paced):
 
     via = "urllib"
 
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.pages: dict[str, str] = {}   # url → body, so the EU text read via Cellar is saved like any page
+
     def __call__(self, url, headers, *args, **kw):
         self.pause()
-        return cellar.urllib_get(url, headers, *args, **kw)
+        status, final_url, body = cellar.urllib_get(url, headers, *args, **kw)
+        if status == 200:
+            self.pages[url] = body
+        return status, final_url, body
+
+
+def official_text(url: str, rec: RecordingFetcher, cellar_get) -> str | None:
+    """The text behind a reading's evidence: a page of the fetch engines, or a Cellar text (EU fallback)."""
+    # why: pop, not get: a run of many acts must not keep every page it read in memory
+    page = rec.pages.pop(url, None)
+    if page is not None:
+        return page.text or page.markdown
+    body = getattr(cellar_get, "pages", {}).pop(url, None)
+    # why: the same plain text the adapter hashed, so the snapshot name matches evidence.sha256
+    return cellar.page_text(body)[1] if body is not None else None
 
 
 def check_one(act: dict, fetcher, today: _dt.date, *, cellar_get=None) -> dict:
@@ -135,6 +153,9 @@ def update_state(state: dict, r: dict, day: str, snapshot: str | None) -> None:
     ev = r.get("evidence") or {}
     held.update({"sha256": ev.get("sha256"), "url": ev.get("url"), "via": ev.get("via"),
                  "checked_on": day, "snapshot": snapshot or held.get("snapshot")})
+    # why: a check by hand answers the amendments the reader listed, so the next automatic reading starts its
+    # list afresh; otherwise an amendment listed once would keep the act "not verified" for ever
+    held["related"] = None if ev.get("via") == "host" else r.get("related")
     # A checked reading (a new version, or a check by hand) answers the Gazette's signals for this act.
     if r["status"] in CHANGE_KIND or ev.get("via") == "host":
         state.setdefault("signals", {}).pop(r["act_id"], None)
@@ -223,7 +244,9 @@ def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: 
     rec = RecordingFetcher(fetcher)
 
     mon = None
-    md_acts = [a for a in chosen if a.get("jurisdiction") == "MD"]
+    # why: every watched MD act, not only the chosen ones: the scan point is one for all acts, so a partial run
+    # that matched only its own acts would move past an issue naming another act and lose that signal for good
+    md_acts = [a for a in acts if a.get("jurisdiction") == "MD"]
     if scan_gazette and md_acts:
         since = (state.get("monitorul") or {}).get("checked_through")
         try:
@@ -248,9 +271,9 @@ def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: 
                             signals=state["signals"].get(act["id"]))
         snap = None
         ev = r.get("evidence") or {}
-        page = rec.pages.get(ev.get("url") or "")
-        if r.get("checked") and page is not None and not dry_run:
-            snap = lib.save_snapshot(profile, r["act_id"], page.text or page.markdown, ev.get("sha256"), day)
+        text = official_text(ev.get("url") or "", rec, cellar_get)
+        if r.get("checked") and text is not None and not dry_run:
+            snap = lib.save_snapshot(profile, r["act_id"], text, ev.get("sha256"), day)
         r["snapshot"] = snap
         if not dry_run:
             update_state(state, r, day, snap)

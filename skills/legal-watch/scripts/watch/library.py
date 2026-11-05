@@ -39,8 +39,21 @@ def today_iso() -> str:
     return _dt.date.today().isoformat()
 
 
+ENGINE_ROOT = SKILL.parent.parent
+
+
+def refuse_engine(path: Path) -> None:
+    """why: a profile (or a link inside it: laws/, contracts/) pointing into the engine checkout would put the
+    user's laws, state and contract indexes where a commit can publish them. Checked on the resolved target."""
+    real, engine = Path(path).expanduser().resolve(), ENGINE_ROOT.resolve()
+    if real == engine or engine in real.parents:
+        raise WatchError(f"refusing to write {path}: it is inside the engine folder {engine}; the profile must "
+                         "live outside it (default ~/legal-profile)")
+
+
 def write_atomic(path: Path, text: str) -> None:
     """Write through a temporary file: a crash mid-write must not leave half a state file."""
+    refuse_engine(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
     try:
@@ -190,6 +203,7 @@ def resolve_acts(watchlist: dict, catalog: dict[str, dict], state: dict) -> list
         held = (state.get("acts") or {}).get(act["id"]) or {}
         act["current"] = held.get("current")
         act["next"] = held.get("next")
+        act["related"] = held.get("related")
         act["repealed"] = held.get("repealed")
         out.append(act)
     return out

@@ -212,6 +212,21 @@ class StructureCliTests(Base):
         self.assertEqual(code, 2)
         self.assertFalse((ENV.ENGINE_ROOT / "never.json").exists())
 
+    def test_report_never_overwrites_an_input(self):
+        """Codex review: `--report contract.md` (or a link to it) replaced the contract with JSON."""
+        doc = self.dir / "contract.md"
+        doc.write_text("## 1 Obiect\n1.1 Text.\n", encoding="utf-8")
+        link = self.dir / "link.md"
+        link.symlink_to(doc)
+        for target in (doc, link):
+            with self.subTest(target=target.name):
+                self.assertEqual(run(S.main, str(doc), "--report", str(target))[0], 2)
+                self.assertEqual(doc.read_text(encoding="utf-8"), "## 1 Obiect\n1.1 Text.\n")
+        voice = self.dir / "b.ro.md"
+        voice.write_text("Restituim prețul.\n", encoding="utf-8")
+        self.assertEqual(run(T.main, str(voice), "--report", str(voice))[0], 2)
+        self.assertEqual(voice.read_text(encoding="utf-8"), "Restituim prețul.\n")
+
 
 class StyleCliTests(Base):
     def test_codes(self):

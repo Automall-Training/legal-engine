@@ -87,6 +87,15 @@ class ResolveProfile(TmpCase):
             with self.subTest(inside=inside), self.assertRaises(lp.ProfileLocationError):
                 lp.resolve_profile(cfg)
 
+    def test_link_inside_profile_into_engine_is_refused(self):
+        """Codex review: a matters/ link into the checkout put private intake data in the public repository."""
+        (self.root / "matters").symlink_to(lp.ENGINE_ROOT / "skills")
+        with self.assertRaises(lp.MatterError):
+            lp.matter_new(self.root, "nda", "NDA", "contracts", CATALOG)
+        self.assertFalse(any((lp.ENGINE_ROOT / "skills").glob("*-nda")))
+        with self.assertRaises(lp.SetupError):
+            lp._write_atomic(self.root / "matters" / "x.json", "{}", lp.SetupError)
+
 
 class Catalog(TmpCase):
     def test_shipped_catalog_is_valid(self):

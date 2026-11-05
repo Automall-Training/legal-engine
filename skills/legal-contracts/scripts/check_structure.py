@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _engine_env import refuse_inside_engine  # noqa: E402
+from _engine_env import write_report  # noqa: E402
 
 
 class StructureInputError(ValueError):
@@ -62,7 +62,7 @@ def main(argv=None):
         calculations=reconcile(json.loads(a.commercial.read_text(encoding='utf-8'))) if a.commercial else []
         out={'status':'needs_review' if any(findings.values()) or calculations else 'no_candidates', 'files':findings,'calculations':calculations,'scope':'Limited structural candidates only; manual legal, semantic, cross-reference and rendered review required'}
         encoded=json.dumps(out,ensure_ascii=False,indent=2)+'\n'
-        if a.report:refuse_inside_engine(a.report,StructureInputError).write_text(encoded,encoding='utf-8')
+        if a.report:write_report(a.report,encoded,[*a.paths,a.commercial],StructureInputError)
         else:print(encoded,end='')
         return int(out['status']=='needs_review')
     except (ValueError,KeyError,TypeError,OSError,InvalidOperation) as e:

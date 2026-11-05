@@ -93,6 +93,7 @@ def _write_atomic(path: Path, text: str, error: type[LegalProfileError]) -> None
     """Write via a unique temp file and an atomic replace: a crash never leaves a half-written user file."""
     # why: a symlinked file (e.g. a dotfiles-managed config.json) is written through, not replaced by a copy.
     real = path.resolve()
+    _check_write(real, error)
     tmp: Path | None = None
     try:
         fd, name = tempfile.mkstemp(dir=real.parent, prefix=f".{real.name}-", suffix=".tmp")
@@ -130,6 +131,14 @@ def resolve_profile(config: Path = CONFIG) -> tuple[Path, str]:
         source = f"config {config}"
     _check_location(path)
     return path, source
+
+
+def _check_write(real: Path, error: type[LegalProfileError]) -> None:
+    """why: the profile root is checked, but a folder inside it (matters/, laws/) may be a link into the engine
+    checkout; private data written there could reach a public commit. Checked on the resolved target."""
+    engine = ENGINE_ROOT.resolve()
+    if real == engine or engine in real.parents:
+        raise error(f"refusing to write {real}: it is inside the engine folder {engine} (a link in the profile?)")
 
 
 def _check_location(path: Path) -> None:
@@ -444,6 +453,7 @@ def matter_new(profile: Path, slug: str, title: str, module: str, catalog: dict,
         raise MatterError("title must be 1–200 characters")
     day = _date(date)
     matters = _matters_dir(profile)
+    _check_write(matters.resolve(), MatterError)
     matters.mkdir(exist_ok=True)
     base = f"{day}-{slug}"
     for n in range(1, 100):

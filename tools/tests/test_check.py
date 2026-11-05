@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -85,6 +86,39 @@ class Scan(unittest.TestCase):
             write(base, "x.docx", "not a zip")
             fails, _ = check.scan(base, deny=["x"])
             self.assertEqual(len(fails), 2)
+
+    def test_docx_metadata_authors_and_links_are_scanned(self):
+        """Codex review: a name only in docProps, w:author or a link target passed the check."""
+        cases = {
+            "docProps/core.xml": "<cp:coreProperties><dc:creator>Ion Fictiv</dc:creator></cp:coreProperties>",
+            "word/comments.xml": '<w:comments><w:comment w:author="Ion Fictiv" w:id="1"/></w:comments>',
+            "word/_rels/document.xml.rels": f'<Relationships><Relationship Target="mailto:{FAKE_MAIL}"/></Relationships>',
+        }
+        for part, xml in cases.items():
+            with self.subTest(part=part), tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "m.docx"
+                with zipfile.ZipFile(path, "w") as z:
+                    z.writestr("word/document.xml", "<w:document><w:p><w:r><w:t>ok</w:t></w:r></w:p></w:document>")
+                    z.writestr(part, xml)
+                fails, _ = check.scan(Path(tmp), deny=["ion fictiv"])
+                self.assertEqual(len(fails), 1, fails)
+
+    def test_staged_content_is_scanned_not_the_working_tree(self):
+        """Codex review: data staged and then cleaned only in the working tree passed the hook."""
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            git = lambda *a: subprocess.run(["git", "-C", tmp, *a], check=True, capture_output=True)  # noqa: E731
+            git("init", "-q")
+            write(base, "a.md", f"mail {FAKE_MAIL}")
+            write(base, "docs/owner/PLAN.md", "private")
+            git("add", "a.md")
+            git("add", "-f", "docs/owner/PLAN.md")
+            write(base, "a.md", "clean now")
+            self.assertEqual(check.scan(base, deny=["x"])[0], [])
+            fails, _, n = check.scan_staged(base, deny=["x"])
+            self.assertEqual(n, 2)
+            self.assertEqual(len(fails), 2, fails)
+            self.assertTrue(any("docs/owner/PLAN.md" in f for f in fails))
 
     def test_missing_denylist_warns(self):
         with tempfile.TemporaryDirectory() as tmp:

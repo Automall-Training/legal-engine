@@ -3,6 +3,8 @@
 # Enable once per clone: git config core.hooksPath tools/hooks
 set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
+# why: the staged content is what gets committed; the full scan also catches files staged earlier
+python3 "$ROOT/tools/check.py" --quiet --staged
 python3 "$ROOT/tools/check.py" --quiet
 python3 -m unittest discover -s "$ROOT/tools/tests" -q
 # why: contract tools need python-docx and lxml, which live in the engine's .venv (./install.sh)

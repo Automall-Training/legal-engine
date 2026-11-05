@@ -62,6 +62,14 @@ def card_to_result(act: dict, card: dict, today: _dt.date, text: str | None = No
     for nxt in card.get("next_versions") or []:
         parsed.append(Redaction(label=nxt.get("label") or f"version from {nxt['applies_from']}",
                                 in_force_from=nxt["applies_from"]))
+    # why: an amendment in force (or adopted for later) may not be in a consolidation yet; it is a version of the
+    # act all the same, or a held consolidation date would make an amended act look "unchanged".
+    known = {r.in_force_from for r in parsed}
+    for ch in card.get("changes") or []:
+        when = ch.get("applies_from") or ch.get("in_force_from")
+        if ch.get("status") in ("in_force", "published_not_in_force") and when and when not in known:
+            parsed.append(Redaction(label=f"amended by {ch.get('act')} (not consolidated)", in_force_from=when))
+            known.add(when)
     rep = card.get("repealed") or {}
     gone = bool(rep.get("from")) and parse_date(rep["from"]) <= today
     if rep.get("from") and not gone:

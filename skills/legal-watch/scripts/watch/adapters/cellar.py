@@ -33,7 +33,7 @@ import urllib.parse
 import urllib.request
 from typing import Callable
 
-from ..contract import (FETCH_FAILED, PARSE_FAILED, AdapterResult, Evidence, Redaction, classify, parse_date,
+from ..contract import (FETCH_FAILED, PARSE_FAILED, UNCHANGED, AdapterResult, Evidence, Redaction, classify, parse_date,
                         text_sha256)
 from ..fetchers import USER_AGENT, now_iso
 from . import eurlex
@@ -261,7 +261,19 @@ def check_act(act: dict, today: _dt.date, *, get: HttpGet | None = None,
         return fail(PARSE_FAILED, f"Cellar text does not identify {celex}")
     if not p["repealed"] and not p["redactions"]:
         return fail(PARSE_FAILED, "Cellar: no consolidation or entry-into-force date")
+    if not p["repealed"] and meta.get("in_force") is False:
+        # Cellar says "not in force" yet names no repeal and no past end date: contradictory, so not verified.
+        return fail(PARSE_FAILED, "Cellar: marked not in force without a repealing act or a past end of "
+                                  "validity; check by hand")
     st, cur, nxt, err, cnotes = classify(act=act, parsed=p["redactions"], today=today,
                                          repealed=p["repealed"], repealed_label=p["repealed_label"])
+    related = sorted(set(meta["amended_by"]) | set(meta["corrections"]))
+    held = act.get("related")
+    new = sorted(set(related) - set(held)) if held is not None else []
+    if st == UNCHANGED and new:
+        # An amending act or a corrigendum appeared while the consolidation date stayed the same: the text may
+        # have changed. Not a confirmed change (an identifier alone says nothing about its date), not "unchanged".
+        st, err = PARSE_FAILED, (f"new amending act or corrigendum listed since the last reading: {', '.join(new)}; "
+                                 "no consolidation shows it yet; check by hand")
     return AdapterResult(act_id=act_id, adapter=ADAPTER, status=st, current=cur, next=nxt, evidence=ev,
-                         error=err, notes=notes + p["notes"] + cnotes).validate()
+                         error=err, notes=notes + p["notes"] + cnotes, related=related).validate()
