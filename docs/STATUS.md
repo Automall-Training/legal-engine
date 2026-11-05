@@ -1,6 +1,6 @@
 # Status
 
-Version: v0 (in development). Updated: 2026-11-04.
+Version: 1.0.0 (2026-11-05; merge to `main` and the tag only after the owner's «да»). Updated: 2026-11-05.
 
 | Step | What | State |
 |---|---|---|
@@ -13,8 +13,22 @@ Version: v0 (in development). Updated: 2026-11-04.
 | 7 | module `legal-trademark`; norms §15 (cost against risk); `legal-consumer` made generic | done (branch `phase-1/legal-trademark` on top of step 6; merge only after «да») |
 | 8 | module `legal-employment` | done (branch `phase-1/legal-employment` on top of step 7; merge only after «да») |
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | done (branch `phase-1/legal-watch` on top of step 8; merge only after «да») |
-| 10 | end-to-end check, cross-model review, v1.0.0 | next |
-| 11 | public GitHub repository and first push (owner's «да» first) | — |
+| 10 | end-to-end check, cross-model review, v1.0.0 | done (branch `phase-1/release-1.0` on top of step 9; merge only after «да») |
+| 11 | public GitHub repository and first push (owner's «да» first) | next |
+
+Release check (step 10, 2026-11-05): 566 tests, coverage 93 %; clean install twice → `READY`; live monitoring
+run; scenario runs by fresh agents (wizard for an invented online-courses firm, NDA and Word redline, legal
+question, privacy policy, module switched off) all passed, their findings fixed; Codex review of code and texts
+in two rounds, every finding fixed (round 1: code 2/5, texts 3/5; round 2 fixes after it not re-reviewed).
+Live findings: plain requests and the host's web tools are refused by legis.md (403 challenge) and
+legislatie.just.ro (connection dropped); EU acts are read through the Publications Office (EUR-Lex itself
+answers an empty 202); the user's Chrome opened legis.md, while legislatie.just.ro did not open even in a browser
+that day. So Moldovan acts are checked by hand through the user's browser, Romanian ones when the portal answers.
+Still open after 1.0.0: calibrate the just.ro reader on a live page (the portal was down for the whole check);
+`civil` and other code pages of just.ro; 37 catalog acts without a document id; MD document ids `reported`; PDF
+scan of MD omnibus laws; trademark bulletin watch; `matter new` does not copy the represented party and languages
+from the profile; `suggest` does not show act priorities; minor: the digest keeps source labels in the source's
+language ("consolidare …").
 
 Checks: `python3 tools/check.py` · `python3 -m unittest discover -s tools/tests` ·
 `.venv/bin/python -m unittest discover -s skills/<skill>/tests` (the pre-commit hook runs all of them; contract tools

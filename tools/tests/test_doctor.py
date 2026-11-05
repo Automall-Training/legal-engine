@@ -59,5 +59,37 @@ class EngineSkills(unittest.TestCase):
             self.assertFalse(doctor.playwright_ready(Path(sys.executable), (Path(tmp) / "none",)))
 
 
+class Vendor(unittest.TestCase):
+    """VENDOR.json says which release is installed and which hosts the scripts read: it must stay true."""
+
+    ROOT = Path(__file__).resolve().parents[2]
+
+    def setUp(self):
+        self.v = json.loads((self.ROOT / "VENDOR.json").read_text(encoding="utf-8"))
+
+    def test_skills_and_modules_match(self):
+        self.assertEqual(sorted(self.v["skills"]), doctor.engine_skills(self.ROOT))
+        mods = json.loads((self.ROOT / "skills/legal-workflow/assets/modules.json").read_text(encoding="utf-8"))
+        for m in mods["modules"].values():
+            role = "core module" if m["core"] else "optional module"
+            self.assertTrue(self.v["skills"][m["skill"]].startswith(role), m["skill"])
+
+    def test_version_is_the_latest_release_in_the_changelog(self):
+        import re
+        text = (self.ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        m = re.search(r"^## \[?(\d+\.\d+\.\d+)\]? — (\d{4}-\d{2}-\d{2})", text, re.M)
+        self.assertIsNotNone(m, "CHANGELOG has no released version heading '## X.Y.Z — YYYY-MM-DD'")
+        self.assertEqual((m.group(1), m.group(2)), (self.v["version"], self.v["released"]))
+        self.assertIn(self.v["version"], doctor.engine_version(self.ROOT))
+
+    def test_every_host_the_watch_scripts_read_is_declared(self):
+        import re
+        hosts = set()
+        for py in (self.ROOT / "skills/legal-watch/scripts").rglob("*.py"):
+            hosts |= set(re.findall(r"https?://([a-z0-9-]+(?:\.[a-z0-9-]+)+)", py.read_text(encoding="utf-8")))
+        hosts -= {"schemas.openxmlformats.org"}   # an XML namespace, not a request
+        self.assertLessEqual(hosts, set(self.v["network"]["hosts"]))
+
+
 if __name__ == "__main__":
     unittest.main()

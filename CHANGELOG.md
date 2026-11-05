@@ -1,6 +1,35 @@
 # Changelog
 
-## Unreleased
+## 1.0.0 — 2026-11-05
+
+First public release: the entry point and wizard, three core modules (contracts, legal questions, law library and
+monitoring) and four optional ones (personal data, consumers, trademarks, employment). Known limits are listed in
+`docs/STATUS.md`.
+
+Release check (step 10): every test suite with the project libraries (coverage 93 %), a clean install twice
+(`READY`, the second run changes nothing), a live monitoring run on official sites, scenario runs by fresh agents
+on invented firms, and a review by another model (Codex) of code and texts with every finding fixed.
+
+- Fixes from the live run: EU texts read through the Publications Office are saved to the law library; the digest
+  says "last run with every main act checked"; `doctor` reports the browser engine only when it can really run.
+- Fixes from the review: "no changes" is written only when nothing is left unverified; a partial run no longer
+  loses Official Gazette signals of other acts; a version date always wins over its label; an EU act marked not in
+  force without a repeal, or with a new amendment not yet consolidated, is "not verified"; amendments named in a
+  hand check count as versions; clauses of Word contracts are read in document order (tables included); the leak
+  check reads Word metadata, authors and links and checks exactly what is staged; check reports never overwrite
+  the file checked; nothing is written inside the engine folder, even through a link in the profile;
+  `install.sh` stops when a dependency step fails. Texts: risks without a sanction weighed by their real
+  consequence; digital content and digital services kept apart for withdrawal; contract flags cleared clause by
+  clause; a question of a switched-off module goes back to the router; the website check is a static screening;
+  README says exactly what stays on the computer and what the AI host processes.
+- Fixes from the scenario runs: Romanian clause numbers "1.1." read by the structure check; a source that could
+  not be opened may have no version; the wizard asks the firm facts in two questions, writes no weekly schedule
+  before the user chooses, lists linked skills among required tools; the router names the setup request; the
+  leak check no longer treats example.md and example.ro as reserved (only example.com, .net, .org are).
+- `VENDOR.json`: name, version, licences, skills and the hosts the monitoring scripts read; `doctor` prints the
+  version.
+
+## Before 1.0.0
 
 - `legal-watch` module (core): a catalog of 10 niches, 21 law categories and 116 MD / RO / EU acts with official
   ids, each dated and `verified` or `reported`; the wizard steps `niches`, `laws`, `first-run`; a watchlist in the

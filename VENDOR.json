@@ -1,0 +1,26 @@
+{
+  "name": "legal-engine",
+  "version": "1.0.0",
+  "released": "2026-11-05",
+  "license": {"code": "MIT", "texts": "CC BY 4.0"},
+  "python": ">=3.10",
+  "requirements": "requirements.txt",
+  "origin": "Written for this repository. Working procedures were adapted from the author's own private skills and rewritten generic: no firm, person or decision of the author is included.",
+  "skills": {
+    "legal-workflow": "entry point: router, profile, matters, working norms",
+    "legal-workflow-setup": "setup wizard",
+    "legal-workflow-update": "profile changes after feedback (only when the user asks)",
+    "legal-contracts": "core module: draft, audit, Word redline",
+    "legal-research": "core module: legal question, current-version check of an act",
+    "legal-watch": "core module: law library, monitoring, contract re-review",
+    "legal-privacy": "optional module: personal data",
+    "legal-consumer": "optional module: sales to consumers",
+    "legal-trademark": "optional module: trademarks",
+    "legal-employment": "optional module: employment"
+  },
+  "network": {
+    "note": "Hosts the monitoring scripts read (GET of public pages, paced). Nothing is sent anywhere else; a paid reading service is only the user's own command.",
+    "hosts": ["www.legis.md", "monitorul.gov.md", "legislatie.just.ro", "eur-lex.europa.eu",
+              "publications.europa.eu", "web.archive.org"]
+  }
+}

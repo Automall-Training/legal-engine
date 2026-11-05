@@ -10,6 +10,7 @@ The user's profile is reported, not required: the setup wizard creates it.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -69,8 +70,18 @@ def playwright_ready(py: Path = VENV_PY, caches: tuple[Path, ...] = PLAYWRIGHT_C
     return subprocess.run([str(py), "-c", "import playwright"], capture_output=True).returncode == 0
 
 
+def engine_version(root: Path = ROOT) -> str:
+    """Name and version from VENDOR.json, so a bug report can say which release is installed."""
+    try:
+        v = json.loads((root / "VENDOR.json").read_text(encoding="utf-8"))
+        return f"{v['name']} {v['version']} ({v['released']})"
+    except (OSError, ValueError, KeyError, TypeError):
+        return "unknown version (VENDOR.json missing or unreadable)"
+
+
 def main() -> int:
     missing = 0
+    print(f"engine: {engine_version()}")
     print(f"skills folder: {SKILLS_DIR}")
     skills = engine_skills()
     if not skills:

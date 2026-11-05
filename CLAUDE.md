@@ -4,7 +4,8 @@ Public repository: an AI lawyer (Moldova, Romania, EU) as Claude Code skills, se
 
 - **No personal data, ever.** The engine is generic. A user's firms, niches, contracts, downloaded laws and
   matters live only in their profile (default `~/legal-profile/`, path in `~/.config/legal-engine/config.json`),
-  never in this repo. Examples use invented firms and the `example.*` domains.
+  never in this repo. Examples use invented firms and the reserved domains example.com / .net / .org (example.md and
+  example.ro are real sites).
 - `python3 tools/check.py` must show **0 FAIL** before every commit (the pre-commit hook runs it). The owner
   keeps a git-ignored `tools/denylist.local.txt` with real names; never commit it, never print it.
 - No keys: the engine works with the host's built-in web tools or a local browser. A paid service is an
