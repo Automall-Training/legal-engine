@@ -48,6 +48,16 @@ class EngineSkills(unittest.TestCase):
     def test_missing_venv_is_not_ready(self):
         self.assertFalse(doctor.venv_ready(Path("/nonexistent/python")))
 
+    def test_browser_needs_package_and_chromium(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = Path(tmp) / "cache"
+            (cache / "chromium-1").mkdir(parents=True)
+            # a Chromium in the shared cache is not enough without the package in .venv
+            self.assertFalse(doctor.playwright_ready(Path("/nonexistent/python"), (cache,)))
+            # python3 here has no playwright package
+            self.assertFalse(doctor.playwright_ready(Path(sys.executable), (cache,)))
+            self.assertFalse(doctor.playwright_ready(Path(sys.executable), (Path(tmp) / "none",)))
+
 
 if __name__ == "__main__":
     unittest.main()

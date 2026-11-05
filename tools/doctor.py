@@ -60,6 +60,15 @@ def venv_ready(py: Path = VENV_PY) -> bool:
     return subprocess.run([str(py), "-c", code], capture_output=True).returncode == 0
 
 
+def playwright_ready(py: Path = VENV_PY, caches: tuple[Path, ...] = PLAYWRIGHT_CACHES) -> bool:
+    """The browser engine runs only with both parts: the Python package in .venv and a downloaded Chromium.
+    why: a Chromium left by another tool in the shared cache made doctor say OK while the engine failed to import."""
+    chromium = any(c.is_dir() and any(c.glob("chromium*")) for c in caches)
+    if not (chromium and py.is_file()):
+        return False
+    return subprocess.run([str(py), "-c", "import playwright"], capture_output=True).returncode == 0
+
+
 def main() -> int:
     missing = 0
     print(f"skills folder: {SKILLS_DIR}")
@@ -81,8 +90,8 @@ def main() -> int:
     missing += not env_ok
     for cmd, why in OPTIONAL_CMDS.items():
         line(True if shutil.which(cmd) else None, cmd, why)
-    chromium = any(c.is_dir() and any(c.glob("chromium*")) for c in PLAYWRIGHT_CACHES)
-    line(True if chromium else None, "Playwright Chromium",
+    browser = playwright_ready()
+    line(True if browser else None, "Playwright Chromium",
          "free engine for scheduled law monitoring; WITH_PLAYWRIGHT=1 ./install.sh")
     prof, source = profile_dir()
     ready = (prof / "context" / "integration-status.md").is_file()
