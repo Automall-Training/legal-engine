@@ -37,7 +37,8 @@ versions is the folder `texts/<act>/`).
 - **Before a task:** `watch show` gives, per act, the version held, when it was checked, its hash and its text
   copies. It tells the agent what to expect and which acts the user follows; it is not a source.
 - **During the task:** the official text is opened again on the task date and a version card is made
-  (`<legal-research>/references/version-check.md`), with `held_version` taken from `watch show`. A card differing
+  (`<legal-research>/references/version-check.md`), with `held_version` copied from `watch show` as it is
+  (`label` and `version_from`: without the date the checker cannot spot an outdated holding). A card differing
   from the held version is a finding: tell the user and run `watch run --acts <id>`.
 - **After the task:** a card from today about the whole act (`scope: "text"`, `cited_provisions: ["whole act"]`)
   also updates the library with `watch record --card … --root <matter>`: one reading serves the task and the

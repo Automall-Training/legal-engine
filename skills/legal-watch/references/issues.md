@@ -9,14 +9,14 @@ the agent read it; the person sees it on `laws/report.html`. Written by the scri
   a row), `last` (engine, url, HTTP code, error ≤ 300 characters, notes), `history` (last 10 attempts), `state`
   `open` / `resolved`, `resolved_on`, `resolved_by`. A check of the act (a run or `watch record`) closes it; a
   solved entry is dropped after 90 days. A second run of the same day adds an attempt; it never wipes the first.
-- `engines.<site>.<engine>` — how many days in a row that engine failed on that site (`streak`), `last_error`,
+- `engines.<site>.<engine>` — on how many days that engine failed on that site since its last success (`streak`), `last_error`,
   `last_ok`, `demoted_since`.
 - Not logged: `host_only` (the user chose hand checks) and Official Gazette signals; they are expected work, the
   digest lists them.
 
 ## What the next run does by itself
 
-After 3 days in a row of failures of an engine on a site, `watch run` tries that engine **last** there (it would
+After 3 days with failures of an engine on a site and no success in between, `watch run` tries that engine **last** there (it would
 only cost the 5–15 s pause per act) and notes it in the reading. Every 7 days it is tried first again, in case the
 site opened up. An engine that is the only one still runs. Nothing is skipped silently: an act not read stays
 "not verified".

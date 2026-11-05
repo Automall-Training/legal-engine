@@ -44,6 +44,23 @@ class Page(RunnerBase):
         self.assertNotIn("<b>x</b>", page)
         self.assertIn("&lt;script&gt;", page)
 
+    def test_damaged_state_cannot_inject_attributes(self):
+        self.run_with([act()], adapter([V1], fail="fetch_failed"))
+        log = issues.load(self.profile)
+        log["acts"]["ro.lege.1-2020"]["priority"] = "p1 onmouseover=alert(1)"
+        issues.save(self.profile, log)
+        page = report.render(self.profile, "en", TODAY)
+        self.assertNotRegex(page, r"<tr[^>]*onmouseover")
+
+    def test_repeal_is_shown_not_the_old_version_as_in_force(self):
+        state = lib.load_state(self.profile)
+        state["acts"]["ro.lege.1-2020"] = {"current": {"label": "v1", "in_force_from": "2026-01-01"}, "repealed": {"label": "repealed by Law X",
+                                                                                 "in_force_from": "2026-10-01"},
+                                           "checked_on": "2026-11-04"}
+        lib.save_state(self.profile, state)
+        page = report.render(self.profile, "en", TODAY)
+        self.assertIn(digest.T["en"]["kind"]["repealed"] + ": repealed by Law X", page)
+
     def test_empty_profile_and_languages(self):
         for lang in ("en", "ro", "ru", "xx"):
             page = report.render(self.profile, lang, TODAY)
@@ -113,6 +130,14 @@ class Commands(unittest.TestCase):
         self.assertEqual(len(next(a for a in wl["acts"] if a["id"] == "md.cod.civil")["sources"]), 1)
         self.assertEqual(self.p("source", "add", "eu.reg.2016-679", "--doc-id", "1")[0], 2)   # EU needs celex
         self.assertEqual(self.p("source", "add", "ro.lege.nope-1", "--doc-id", "1")[0], 2)
+
+    def test_show_gives_held_version_for_the_card(self):
+        self.init()
+        state = lib.load_state(self.profile)
+        state["acts"]["md.cod.civil"] = {"current": {"label": "v1", "in_force_from": "2026-01-01"}}
+        lib.save_state(self.profile, state)
+        civil = next(a for a in json.loads(self.p("show")[1])["acts"] if a["id"] == "md.cod.civil")
+        self.assertEqual(civil["held_version"], {"label": "v1", "version_from": "2026-01-01"})
 
     def test_show_lists_text_copies(self):
         self.init()

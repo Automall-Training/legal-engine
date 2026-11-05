@@ -227,11 +227,13 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
         runs = [x for x in state["runs"] if x.get("date") != out["date"]]
         state["runs"] = runs + [{"date": out["date"], "result": result, "full": bool(out.get("full")),
                                  "at": now_iso()}]
-        lib.save_state(profile, state)
-        # why: from the acts read now, before anything else reads the merged day: a second run of the same day
-        # adds an attempt to the log instead of wiping the first failure's detail
+        # why: the log is read and updated in memory before the state is committed: a broken issues.json then
+        # stops the run before the baseline moves, never after it (a moved baseline without its run report would
+        # hide the change on a retry). From the acts read now, so a second run of the day adds an attempt.
         read = set(flag_ids if flag_ids is not None else (r["act_id"] for r in records))
-        _issues.record_run(profile, out, read | ({"monitorul_md"} if gazette_now else set()), by_hand=by_hand)
+        log = _issues.prepare_run(profile, out, read | ({"monitorul_md"} if gazette_now else set()), by_hand=by_hand)
+        lib.save_state(profile, state)
+        _issues.save(profile, log)
     out["health"] = _digest.health(state, _dt.date.fromisoformat(out["date"]), out.get("schedule"))
     run_dir = lib.laws_dir(profile) / "runs" / out["date"]
     if dry_run:

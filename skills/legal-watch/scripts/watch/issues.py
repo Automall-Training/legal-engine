@@ -53,7 +53,28 @@ def load(profile: Path) -> dict:
         raise lib.WatchError(f"error log {p} has schema {data.get('schema_version')!r}, expected {SCHEMA}")
     data.setdefault("acts", {})
     data.setdefault("engines", {})
+    _validate(data, p)
     return data
+
+
+def _validate(data: dict, p: Path) -> None:
+    """A hand-edited or damaged log is a clear error, not a crash in the middle of a run."""
+    bad = []
+    if not isinstance(data["acts"], dict) or not isinstance(data["engines"], dict):
+        bad.append("acts and engines must be objects")
+    else:
+        for k, e in data["acts"].items():
+            if not isinstance(e, dict) or e.get("state") not in ("open", "resolved") \
+                    or not isinstance(e.get("count", 0), int) or not isinstance(e.get("streak", 0), int) \
+                    or not isinstance(e.get("history", []), list):
+                bad.append(f"acts.{k}")
+        for h, eng in data["engines"].items():
+            if not isinstance(eng, dict) or any(not isinstance(v, dict) or not isinstance(v.get("streak", 0), int)
+                                                for v in eng.values()):
+                bad.append(f"engines.{h}")
+    if bad:
+        raise lib.WatchError(f"error log {p} is damaged ({', '.join(bad[:5])}); move it away and run again "
+                             "(the next run starts a new log)")
 
 
 def save(profile: Path, log: dict) -> None:
@@ -156,7 +177,7 @@ def site_issues(log: dict) -> list[dict]:
     return sorted(out, key=lambda e: (-e["streak"], e["host"], e["via"]))
 
 
-def record_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False) -> dict:
+def prepare_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False) -> dict:
     """Update the log from what was read now (not the merged day) and the engine attempts of this run.
 
     `read_ids`: the acts read now, plus "monitorul_md" when the Gazette was scanned now.
@@ -169,5 +190,10 @@ def record_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = 
         checked.add("monitorul_md")
     update_acts(log, unverified, checked, day, at, resolved_by="checked by hand" if by_hand else "checked by a run")
     update_engines(log, out.get("engine_attempts") or [], day)
+    return log
+
+
+def record_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False) -> dict:
+    log = prepare_run(profile, out, read_ids, by_hand=by_hand)
     save(profile, log)
     return log

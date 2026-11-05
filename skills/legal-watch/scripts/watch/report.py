@@ -106,6 +106,11 @@ th,td{border-bottom:1px solid #ddd;padding:.4em .5em;text-align:left;vertical-al
 .p1{font-weight:600}.muted{color:#666}.bad{color:#a00}code{font-size:.9em}details{margin:.2em 0}"""
 
 
+def cls(priority) -> str:
+    """A class attribute from an allowlist only: a damaged state must not inject attributes."""
+    return f' class="{priority}"' if priority in lib.PRIORITIES else ""
+
+
 def e(x) -> str:
     return html.escape("" if x is None else str(x), quote=True)
 
@@ -133,7 +138,7 @@ def render(profile: Path, language: str = "en", today: _dt.date | None = None) -
     out = [f'<!doctype html><html lang="{e(language)}"><head><meta charset="utf-8">',
            f"<title>{e(t['title'])}</title><style>{CSS}</style></head><body>",
            f"<h1>{e(t['title'])}</h1>",
-           f"<p class=muted>{e(t['generated'])}: {e(today.isoformat())} · {e(t['note'])}</p>"]
+           f"<p class='muted'>{e(t['generated'])}: {e(today.isoformat())} · {e(t['note'])}</p>"]
     if run:
         head = run.get("result")
         if head == "OK" and not run.get("phrase_no_changes_allowed"):
@@ -142,7 +147,7 @@ def render(profile: Path, language: str = "en", today: _dt.date | None = None) -
         out.append(f"<p>{e(t['last_run'])}: <b>{e(run.get('date'))}</b> — {e(d['result'].get(head, head))} · "
                    f"{e(d['checked'])} {e(s.get('checked'))} {e(d['of'])} {e(s.get('acts'))}</p>")
     out.append(f"<p>{e(d['health'])}: <b>{e(h['last_complete'] or d['never'])}</b>"
-               + (f" <span class=bad>{e(d['overdue'].format(d=h['days_since'] if h['days_since'] is not None else '?'))}</span>"
+               + (f" <span class='bad'>{e(d['overdue'].format(d=h['days_since'] if h['days_since'] is not None else '?'))}</span>"
                   if h["overdue"] else "") + "</p>")
 
     out.append(f"<h2>{e(t['open'])}</h2>")
@@ -159,7 +164,7 @@ def render(profile: Path, language: str = "en", today: _dt.date | None = None) -
             detail = " · ".join(e(x) for x in (last.get("via"), f"HTTP {last['http_status']}"
                                                if last.get("http_status") else None, last.get("error")) if x)
             url = f'<br><code>{e(last.get("url"))}</code>' if last.get("url") else ""
-            out.append(f"<tr class={e(i.get('priority'))}><td>{e(i.get('title') or i['act_id'])}<br>"
+            out.append(f"<tr{cls(i.get('priority'))}><td>{e(i.get('title') or i['act_id'])}<br>"
                        f"<code>{e(i['act_id'])}</code> [{e(i.get('priority'))}]</td>"
                        f"<td>{e(what)}<details><summary>{e(t['detail'])}</summary>{detail}{url}</details></td>"
                        f"<td>{e(i.get('first_seen'))}</td><td>{e(i.get('count'))}</td>"
@@ -195,8 +200,12 @@ def render(profile: Path, language: str = "en", today: _dt.date | None = None) -
             held = state["acts"].get(a) or {}
             cur, nxt = held.get("current") or {}, held.get("next") or {}
             fmt = lambda r: f"{r.get('label')} ({d['from']} {r.get('in_force_from')})" if r else "—"  # noqa: E731
-            out.append(f"<tr class={e(prio.get(a))}><td>{e(titles.get(a) or a)}<br><code>{e(a)}</code></td>"
-                       f"<td>{e(fmt(cur))}</td><td>{e(fmt(nxt))}</td><td>{e(held.get('checked_on') or '—')}</td>"
+            gone = held.get("repealed")
+            # why: a repeal keeps the last version as history; the page must not show it as the version in force
+            held_cell = (f"<b class='bad'>{e(d['kind']['repealed'])}: {e(fmt(gone))}</b><br>"
+                         f"<span class='muted'>{e(fmt(cur))}</span>") if gone else e(fmt(cur))
+            out.append(f"<tr{cls(prio.get(a))}><td>{e(titles.get(a) or a)}<br><code>{e(a)}</code></td>"
+                       f"<td>{held_cell}</td><td>{e(fmt(nxt))}</td><td>{e(held.get('checked_on') or '—')}</td>"
                        f"<td>{len(_texts(laws, a))}</td></tr>")
         out.append("</table>")
     out.append("</body></html>\n")

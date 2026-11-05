@@ -101,6 +101,12 @@ class Log(RunnerBase):
         with self.assertRaises(lib.WatchError):
             issues.load(self.profile)
 
+    def test_damaged_log_stops_the_run_before_the_baseline_moves(self):
+        lib.write_json(issues.path(self.profile), {"schema_version": 1, "acts": {"x": "broken"}, "engines": {}})
+        with self.assertRaises(lib.WatchError):
+            self.run_with([act()], adapter([V1]))
+        self.assertIsNone(self.held())
+
     def test_never_written_inside_the_engine(self):
         with self.assertRaises(lib.WatchError):
             issues.save(lib.ENGINE_ROOT, issues.empty())

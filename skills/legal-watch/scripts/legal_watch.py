@@ -132,7 +132,10 @@ def cmd_show(a) -> int:
     laws = lib.laws_dir(profile)
     _print({"settings": wl["settings"], "acts": [
         {"id": x["id"], "priority": x.get("priority"), "held": (x.get("current") or {}).get("label"),
-         "next": (x.get("next") or {}).get("label"),
+         # why: ready to copy into a version card; without its date the checker cannot see an outdated holding
+         "held_version": {"label": (x.get("current") or {}).get("label"),
+                          "version_from": (x.get("current") or {}).get("in_force_from")} if x.get("current") else None,
+         "next": x.get("next"), "repealed": x.get("repealed"),
          "checked_on": (state["acts"].get(x["id"]) or {}).get("checked_on"),
          "sha256": (state["acts"].get(x["id"]) or {}).get("sha256"),
          # why: the copies are evidence of what was read and when; a task re-reads the official text anyway
