@@ -3,7 +3,7 @@
 > [!WARNING]
 > Это не юридическая консультация. / Nu este consultanță juridică. → [DISCLAIMER.md](DISCLAIMER.md)
 
-**Status: v1.0.0.** Все модули ниже готовы. Известные ограничения (например, часть официальных сайтов закрыта для
+**Status: v1.1.0.** Все модули ниже готовы. Известные ограничения (например, часть официальных сайтов закрыта для
 автоматического чтения) — в [docs/STATUS.md](docs/STATUS.md). / Toate modulele sunt gata; limitele cunoscute — în
 [docs/STATUS.md](docs/STATUS.md).
 

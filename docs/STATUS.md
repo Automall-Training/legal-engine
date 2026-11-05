@@ -1,6 +1,6 @@
 # Status
 
-Version: 1.0.0 (2026-11-05; merge to `main` and the tag only after the owner's «да»). Updated: 2026-11-05.
+Version: 1.1.0 (2026-11-05; merge to `main` and the tags only after the owner's «да»). Updated: 2026-11-05.
 
 | Step | What | State |
 |---|---|---|
@@ -14,6 +14,7 @@ Version: 1.0.0 (2026-11-05; merge to `main` and the tag only after the owner's �
 | 8 | module `legal-employment` | done (branch `phase-1/legal-employment` on top of step 7; merge only after «да») |
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | done (branch `phase-1/legal-watch` on top of step 8; merge only after «да») |
 | 10 | end-to-end check, cross-model review, v1.0.0 | done (branch `phase-1/release-1.0` on top of step 9; merge only after «да») |
+| 10a | monitoring error log + `laws/report.html`, law library described (`legal-watch/references/issues.md`, `library.md`), v1.1.0 | done (branch `phase-1/watch-issues` on top of step 10; merge only after «да») |
 | 11 | public GitHub repository and first push (owner's «да» first) | next |
 
 Release check (step 10, 2026-11-05): 566 tests, coverage 93 %; clean install twice → `READY`; live monitoring
@@ -25,7 +26,7 @@ legislatie.just.ro (connection dropped); EU acts are read through the Publicatio
 answers an empty 202); the user's Chrome opened legis.md, while legislatie.just.ro did not open even in a browser
 that day. So Moldovan acts are checked by hand through the user's browser, Romanian ones when the portal answers.
 Still open after 1.0.0: calibrate the just.ro reader on a live page (the portal was down for the whole check);
-`civil` and other code pages of just.ro; 37 catalog acts without a document id; MD document ids `reported`; PDF
+`civil` and other code pages of just.ro; 38 catalog acts without a document id; MD document ids `reported`; PDF
 scan of MD omnibus laws; trademark bulletin watch; `matter new` does not copy the represented party and languages
 from the profile; `suggest` does not show act priorities; minor: the digest keeps source labels in the source's
 language ("consolidare …").
@@ -57,7 +58,7 @@ pages: legis.md markdown (via a command engine), EUR-Lex / Cellar, the MD Gazett
 calibrated: legis.md HTML, both just.ro readers (their readings are "not verified" until confirmed by hand). On
 2026-11-04 plain requests were refused by legis.md (403), legislatie.just.ro (connection dropped) and EUR-Lex
 (empty 202): expect checks by hand. Open, live run (step 10): calibrate the just.ro reader on a live page; just.ro
-code pages known only for the fiscal and labour codes; 37 catalog acts lack a document id (found on first run);
+code pages known only for the fiscal and labour codes; 38 catalog acts lack a document id (the agent finds them: recipe `no_source`, `watch source add`);
 Moldovan document ids are all `reported`; PDF scan of omnibus laws in the MD Gazette not ported; trademark bulletin
 watch (BOPI) not ported (later option).
 Optional modules (from step 6) check `legal_profile.py module <id>` first, decide the content of a document and

@@ -32,7 +32,8 @@ a disk that is not connected, is recreated only with `--create`; nothing is ever
   modules.json            optional modules on/off
   templates/              the user's own sample documents (optional)
   matters/                see matters.md
-  laws/                   watchlist.yaml (choices), state.json (versions held), texts/, runs/ (legal-watch)
+  laws/                   watchlist.yaml, state.json, texts/, runs/, issues.json, report.html (legal-watch,
+                          see its references/library.md)
   contracts/              the user's contracts in force + index/ (legal-watch)
   trademarks/             portfolio.json: own marks and their dates (legal-trademark; created on first use)
 ```

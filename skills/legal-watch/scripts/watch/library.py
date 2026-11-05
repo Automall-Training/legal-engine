@@ -5,6 +5,9 @@ machine state (versions held) and the text snapshots.
     <profile>/laws/state.json       what the engine holds per act (written only by the scripts)
     <profile>/laws/texts/<act>/     snapshots of official texts, one file per distinct text
     <profile>/laws/runs/<date>/     run.json and digest.md of each monitoring run
+    <profile>/laws/issues.json      the error log (issues.py); laws/report.html, the page for the person (report.py)
+
+How the skills use these layers: references/library.md.
 
 The watchlist holds choices, the state holds facts read from official pages: keeping them apart lets the user
 edit the watchlist without breaking the baseline, and a lost state only means the next run re-reads baselines.

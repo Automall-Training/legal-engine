@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.1.0 — 2026-11-05
+
+Law monitoring learns from its failures, and the law library is described.
+
+- **Error log** `laws/issues.json` in the profile: every act that could not be verified, with each attempt (site,
+  engine, HTTP code, error), kept across runs and closed when the act is checked by a run or by hand. A second
+  run of the same day no longer wipes the first failure's detail.
+- **Next runs adapt:** an engine a site refused 3 days in a row is tried last there, and first again every 7 days.
+  Before every monitoring request the agent follows the recipe of each open problem (`legal-watch/references/issues.md`).
+- **Page for the person** `laws/report.html` (local, rewritten after every run): open problems with what happened,
+  what the agent will do and what the person can do; sites that refuse an engine; solved problems; the library.
+- **Commands:** `issues`, `report`, `source add` (gives an act its official source), `prune --runs-older`
+  (lists old run folders, deletes them only with `--apply`); `show` lists the text copies; doctor shows the
+  number of open problems; the digest points to the page.
+- **The law library explained** (`legal-watch/references/library.md`): catalog, watchlist, state, text copies,
+  runs and error log, which of them is truth (none), and how research and contracts use them (`held_version`
+  from `watch show`; a today's whole-act card also updates the library).
+
 ## 1.0.0 — 2026-11-05
 
 First public release: the entry point and wizard, three core modules (contracts, legal questions, law library and

@@ -34,6 +34,8 @@ and the approval boundaries live there and are followed by reference, never copi
    subject, without the user's names, figures or confidential text.
 4. **Current-version check** — [version-check.md](references/version-check.md) for every act a material
    conclusion rests on: one card per act in `<matter>/work/versions/`, saved texts in `<matter>/work/sources/`.
+   `held_version` comes from `watch show` when the act is watched; a card from today about the whole act also
+   updates the law library (`watch record`, `<skill-dir>/../legal-watch/references/library.md`).
    ```bash
    python3 <skill-dir>/scripts/check_version.py <matter>/work/versions/<act-id>.json --root <matter>
    ```

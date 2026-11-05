@@ -19,7 +19,10 @@ document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scri
 2. **Norms.** Read `<legal-workflow>/references/norms.md` once per session. The law rule of the engine applies
    to every line here: a stored text or version is a lead, never the law of today; "the rule is in force" in an
    answer still goes through `<legal-research>` (version check on the task date).
-3. **Data.** Everything lives in the user's profile (`laws/`, `contracts/`), never in the engine.
+3. **Data.** Everything lives in the user's profile (`laws/`, `contracts/`), never in the engine. What is kept
+   where, and how other skills use it: [references/library.md](references/library.md).
+4. **Error log.** Before any monitoring request run `watch issues` and follow the recipe of each open problem,
+   p1 first ([references/issues.md](references/issues.md)); say in one line what was done and what is left.
 
 ## What the user can ask
 
@@ -30,6 +33,8 @@ document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scri
 | what changed | the latest digest (`watch digest`), explained in plain words with what it means for the business |
 | re-check my contracts after a change | [contracts.md](references/contracts.md): pending flags → a re-review matter through `legal-contracts` |
 | a new contract in force to follow | [contracts.md](references/contracts.md): `watch index scan`, completed by reading the clauses |
+| what went wrong / show me the problems | `watch issues`; the page `laws/report.html` (`watch report`) — give the user its path |
+| how are the laws stored | [library.md](references/library.md), in plain words |
 | run it every week | [engines.md](references/engines.md): schedule, only after the user's yes |
 
 ## Route of a monitoring request
@@ -67,5 +72,7 @@ document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scri
 - [references/monitoring.md](references/monitoring.md) — statuses, results, the host check, the digest.
 - [references/contracts.md](references/contracts.md) — the clause index and re-review.
 - [references/engines.md](references/engines.md) — fetch engines and the schedule.
+- [references/issues.md](references/issues.md) — the error log, its recipes and the page for the person.
+- [references/library.md](references/library.md) — the layers of the law library and how skills use them.
 - `assets/catalog/` — niches → categories → acts with official ids; `templates/watchlist.yaml` — an example.
 - `scripts/legal_watch.py` and `scripts/watch/` — the tools; `tests/` — their tests.

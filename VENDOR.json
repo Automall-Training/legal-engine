@@ -1,6 +1,6 @@
 {
   "name": "legal-engine",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "released": "2026-11-05",
   "license": {"code": "MIT", "texts": "CC BY 4.0"},
   "python": ">=3.10",

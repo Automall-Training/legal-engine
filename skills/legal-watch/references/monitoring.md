@@ -4,7 +4,8 @@
 the version held, stores a new text when it differs, writes `laws/runs/<date>/run.json` and `digest.md`, and
 flags dependent contract clauses. A run of some acts, or a check by hand, joins the day's run instead of replacing
 it; only a run of all acts counts as a complete run. `--dry-run` writes into `runs/<date>/dry-run/` only, with no
-state, texts or flags.
+state, texts, flags or error log. Every real run also updates the error log `laws/issues.json` and the page
+`laws/report.html` ([issues.md](issues.md)); the layers of the library are in [library.md](library.md).
 
 ## Sources
 

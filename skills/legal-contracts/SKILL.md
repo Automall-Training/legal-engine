@@ -38,7 +38,8 @@ re-runs itself in the engine's environment (missing → it says to run `./instal
    and run `python3 <legal-workflow>/scripts/check_register.py <matter>/source-register.json --task-id <matter-id>@<today's check date>`.
    For each act a material conclusion rests on, run the current-version check of
    `<skill-dir>/../legal-research/references/version-check.md` (one card per act, `check_version.py`). This
-   package and any cache are navigation only.
+   package, any cache and the law library (`watch show`, `<skill-dir>/../legal-watch/references/library.md`)
+   are navigation only.
 5. **Subject checks** — [commercial.md](references/commercial.md). Every material conclusion is linked to a
    verified rule and version in the register; negotiation advice is labelled as such.
 6. **Action and structure source** — [workflows.md](references/workflows.md). Pick a model from the
