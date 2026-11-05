@@ -8,9 +8,12 @@ the agent read it; the person sees it on `laws/report.html`. Written by the scri
 - `acts.<id>` — one entry per act not verified: `kind`, `first_seen`, `last_seen`, `count`, `streak` (attempts in
   a row), `last` (engine, url, HTTP code, error ≤ 300 characters, notes), `history` (last 10 attempts), `state`
   `open` / `resolved`, `resolved_on`, `resolved_by`. A check of the act (a run or `watch record`) closes it; a
-  solved entry is dropped after 90 days. A second run of the same day adds an attempt; it never wipes the first.
+  solved entry is dropped after 90 days. An act removed from the watchlist is closed as "removed from the watchlist"
+  (a run of some acts never counts as removal). A second run of the same day adds an attempt; it never wipes the first.
 - `engines.<site>.<engine>` — on how many days that engine failed on that site since its last success (`streak`), `last_error`,
   `last_ok`, `demoted_since`.
+- A damaged log (hand-edited, cut short) stops the run with a clear message before anything is written; move the
+  file away and the next run starts a new one.
 - Not logged: `host_only` (the user chose hand checks) and Official Gazette signals; they are expected work, the
   digest lists them.
 

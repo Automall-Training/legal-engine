@@ -57,21 +57,48 @@ def load(profile: Path) -> dict:
     return data
 
 
+def _is_date(x, *, optional: bool = True) -> bool:
+    if x is None:
+        return optional
+    try:
+        _dt.date.fromisoformat(x)
+        return True
+    except (TypeError, ValueError):
+        return False
+
+
+def _act_ok(e) -> bool:
+    if not isinstance(e, dict) or e.get("state") not in ("open", "resolved"):
+        return False
+    if not all(isinstance(e.get(k, 0), int) and not isinstance(e.get(k, 0), bool) for k in ("count", "streak")):
+        return False
+    if not isinstance(e.get("history", []), list) or not all(isinstance(h, dict) for h in e.get("history", [])):
+        return False
+    if e.get("last") is not None and not isinstance(e["last"], dict):
+        return False
+    if not all(_is_date(e.get(k)) for k in ("first_seen", "last_seen", "resolved_on")):
+        return False
+    return all(e.get(k) is None or isinstance(e[k], str) for k in ("act_id", "kind", "title", "priority", "host"))
+
+
+def _engine_ok(v) -> bool:
+    return (isinstance(v, dict) and isinstance(v.get("streak", 0), int) and not isinstance(v.get("streak", 0), bool)
+            and all(_is_date(v.get(k)) for k in ("demoted_since", "last_failed", "last_ok")))
+
+
 def _validate(data: dict, p: Path) -> None:
-    """A hand-edited or damaged log is a clear error, not a crash in the middle of a run."""
+    """A hand-edited or damaged log is a clear error before any write, not a crash in the middle of a run: every
+    field that the update, the sorting and the page read is checked here."""
     bad = []
     if not isinstance(data["acts"], dict) or not isinstance(data["engines"], dict):
         bad.append("acts and engines must be objects")
     else:
-        for k, e in data["acts"].items():
-            if not isinstance(e, dict) or e.get("state") not in ("open", "resolved") \
-                    or not isinstance(e.get("count", 0), int) or not isinstance(e.get("streak", 0), int) \
-                    or not isinstance(e.get("history", []), list):
-                bad.append(f"acts.{k}")
+        bad += [f"acts.{k}" for k, e in data["acts"].items() if not _act_ok(e)]
         for h, eng in data["engines"].items():
-            if not isinstance(eng, dict) or any(not isinstance(v, dict) or not isinstance(v.get("streak", 0), int)
-                                                for v in eng.values()):
+            if not isinstance(eng, dict):
                 bad.append(f"engines.{h}")
+            else:
+                bad += [f"engines.{h}.{v}" for v, e in eng.items() if not _engine_ok(e)]
     if bad:
         raise lib.WatchError(f"error log {p} is damaged ({', '.join(bad[:5])}); move it away and run again "
                              "(the next run starts a new log)")
@@ -177,10 +204,13 @@ def site_issues(log: dict) -> list[dict]:
     return sorted(out, key=lambda e: (-e["streak"], e["host"], e["via"]))
 
 
-def prepare_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False) -> dict:
+def prepare_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False,
+                watched: set[str] | None = None) -> dict:
     """Update the log from what was read now (not the merged day) and the engine attempts of this run.
 
     `read_ids`: the acts read now, plus "monitorul_md" when the Gazette was scanned now.
+    `watched`: the whole current watchlist (not the acts of a partial run): an open problem of an act the user
+    removed is closed as "removed from the watchlist", since no recipe can reach an act that is not watched.
     """
     log = load(profile)
     day, at = out["date"], out.get("generated_at") or out["date"]
@@ -190,10 +220,16 @@ def prepare_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool =
         checked.add("monitorul_md")
     update_acts(log, unverified, checked, day, at, resolved_by="checked by hand" if by_hand else "checked by a run")
     update_engines(log, out.get("engine_attempts") or [], day)
+    if watched is not None:
+        for act_id, e in log["acts"].items():
+            if e.get("state") == "open" and act_id != "monitorul_md" and act_id not in watched:
+                e.update({"state": "resolved", "resolved_on": day, "streak": 0,
+                          "resolved_by": "removed from the watchlist"})
     return log
 
 
-def record_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False) -> dict:
-    log = prepare_run(profile, out, read_ids, by_hand=by_hand)
+def record_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool = False,
+               watched: set[str] | None = None) -> dict:
+    log = prepare_run(profile, out, read_ids, by_hand=by_hand, watched=watched)
     save(profile, log)
     return log

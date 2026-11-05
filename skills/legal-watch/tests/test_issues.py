@@ -13,7 +13,7 @@ from unittest import mock
 SKILL = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(SKILL / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from test_runner import TODAY, V1, RunnerBase, act, adapter, card  # noqa: E402
+from test_runner import TODAY, V1, V2, RunnerBase, act, adapter, card  # noqa: E402
 from watch import issues, library as lib, manual, runner  # noqa: E402
 from watch.fetchers import ChainFetcher, FetchResult  # noqa: E402
 
@@ -106,6 +106,35 @@ class Log(RunnerBase):
         with self.assertRaises(lib.WatchError):
             self.run_with([act()], adapter([V1]))
         self.assertIsNone(self.held())
+
+    def test_failed_log_write_keeps_the_change_for_a_retry(self):
+        self.run_with([act()], adapter([V1]))                       # baseline v1
+        held = act(current={"label": "v1", "in_force_from": "2026-01-01"})
+        with mock.patch.object(issues, "save", side_effect=OSError("disk full")), self.assertRaises(OSError):
+            self.run_with([held], adapter([V1, V2]))
+        self.assertEqual(self.held()["current"]["label"], "v1")    # the baseline did not move
+        day = lib.read_json(self.profile / "laws" / "runs" / TODAY.isoformat() / "run.json", "run")
+        self.assertEqual(day["changes"][0]["label"], "v2")         # the evidence is on disk
+        out = self.run_with([held], adapter([V1, V2]))              # the retry finds the change again
+        self.assertEqual(out["changes"][0]["label"], "v2")
+
+    def test_damaged_nested_fields_are_refused(self):
+        for log in ({"acts": {"x": {"state": "open", "last": "broken"}}, "engines": {}},
+                    {"acts": {"x": {"state": "open", "first_seen": "yesterday"}}, "engines": {}},
+                    {"acts": {}, "engines": {"h": {"urllib": {"streak": 3, "demoted_since": "bad-date"}}}},
+                    {"acts": {}, "engines": {"h": "x"}}):
+            lib.write_json(issues.path(self.profile), {"schema_version": 1, **log})
+            with self.assertRaises(lib.WatchError):
+                issues.load(self.profile)
+
+    def test_act_removed_from_the_watchlist_is_closed(self):
+        a, b = act(), act("ro.lege.2-2020")
+        self.run_with([a, b], adapter([V1], fail="fetch_failed"))
+        self.run_with([a, b], adapter([V1], fail="fetch_failed"), selector="ro.lege.1-2020")
+        self.assertEqual(self.log()["acts"]["ro.lege.2-2020"]["state"], "open")   # a partial run is not removal
+        self.run_with([a], adapter([V1], fail="fetch_failed"))
+        e = self.log()["acts"]["ro.lege.2-2020"]
+        self.assertEqual((e["state"], e["resolved_by"]), ("resolved", "removed from the watchlist"))
 
     def test_never_written_inside_the_engine(self):
         with self.assertRaises(lib.WatchError):

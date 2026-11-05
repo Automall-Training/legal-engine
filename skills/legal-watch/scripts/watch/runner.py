@@ -182,7 +182,7 @@ def update_state(state: dict, r: dict, day: str, snapshot: str | None) -> None:
 
 
 def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: set[str] | None = None,
-           gazette_now: bool = False, by_hand: bool = False) -> dict:
+           gazette_now: bool = False, by_hand: bool = False, watched: set[str] | None = None) -> dict:
     """Shared tail of `run` and `record`: result, exit code, contract flags, digest, files.
 
     `flag_ids` limits the contract flags to the acts read now (a hand record must not re-flag the clauses of
@@ -218,6 +218,16 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
                             "unverified": len(unverified),
                             "unverified_p1": sum(u["priority"] == "p1" for u in unverified),
                             "changes": len(changes)}})
+    # Order of the writes, so that a failure at any point leaves the change still reported (why):
+    # 1. the error log is read, validated and updated in memory first: a damaged log stops here, before anything;
+    # 2. contract flags (idempotent), then run.json and the digest: the evidence of the run is on disk;
+    # 3. the error log, then the state last: a run that stops before it keeps the old baseline, so a retry finds
+    #    the same change again instead of "unchanged".
+    log = None
+    if not dry_run:
+        read = set(flag_ids if flag_ids is not None else (r["act_id"] for r in records))
+        log = _issues.prepare_run(profile, out, read | ({"monitorul_md"} if gazette_now else set()),
+                                  by_hand=by_hand, watched=watched)
     flagged = []
     if not dry_run:
         to_flag = [c for c in changes if c["confirmed"] and (flag_ids is None or c["act_id"] in flag_ids)]
@@ -227,13 +237,6 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
         runs = [x for x in state["runs"] if x.get("date") != out["date"]]
         state["runs"] = runs + [{"date": out["date"], "result": result, "full": bool(out.get("full")),
                                  "at": now_iso()}]
-        # why: the log is read and updated in memory before the state is committed: a broken issues.json then
-        # stops the run before the baseline moves, never after it (a moved baseline without its run report would
-        # hide the change on a retry). From the acts read now, so a second run of the day adds an attempt.
-        read = set(flag_ids if flag_ids is not None else (r["act_id"] for r in records))
-        log = _issues.prepare_run(profile, out, read | ({"monitorul_md"} if gazette_now else set()), by_hand=by_hand)
-        lib.save_state(profile, state)
-        _issues.save(profile, log)
     out["health"] = _digest.health(state, _dt.date.fromisoformat(out["date"]), out.get("schedule"))
     run_dir = lib.laws_dir(profile) / "runs" / out["date"]
     if dry_run:
@@ -241,6 +244,8 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
     lib.write_json(run_dir / "run.json", out)
     lib.write_atomic(run_dir / "digest.md", _digest.render(out, out.get("language", "en")))
     if not dry_run:
+        _issues.save(profile, log)
+        lib.save_state(profile, state)
         _report.write(profile, out.get("language", "en"), _dt.date.fromisoformat(out["date"]))
     return out
 
@@ -320,4 +325,4 @@ def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: 
     if not dry_run:
         out = merge_day(profile, out)
     return finish(profile, out, state, dry_run=dry_run, flag_ids={a["id"] for a in chosen},
-                  gazette_now=mon is not None)
+                  gazette_now=mon is not None, watched={a["id"] for a in acts})
