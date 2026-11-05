@@ -142,4 +142,4 @@ def record(profile: Path, acts: list[dict], card_path: Path, today: _dt.date, *,
            "acts": [r], "monitorul": None}
     out = runner.merge_day(profile, out)
     return runner.finish(profile, out, state, dry_run=False, flag_ids={act["id"]}, by_hand=True,
-                         watched={a["id"] for a in acts})
+                         watched=runner.watched_ids(acts))

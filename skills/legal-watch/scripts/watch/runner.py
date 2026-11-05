@@ -250,6 +250,11 @@ def finish(profile: Path, out: dict, state: dict, *, dry_run: bool, flag_ids: se
     return out
 
 
+def watched_ids(acts: list[dict]) -> set[str]:
+    """The whole watchlist for the error log; the Gazette counts while a Moldovan act is watched."""
+    return {a["id"] for a in acts} | ({"monitorul_md"} if any(a.get("jurisdiction") == "MD" for a in acts) else set())
+
+
 def _merge_flagged(old: list[dict], new: list[dict]) -> list[dict]:
     by = {k["contract"]: dict(k) for k in old}
     for k in new:
@@ -325,4 +330,4 @@ def run(profile: Path, acts: list[dict], fetcher, today: _dt.date, *, selector: 
     if not dry_run:
         out = merge_day(profile, out)
     return finish(profile, out, state, dry_run=dry_run, flag_ids={a["id"] for a in chosen},
-                  gazette_now=mon is not None, watched={a["id"] for a in acts})
+                  gazette_now=mon is not None, watched=watched_ids(acts))

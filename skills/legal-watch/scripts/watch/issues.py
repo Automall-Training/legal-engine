@@ -99,6 +99,17 @@ def _validate(data: dict, p: Path) -> None:
                 bad.append(f"engines.{h}")
             else:
                 bad += [f"engines.{h}.{v}" for v, e in eng.items() if not _engine_ok(e)]
+    if not bad:
+        # why: the key is the identity; the redundant fields every consumer reads are filled from it and defaults
+        for k, e in data["acts"].items():
+            e["act_id"] = k
+            for f, v in (("count", 0), ("streak", 0), ("history", [])):
+                e.setdefault(f, v)
+        for eng in data["engines"].values():
+            for e in eng.values():
+                e.setdefault("streak", 0)
+                e.setdefault("demoted_since", None)
+        return
     if bad:
         raise lib.WatchError(f"error log {p} is damaged ({', '.join(bad[:5])}); move it away and run again "
                              "(the next run starts a new log)")
@@ -209,8 +220,9 @@ def prepare_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool =
     """Update the log from what was read now (not the merged day) and the engine attempts of this run.
 
     `read_ids`: the acts read now, plus "monitorul_md" when the Gazette was scanned now.
-    `watched`: the whole current watchlist (not the acts of a partial run): an open problem of an act the user
-    removed is closed as "removed from the watchlist", since no recipe can reach an act that is not watched.
+    `watched`: the whole current watchlist (not the acts of a partial run), plus "monitorul_md" while a Moldovan act
+    is watched: an open problem of an act the user removed (or of the Gazette, once no Moldovan act is left) is
+    closed as "removed from the watchlist", since no recipe can reach it.
     """
     log = load(profile)
     day, at = out["date"], out.get("generated_at") or out["date"]
@@ -222,7 +234,7 @@ def prepare_run(profile: Path, out: dict, read_ids: set[str], *, by_hand: bool =
     update_engines(log, out.get("engine_attempts") or [], day)
     if watched is not None:
         for act_id, e in log["acts"].items():
-            if e.get("state") == "open" and act_id != "monitorul_md" and act_id not in watched:
+            if e.get("state") == "open" and act_id not in watched:
                 e.update({"state": "resolved", "resolved_on": day, "streak": 0,
                           "resolved_by": "removed from the watchlist"})
     return log

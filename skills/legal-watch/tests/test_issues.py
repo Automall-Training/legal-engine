@@ -136,6 +136,25 @@ class Log(RunnerBase):
         e = self.log()["acts"]["ro.lege.2-2020"]
         self.assertEqual((e["state"], e["resolved_by"]), ("resolved", "removed from the watchlist"))
 
+    def test_gazette_problem_closes_when_no_moldovan_act_is_left(self):
+        log = issues.empty()
+        issues.update_acts(log, [{"act_id": "monitorul_md", "reasons": ["gazette_scan_incomplete"]}], set(),
+                           TODAY.isoformat(), "t")
+        issues.save(self.profile, log)
+        md = {**act("md.lege.1-2020"), "jurisdiction": "MD"}
+        self.assertEqual(runner.watched_ids([md, act()]), {"md.lege.1-2020", "ro.lege.1-2020", "monitorul_md"})
+        self.run_with([md, act()], adapter([V1]))                   # --no-gazette-like: MD still watched
+        self.assertEqual(self.log()["acts"]["monitorul_md"]["state"], "open")
+        self.run_with([act()], adapter([V1]))                       # no Moldovan act left
+        self.assertEqual(self.log()["acts"]["monitorul_md"]["resolved_by"], "removed from the watchlist")
+
+    def test_identity_comes_from_the_key(self):
+        lib.write_json(issues.path(self.profile), {"schema_version": 1, "engines": {"h": {"urllib": {}}},
+                                                   "acts": {"x": {"state": "open", "priority": "p1"}}})
+        log = issues.load(self.profile)
+        self.assertEqual([i["act_id"] for i in issues.open_issues(log)], ["x"])
+        self.assertEqual(issues.demoted(log, TODAY), {})
+
     def test_never_written_inside_the_engine(self):
         with self.assertRaises(lib.WatchError):
             issues.save(lib.ENGINE_ROOT, issues.empty())
