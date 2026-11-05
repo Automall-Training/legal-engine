@@ -39,7 +39,8 @@ def inspect(text):
     for i,line in enumerate(text.splitlines(),1):
         heading=re.match(r'^## (\d+)[ .]',line)
         if heading: article=int(heading[1]); expected=1
-        match=re.match(r'^(\d+)\.(\d+)\s',line)
+        # why: Romanian contracts usually write '1.1.' (trailing dot); '1.1' alone was the only form matched
+        match=re.match(r'^(?:[-*]\s+)?(?:\*\*)?(\d+)\.(\d+)\.?(?:\*\*)?\s',line)
         if match:
             key=(int(match[1]),int(match[2]))
             if key in clauses: issues.append({'line':i,'rule':'duplicate_clause','value':match[0].strip()})

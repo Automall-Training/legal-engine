@@ -26,7 +26,7 @@ folder stays as it is).
 ## Depth
 
 Ask once: **quick** (recommended for a first try, about 5 minutes: steps 1–3; language taken from the user's
-messages, side and risk by default, the rest later) or **full** (about 15 minutes, every step). Quick still writes
+messages, side and risk by default, the rest later: law monitoring and documents stay for later) or **full** (about 15 minutes, every step). Quick still writes
 the files of steps 4 and 5 and marks them `done` with the note `default`: conversation in the language of the
 user's messages, documents in Romanian; risk threshold default; represented party the firm of step 1 when there is
 exactly one, otherwise "ask in each matter".
@@ -48,13 +48,14 @@ exactly one, otherwise "ask in each matter".
 
 ### 1. `firms`
 
-"Which firm (or firms) is this for?" For each: country (MD / RO), legal form, what it does, VAT payer or not,
-website, employees, own brand. A person without a firm is fine: write "natural person" and the country. Several
+Two questions, one after the other (facts, so no recommended option): "Which firm (or firms) is this for, in
+which country and with which legal form?", then for each firm "What does it do, is it a VAT payer, does it have a
+website, employees, a brand of its own?". A person without a firm is fine: write "natural person" and the country. Several
 firms → one section each. Registration numbers are optional; never ask for personal identity numbers.
 
 ### 2. `audience`
 
-"Whom do you sell to?" Options: firms only · people, online · people, offline · both. Then, only if not known
+"Whom do you sell to?" (a fact: options, none recommended) Options: firms only · people, online · people, offline · both. Then, only if not known
 yet: where the clients are, whether there are employees, whether a brand name is used. Suggest modules:
 
 | Fact | Suggests |
@@ -62,7 +63,7 @@ yet: where the clients are, whether there are employees, whether a brand name is
 | sells to consumers (any channel) | `consumer` |
 | consumers, employees, a website with forms or analytics, or any client list | `privacy` |
 | employees, or plans to hire | `employment` |
-| an own brand, shop or product name | `trademark` |
+| a brand or product name other than the firm's own legal name | `trademark` |
 
 Write the facts and the suggestion into the section of `company.md`.
 
@@ -119,10 +120,11 @@ what is missing and what each missing part serves for the modules that are on; r
 
 | Part | Needed for | Install |
 |---|---|---|
+| engine skills linked into the skills folder (`MISS skill …`) | every module, required | `cd <engine> && ./install.sh` |
 | Python environment `.venv` | every document (DOCX), required | `cd <engine> && ./install.sh` |
 | LibreOffice (`soffice`), Poppler (`pdftoppm`) | visual check of a document as PDF | the user's package manager (e.g. `brew install --cask libreoffice`, `brew install poppler`) |
 | `tesseract` with ron, rus, eng | scanned contracts | `brew install tesseract tesseract-lang` |
-| Playwright Chromium | scheduled law monitoring (`legal-watch`) | `cd <engine> && WITH_PLAYWRIGHT=1 ./install.sh` |
+| Playwright Chromium | law monitoring without a conversation (`legal-watch`); it never passes an anti-bot page, so Moldovan and Romanian acts are still checked through the user's browser in a conversation | `cd <engine> && WITH_PLAYWRIGHT=1 ./install.sh` |
 
 One request for approval for the whole list (options: install all (recommended when only required parts are missing)
 · only the required ones · none now). Install only after the user's literal "yes" for that list. Declined parts are

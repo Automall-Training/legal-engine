@@ -13,6 +13,8 @@ on the task date before they carry a conclusion.
       recordings.
 - [ ] Where it goes: hosting, e-mail, CRM, payment provider, analytics, advertising pixels, video calls. Each
       recipient's role (procedure 2) and country (procedure 3).
+- [ ] The site is the user's: confirm the domain belongs to their firm before reading it (a typo or an example
+      domain is someone else's site).
 - [ ] Trackers before consent: load the page and each embedded frame with plain GET requests only (never submit a
       form, never click the banner) and look for tag managers, analytics and advertising scripts. Non-essential
       ones need consent first (Romania: Law 506/2004; Moldova: the rule found per the law map). This is a static

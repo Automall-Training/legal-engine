@@ -55,6 +55,9 @@ recommended terms):
   "expected_paragraph": "Plata se efectuează în 10 zile.", "old": "10 zile", "new": "15 zile"}]}
 ```
 
+`part` is optional (default `word/document.xml`). To read a tracked result, use `inspect`, not python-docx:
+python-docx `.text` drops inserted (`w:ins`) text and so shows a redline that looks broken.
+
 Write a plan only for an agreed edit. The author is the role (for example "Legal review"), never a person's name
 unless the user asks. The script translates no comments, takes no legal decision and does not recalculate Word
 fields. The output folder must be new; nothing is overwritten; it appears only after verification passed.

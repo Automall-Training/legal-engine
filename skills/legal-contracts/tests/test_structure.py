@@ -3,6 +3,12 @@ spec=importlib.util.spec_from_file_location('structure',pathlib.Path(__file__).p
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 
 class StructureTests(unittest.TestCase):
+    def test_romanian_trailing_dot_numbering(self):
+        # E2E 2026-11-05: '1.1.' (the usual Romanian form) was skipped and a duplicate passed unseen
+        issues=m.inspect('## 1. Obiect\n1.1. Text.\n1.1. Alt.\n1.3. Salt.\n**2.1.** Alt articol.\n')
+        rules=[i['rule'] for i in issues]
+        self.assertIn('duplicate_clause',rules)
+        self.assertEqual(rules.count('clause_sequence'),3)
     def test_mismatched_allocation(self):
         self.assertEqual(m.reconcile({'total':'3000','components':['220']*14}),['components: sum differs from total'])
     def test_decimal_rounding_and_installments(self):

@@ -67,7 +67,9 @@ an interpretation; even a green result needs the agent's own reading.
 ## When a source is unavailable
 
 After a failure try the direct record or official PDF, another allowed way of reading, or another official
-publication (register → official journal → the issuing authority). Keep each address and result. Never get
+publication (register → official journal → the issuing authority). When the host's web tools are refused (on
+2026-11-05 legis.md answered 403 and legislatie.just.ro dropped them), the user's own browser through the browser
+tools is the next way of reading, on the user's yes. Keep each address and result. Never get
 around access restrictions and never take an anti-bot page for the act. A few meaningful routes are enough.
 
 Another official copy may confirm the text but not the current version: check later amendments separately. If

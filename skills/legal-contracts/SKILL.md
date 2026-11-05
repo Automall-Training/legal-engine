@@ -59,7 +59,7 @@ re-runs itself in the engine's environment (missing → it says to run `./instal
    `waiting` (with the question) or `done` (with what was delivered) through `legal_profile.py matter log`.
 
 ```bash
-python3 <skill-dir>/scripts/build_docx.py <matter>/output/document.json <matter>/output/draft.docx
+python3 <skill-dir>/scripts/build_docx.py <matter>/work/document.json <matter>/output/draft.docx
 python3 <skill-dir>/scripts/docx_redline.py inspect|apply|verify …          # see references/files.md
 python3 <skill-dir>/scripts/check_ro_style.py <files…> --root <matter> [--review <decisions.json>] [--report <out.json>]
 python3 <skill-dir>/scripts/check_structure.py <contract.md…> [--commercial <manifest.json>] [--report <out.json>]

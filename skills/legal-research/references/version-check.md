@@ -15,7 +15,7 @@ Strictness is in the **label**, not in stopping. When a point stays open the act
 **working conclusion**: the last text actually read, its date, the routes tried, what stays open. Work goes on
 with that label; the dependent findings are `partial` in the register and are named to the user.
 
-Today's date (system clock) is the check date. The model knows no law after its training cut-off: anything newer
+Today's date (system clock) is the check date; take every `checked_at` / `opened_at` from it (`date +%FT%T%z`), never type a time. The model knows no law after its training cut-off: anything newer
 comes only from a source opened now.
 
 ## Input

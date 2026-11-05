@@ -68,6 +68,16 @@ class RegisterTests(unittest.TestCase):
         r["sources"][0].update(status="unavailable", unverified_impact="F1 unresolved")
         self.assertTrue(self.check(r)["errors"])
 
+    def test_unavailable_source_may_have_no_version(self):
+        # E2E 2026-11-05: the version of a source that could not be opened is unknown; null must pass
+        r = register()
+        r["completion"] = "partial"
+        r["sources"][0].update(status="unavailable", unverified_impact="Cannot verify norm", version=None)
+        r["findings"][0].update(status="unverified", unverified_impact="Cannot conclude validity")
+        self.assertEqual(self.check(r)["errors"], [])
+        r["sources"][0].update(status="verified")
+        self.assertTrue(any("missing version" in e for e in self.check(r)["errors"]))
+
     def test_partial_work_allowed_and_disclosed(self):
         r = register()
         r["completion"] = "partial"

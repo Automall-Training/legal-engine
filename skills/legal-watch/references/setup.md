@@ -13,7 +13,8 @@ shows the current choice first and changes only what the user changes.
 3. Show what the choice means: `watch suggest --niches a,b [--b2c] --countries MD,RO,EU`. General categories come
    for every business (civil, tax, accounting, company, personal data), consumer law when the user sells to
    people, the niche categories after them. The user ticks the categories to keep; recommended: all suggested.
-4. Write the watchlist now with the defaults of step 7 (`watch init --niches … --categories … --acts all …`), then
+4. Write the watchlist now with the defaults of step 7 (`watch init --niches … --categories … --acts all --schedule on-request …`: nothing runs by itself until the
+   user answers the schedule question of step 7), then
    mark the step: `step set niches --status done` refuses while `laws/watchlist.yaml` does not exist, and the file
    keeps the answers if the session stops here. Step 7 rewrites it with `--force`.
 

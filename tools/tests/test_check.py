@@ -44,7 +44,7 @@ class ScanLines(unittest.TestCase):
                 self.assertEqual(len(self.fails(f"x {value} y")), 1, value)
 
     def test_placeholders_and_example_mail_pass(self):
-        for value in ("/" + "Users/you/legal-profile", "/home/user/x", "ana@example.md",
+        for value in ("/" + "Users/you/legal-profile", "/home/user/x", "ana@example.com",
                       "noreply@anthropic.com", "~/legal-profile"):
             with self.subTest(value=value):
                 self.assertEqual(self.fails(value), [])
@@ -52,6 +52,11 @@ class ScanLines(unittest.TestCase):
     def test_allow_marker_skips_patterns_but_not_private_marker(self):
         self.assertEqual(self.fails(f"{FAKE_CODE} leak-ok"), [])
         self.assertEqual(len(self.fails("<!-- " + "private:start --> leak-ok")), 1)
+
+    def test_example_md_and_ro_are_real_domains(self):
+        # only example.com / .net / .org are reserved (RFC 2606); example.md and example.ro can belong to someone
+        for value in ("ana" + "@example.md", "ana" + "@example.ro"):
+            self.assertEqual(len(self.fails(value)), 1, value)
 
     def test_denylist_is_case_insensitive(self):
         self.assertEqual(len(self.fails("Semnat de ACME Grup", ["acme grup"])), 1)

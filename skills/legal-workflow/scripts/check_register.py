@@ -54,7 +54,8 @@ def validate(reg: dict, task_id: str, now: datetime) -> dict:
         require(reg["task_id"] == task_id, "task_id mismatch: a new check is required for this task")
         start, checked = moment(reg["started_at"]), moment(reg["checked_at"])
         analysis = date.fromisoformat(reg["analysis_date"])
-        require(start <= checked <= now, "invalid task/check timestamps")
+        require(start <= checked, "started_at is after checked_at")
+        require(checked <= now, "checked_at is in the future: take timestamps from the system clock (date +%FT%T%z)")
         require(checked.astimezone(now.tzinfo).date() == now.date(), "check is not from today: re-check required")
         # why: the id carries the check date (<matter-id>@<YYYY-MM-DD>); a past analysis date there is a mistake.
         _, sep, day = str(reg["task_id"]).rpartition("@")
@@ -69,6 +70,9 @@ def validate(reg: dict, task_id: str, now: datetime) -> dict:
         for sid, s in sources.items():
             label = sid + ": "
             for key in SOURCE_FIELDS:
+                # why: the version of a source that could not be opened is unknown; null is the honest value
+                if key == "version" and s.get("status") not in OPENED_STATUSES:
+                    continue
                 require(bool(s.get(key)), label + "missing " + key)
             require(s["status"] in SOURCE_STATUSES, label + "unknown status")
             require(s["url"].startswith(("https://", "http://")), label + "invalid URL")

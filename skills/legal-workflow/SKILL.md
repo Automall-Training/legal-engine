@@ -53,6 +53,7 @@ python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
 
 | The request is about | Module id | Skill |
 |---|---|---|
+| "set up the lawyer", "настрой юриста", "configurează juristul", change the setup | — | `legal-workflow-setup` |
 | draft, audit, fix, adapt a contract or any commercial document; review a counterparty's draft before signing | `contracts` | `legal-contracts` |
 | "can I…", "is it legal…", which rule applies, deadlines, a sanction, an authority | `research` | `legal-research` |
 | which laws concern my business, download laws, what changed in the law, re-check my contracts after a change | `watch` | `legal-watch` |
