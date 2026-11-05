@@ -14,7 +14,7 @@ Version: 1.1.0 (2026-11-05; merge to `main` and the tags only after the owner's 
 | 8 | module `legal-employment` | done (branch `phase-1/legal-employment` on top of step 7; merge only after «да») |
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | done (branch `phase-1/legal-watch` on top of step 8; merge only after «да») |
 | 10 | end-to-end check, cross-model review, v1.0.0 | done (branch `phase-1/release-1.0` on top of step 9; merge only after «да») |
-| 10a | monitoring error log + `laws/report.html`, law library described (`legal-watch/references/issues.md`, `library.md`), v1.1.0 | done (branch `phase-1/watch-issues` on top of step 10; merge only after «да») |
+| 10a | monitoring error log + `laws/report.html`, law library described (`legal-watch/references/issues.md`, `library.md`), v1.1.0; Codex review in 4 rounds: 3/5 → 3/5 → 4/5 → 5/5 | done (branch `phase-1/watch-issues` on top of step 10; merge only after «да») |
 | 11 | public GitHub repository and first push (owner's «да» first) | next |
 
 Release check (step 10, 2026-11-05): 566 tests, coverage 93 %; clean install twice → `READY`; live monitoring
