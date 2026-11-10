@@ -36,7 +36,7 @@ AI-сервис (например, Claude) по условиям его пост
 2. В терминале:
 
    ```bash
-   git clone https://github.com/achislaru/legal-engine.git ~/legal-engine
+   git clone https://github.com/Automall-Training/legal-engine.git ~/legal-engine
    cd ~/legal-engine && ./install.sh
    ```
 
@@ -45,6 +45,17 @@ AI-сервис (например, Claude) по условиям его пост
    кому продаёте, ниши, какие законы отслеживать, языки, нужные модули.
 
 Обновление: `cd ~/legal-engine && git pull && ./install.sh` — ваш профиль не затрагивается.
+
+### Установка в Codex (Mac)
+
+Тот же движок работает в Codex. Скиллы кладутся в папку скиллов Codex:
+
+```
+git clone https://github.com/Automall-Training/legal-engine.git ~/legal-engine
+cd ~/legal-engine && SKILLS_DIR=~/.agents/skills bash ./install.sh
+```
+
+Нужны программа `uv` (`curl -LsSf https://astral.sh/uv/install.sh | sh`, потом заново открыть Терминал) и Python 3.10 или новее: на Mac системный Python старше, поэтому `uv python install 3.12 --default`, снова открыть Терминал и проверить `python3 --version`. Команда `git` на чистом Mac попросит «инструменты разработчика» — установите и повторите. Дождитесь `READY`, перезапустите Codex и напишите `$legal-workflow-setup настрой юриста`. Строку скрипта «open Claude Code…» в этом случае пропустите. Папку `~/legal-engine` не удаляйте: скиллы подключены к ней ссылками. Пошагово, для тех, кто не открывал Терминал, — плейбук команды Automall: https://automall-playbook.vercel.app, страница «Скиллы», блок «Юристам».
 
 ### Безопасность
 
