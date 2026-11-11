@@ -14,6 +14,20 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _can_symlink() -> bool:
+    """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; such tests are skipped there and
+    directory links fall back to a junction, which any user may create."""
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            os.symlink(tmp, os.path.join(tmp, "probe"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+CAN_SYMLINK = _can_symlink()
+
+
 def module(name):
     spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
     m = importlib.util.module_from_spec(spec)
@@ -256,8 +270,9 @@ class StructureCliTests(Base):
         doc = self.dir / "contract.md"
         doc.write_text("## 1 Obiect\n1.1 Text.\n", encoding="utf-8")
         link = self.dir / "link.md"
-        link.symlink_to(doc)
-        for target in (doc, link):
+        if CAN_SYMLINK:   # why: a file symlink needs admin rights or Developer Mode on Windows
+            link.symlink_to(doc)
+        for target in (doc, link) if CAN_SYMLINK else (doc,):
             with self.subTest(target=target.name):
                 self.assertEqual(run(S.main, str(doc), "--report", str(target))[0], 2)
                 self.assertEqual(doc.read_text(encoding="utf-8"), "## 1 Obiect\n1.1 Text.\n")

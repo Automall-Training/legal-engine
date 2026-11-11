@@ -6,7 +6,7 @@
 |---|---|---|---|
 | `urllib` | free | nothing (Python standard library) | several official portals block it or drop the connection: those acts end "not verified" |
 | `playwright` | free | `WITH_PLAYWRIGHT=1 ./install.sh`, on Windows `$env:WITH_PLAYWRIGHT=1` then `install.ps1` (a local browser) | anti-bot pages are never bypassed; slower; the browser profile lives in `laws/.browser/` |
-| `command` | the user's choice (for example a paid reading service) | `settings.fetch_command`: the user's own command with `{url}`, printing the page (HTML or markdown) to stdout | the user sets up the service and its key themselves; the engine passes only the URL and never reads, asks for or stores a key |
+| `command` | the user's choice (for example a paid reading service) | `settings.fetch_command`: the user's own command with `{url}`, printing the page (HTML or markdown) to stdout; on Windows `{url}` becomes `"%LEGAL_WATCH_URL%"` and the URL is passed in that variable, so cmd.exe cannot change a `%…%` in it | the user sets up the service and its key themselves; the engine passes only the URL and never reads, asks for or stores a key |
 | `host` | free | the agent in a conversation | not automatic: acts left not verified are checked by hand (monitoring.md, "Host check") |
 
 When an engine fails on a page, the next one is tried; the run records which engine produced each reading

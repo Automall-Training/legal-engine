@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -11,6 +12,19 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import doctor  # noqa: E402
+
+
+def _can_symlink() -> bool:
+    """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; those tests are skipped there."""
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            os.symlink(tmp, os.path.join(tmp, "probe"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+CAN_SYMLINK = _can_symlink()
 
 
 class ProfileDir(unittest.TestCase):
@@ -72,14 +86,23 @@ class SkillSource(unittest.TestCase):
         self.skills.mkdir()
         (self.src / "SKILL.md").write_text("---\nname: legal-x\n---\n", encoding="utf-8")
 
+    @unittest.skipUnless(CAN_SYMLINK, "symlinks need admin rights or Developer Mode on Windows")
     def test_link_to_this_engine(self):
         dst = self.skills / "legal-x"
         dst.symlink_to(self.src, target_is_directory=True)
         self.assertEqual(doctor.skill_source(dst, self.src), "this repo")
 
-    def test_junction_counts_like_a_symlink(self):
-        # why: a Windows junction is not `is_symlink()`, but `resolve()` follows it; acceptance must not depend
-        # on the link kind, so the answer stays the same when the link does not look like a symlink.
+    @unittest.skipUnless(os.name == "nt", "junctions exist only on Windows")
+    def test_real_junction_on_windows(self):
+        import _winapi  # CPython's own junction call: what install.ps1 makes, no admin rights needed
+        dst = self.skills / "legal-x"
+        _winapi.CreateJunction(str(self.src), str(dst))
+        self.assertEqual(doctor.skill_source(dst, self.src), "this repo")
+
+    @unittest.skipUnless(CAN_SYMLINK, "simulated with a symlink")
+    def test_link_that_is_not_a_symlink_counts(self):
+        # why: a junction is not `is_symlink()`, but `resolve()` follows it; acceptance must not depend on the
+        # link kind, so the answer stays the same when the link does not look like a symlink.
         dst = self.skills / "legal-x"
         dst.symlink_to(self.src, target_is_directory=True)
         with mock.patch.object(Path, "is_symlink", return_value=False):

@@ -118,6 +118,16 @@ class EnginePython(unittest.TestCase):
         self.assertEqual(offenders, [])
 
 
+class SymlinksInTests(unittest.TestCase):
+    def test_every_test_making_symlinks_checks_it_may(self):
+        """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; a test module that makes one must
+        probe first (CAN_SYMLINK) and skip, or use a junction for a directory."""
+        bad = [p.relative_to(ROOT).as_posix() for p in python_files() if "tests" in p.parts
+               and re.search(r"symlink_to\(|os\.symlink\(", p.read_text(encoding="utf-8"))
+               and "CAN_SYMLINK" not in p.read_text(encoding="utf-8")]
+        self.assertEqual(bad, [])
+
+
 class PreCommitHook(unittest.TestCase):
     @unittest.skipUnless(shutil.which("bash"), "needs bash (Git Bash on Windows)")
     def test_store_placeholder_python3_is_skipped(self):

@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -13,6 +14,29 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import legal_profile as lp  # noqa: E402
+
+
+def _can_symlink() -> bool:
+    """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; such tests are skipped there and
+    directory links fall back to a junction, which any user may create."""
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            os.symlink(tmp, os.path.join(tmp, "probe"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+CAN_SYMLINK = _can_symlink()
+
+
+def link_dir(link: Path, target: Path) -> None:
+    """A directory link: a symlink where allowed, otherwise a Windows junction."""
+    if CAN_SYMLINK:
+        link.symlink_to(target, target_is_directory=True)
+    else:
+        import _winapi  # Windows only: CPython's own junction call, no admin rights needed
+        _winapi.CreateJunction(str(target), str(link))
 
 CATALOG = lp.load_catalog()
 STATUS_TABLE = """# Integration status
@@ -89,13 +113,14 @@ class ResolveProfile(TmpCase):
 
     def test_link_inside_profile_into_engine_is_refused(self):
         """Codex review: a matters/ link into the checkout put private intake data in the public repository."""
-        (self.root / "matters").symlink_to(lp.ENGINE_ROOT / "skills")
+        link_dir(self.root / "matters", lp.ENGINE_ROOT / "skills")
         with self.assertRaises(lp.MatterError):
             lp.matter_new(self.root, "nda", "NDA", "contracts", CATALOG)
         self.assertFalse(any((lp.ENGINE_ROOT / "skills").glob("*-nda")))
         with self.assertRaises(lp.SetupError):
             lp._write_atomic(self.root / "matters" / "x.json", "{}", lp.SetupError)
 
+    @unittest.skipUnless(CAN_SYMLINK, "file symlinks need admin rights or Developer Mode on Windows")
     def test_log_link_into_engine_is_refused(self):
         (self.root / "matters").mkdir()
         target = lp.ENGINE_ROOT / "skills" / "never-log.md"
@@ -457,6 +482,7 @@ class ProfileInit(TmpCase):
         self.assertFalse(gone.exists())
         self.assertEqual(lp.profile_init(None, cfg, create=True)["profile"], str(gone))
 
+    @unittest.skipUnless(CAN_SYMLINK, "file symlinks need admin rights or Developer Mode on Windows")
     def test_symlinked_config_is_written_through(self):
         real = self.root / "dotfiles" / "config.json"
         real.parent.mkdir()

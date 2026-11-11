@@ -3,6 +3,8 @@ and the Windows Task Scheduler (schtasks). Runs on every system; the lock test u
 
 from __future__ import annotations
 
+import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -41,15 +43,38 @@ class Lock(unittest.TestCase):
             self.assertEqual(subprocess.run(args).returncode, 0)
 
 
-class QuoteUrl(unittest.TestCase):
+class CommandUrl(unittest.TestCase):
     URL = "https://www.legis.md/cautare/getResults?doc_id=1&lang=ro"
+    TRICKY = "https://example.org/a%PATH%b?x=1&y=%USERNAME%|z"   # cmd.exe would expand or split these
 
     def test_posix_shell_quoting(self):
-        self.assertEqual(F.quote_url(self.URL, windows=False), "'" + self.URL + "'")
+        self.assertEqual(F.command_line("fetch {url}", self.URL, windows=False), ("fetch '" + self.URL + "'", None))
 
-    def test_cmd_exe_needs_double_quotes(self):
-        self.assertEqual(F.quote_url(self.URL, windows=True), '"' + self.URL + '"')
-        self.assertEqual(F.quote_url('https://example.org/a"b', windows=True), '"https://example.org/a%22b"')
+    def test_windows_passes_the_url_in_a_variable(self):
+        cmd, env = F.command_line("fetch.cmd {url} --md", self.TRICKY, windows=True)
+        self.assertEqual(cmd, 'fetch.cmd "%LEGAL_WATCH_URL%" --md')
+        self.assertNotIn("PATH%b", cmd)
+        self.assertEqual(env[F.URL_ENV], self.TRICKY)
+        self.assertEqual(F.command_line("x {url}", 'https://example.org/a"b', windows=True)[1][F.URL_ENV],
+                         "https://example.org/a%22b")
+
+    def test_the_command_receives_the_url_unchanged(self):
+        """Real shell of this system (sh, or cmd.exe on Windows): the URL arrives byte for byte."""
+        with tempfile.TemporaryDirectory() as tmp:
+            echo = Path(tmp) / "echo_url.py"
+            echo.write_text("import sys\nprint('<html><body>' + sys.argv[1] + '</body></html>')\n", encoding="utf-8")
+            q = (lambda a: f'"{a}"') if os.name == "nt" else shlex.quote
+            fetcher = F.CommandFetcher(f"{q(sys.executable)} {q(str(echo))} {{url}}", pause_range=(0, 0))
+            seen = {}
+
+            def run(*a, **kw):
+                seen["p"] = subprocess.run(*a, **kw)
+                return seen["p"]
+
+            fetcher.run = run
+            fetcher.get(self.TRICKY)
+        self.assertEqual(seen["p"].returncode, 0, seen["p"].stderr)
+        self.assertIn("<body>" + self.TRICKY + "</body>", seen["p"].stdout)
 
     def test_command_output_is_read_as_utf8(self):
         seen = {}
@@ -60,7 +85,7 @@ class QuoteUrl(unittest.TestCase):
 
         F.CommandFetcher("fetch {url}", run=run, pause_range=(0, 0)).get(self.URL)
         self.assertEqual((seen["encoding"], seen["errors"]), ("utf-8", "replace"))
-        self.assertIn(F.quote_url(self.URL), seen["cmd"])
+        self.assertEqual(seen["cmd"], F.command_line("fetch {url}", self.URL)[0])
 
 
 class EnginePython(unittest.TestCase):

@@ -159,16 +159,23 @@ class UrllibFetcher(_Paced):
                                error=f"{type(e).__name__}: {str(e).splitlines()[0][:300] if str(e) else ''}")
 
 
-def quote_url(url: str, windows: bool | None = None) -> str:
-    """One shell argument for the URL.
-    why: the command runs through the system shell, `sh` on Mac/Linux, `cmd.exe` on Windows; cmd does not know
-    single quotes, so there the URL goes in double quotes (a URL has no raw `"`; one is percent-encoded anyway)."""
+URL_ENV = "LEGAL_WATCH_URL"   # Windows: the variable the user's command reads the page URL from
+
+
+def command_line(command: str, url: str, windows: bool | None = None) -> tuple[str, dict | None]:
+    """The shell line for the user's command and the environment to run it with (None: inherit).
+    why: the command runs through the system shell, `sh` on Mac/Linux, `cmd.exe` on Windows. `sh` gets the URL
+    single-quoted. cmd.exe expands `%NAME%` even inside double quotes, so a URL like `…%PATH%…` would be altered;
+    there `{url}` becomes `"%LEGAL_WATCH_URL%"` and the URL travels in that variable: cmd expands it once and never
+    expands what the value contains, and the quotes keep `&` and `|` literal (a raw `"` is percent-encoded)."""
     windows = os.name == "nt" if windows is None else windows
-    return '"' + url.replace('"', "%22") + '"' if windows else shlex.quote(url)
+    if windows:
+        return command.replace("{url}", f'"%{URL_ENV}%"'), {**os.environ, URL_ENV: url.replace('"', "%22")}
+    return command.replace("{url}", shlex.quote(url)), None
 
 
 class CommandFetcher(_Paced):
-    """Runs the user's own command; `{url}` in it is replaced by the page URL (shell-quoted).
+    """Runs the user's own command; `{url}` in it stands for the page URL (see `command_line`).
 
     The command prints the page (HTML or markdown) to stdout. Its credentials, if any, live in the user's own
     setup; this class passes only the URL.
@@ -183,11 +190,11 @@ class CommandFetcher(_Paced):
     def get(self, url: str) -> FetchResult:
         self.pause()
         fetched_at = now_iso()
-        cmd = self.command.replace("{url}", quote_url(url))
+        cmd, env = command_line(self.command, url)
         try:
             # why: pages are read as UTF-8 on every system (Windows would decode with its ANSI code page)
-            p = self.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8", errors="replace",
-                         timeout=self.timeout)
+            p = self.run(cmd, shell=True, env=env, capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", timeout=self.timeout)
         except Exception as e:  # noqa: BLE001
             return FetchResult(url=url, status=None, fetched_at=fetched_at, via="command",
                                error=f"command failed: {type(e).__name__}")
