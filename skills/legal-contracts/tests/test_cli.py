@@ -73,7 +73,7 @@ class ReexecTests(Base):
             os.environ.pop(ENV.GUARD, None)
             ENV.reexec(__file__, "lxml", venv=self.dir / "no-python")
         self.assertEqual(stop.exception.code, 2)
-        self.assertIn("./install.sh", out.getvalue())
+        self.assertIn(ENV.install_hint(), out.getvalue())
 
     def test_guard_prevents_a_loop(self):
         fake = self.dir / "python"
@@ -87,6 +87,7 @@ class ReexecTests(Base):
         fake = self.dir / "python"
         fake.write_text("", encoding="utf-8")
         with mock.patch.dict(os.environ, {}, clear=False), mock.patch.object(ENV.os, "execv") as execv, \
+                mock.patch.object(ENV, "WINDOWS", False), \
                 mock.patch.object(ENV.sys, "argv", ["x.py", "inspect", "a.docx"]), \
                 contextlib.redirect_stdout(io.StringIO()):
             os.environ.pop(ENV.GUARD, None)
@@ -94,6 +95,32 @@ class ReexecTests(Base):
                 ENV.reexec(__file__, "lxml", venv=fake)
             self.assertEqual(os.environ[ENV.GUARD], "1")
         execv.assert_called_once_with(str(fake), [str(fake), str(Path(__file__).resolve()), "inspect", "a.docx"])
+
+    def test_windows_waits_for_the_rerun_and_passes_its_exit_code(self):
+        fake = self.dir / "python.exe"
+        fake.write_text("", encoding="utf-8")
+        with mock.patch.dict(os.environ, {}, clear=False), mock.patch.object(ENV.os, "execv") as execv, \
+                mock.patch.object(ENV, "WINDOWS", True), \
+                mock.patch.object(ENV.subprocess, "call", return_value=3) as call, \
+                mock.patch.object(ENV.sys, "argv", ["x.py", "verify", "a.docx"]):
+            os.environ.pop(ENV.GUARD, None)
+            with self.assertRaises(SystemExit) as stop:
+                ENV.reexec(__file__, "lxml", venv=fake)
+        self.assertEqual(stop.exception.code, 3)
+        execv.assert_not_called()
+        call.assert_called_once_with([str(fake), str(Path(__file__).resolve()), "verify", "a.docx"])
+
+
+class EnginePythonTests(unittest.TestCase):
+    def test_venv_layout_per_system(self):
+        root = Path("engine")
+        self.assertEqual(ENV.venv_python(root, windows=False), root / ".venv" / "bin" / "python")
+        self.assertEqual(ENV.venv_python(root, windows=True), root / ".venv" / "Scripts" / "python.exe")
+        self.assertEqual(ENV.VENV_PYTHON, ENV.venv_python(ENV.ENGINE_ROOT))
+
+    def test_install_hint_per_system(self):
+        self.assertEqual(ENV.install_hint(windows=False), "./install.sh")
+        self.assertIn("install.ps1", ENV.install_hint(windows=True))
 
 
 class BuildCliTests(Base):

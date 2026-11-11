@@ -1,29 +1,54 @@
 """Run a contract script inside the engine's Python environment when the system python lacks its packages.
 
 why: SKILL.md calls every script with plain `python3`, so the agent never has to find the engine's `.venv`.
-A script whose third-party import fails re-runs itself once with `<engine>/.venv/bin/python` (built by
-./install.sh); without that environment it stops with a clear message instead of a traceback.
+A script whose third-party import fails re-runs itself once with the engine's Python (`<engine>/.venv/bin/python`
+on Mac/Linux, `<engine>\\.venv\\Scripts\\python.exe` on Windows, built by ./install.sh or install.ps1); without that
+environment it stops with a clear message instead of a traceback.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 # skills/legal-contracts/scripts/_engine_env.py → the engine root is three folders up (links resolved).
 ENGINE_ROOT = Path(__file__).resolve().parents[3]
-VENV_PYTHON = ENGINE_ROOT / ".venv" / "bin" / "python"
+# why: one switch for "this is Windows", so tests can flip it without patching os.name (pathlib reads os.name).
+WINDOWS = os.name == "nt"
+
+
+def venv_python(root: Path = ENGINE_ROOT, windows: bool | None = None) -> Path:
+    """The engine's Python inside `<root>/.venv`.
+    why: a virtual environment keeps its interpreter in `Scripts\\python.exe` on Windows and `bin/python` elsewhere.
+    legal-watch keeps a copy of this rule (its scripts stay importable on their own); tools/tests checks both agree."""
+    windows = WINDOWS if windows is None else windows
+    return root / ".venv" / ("Scripts" if windows else "bin") / ("python.exe" if windows else "python")
+
+
+def install_hint(windows: bool | None = None) -> str:
+    """The command that (re)builds the engine on this system: install.sh is bash, Windows has install.ps1."""
+    windows = WINDOWS if windows is None else windows
+    return "powershell -ExecutionPolicy Bypass -File .\\install.ps1" if windows else "./install.sh"
+
+
+VENV_PYTHON = venv_python()
 GUARD = "LEGAL_ENGINE_REEXEC"  # why: set on the re-run so a broken environment cannot loop forever
 
 
 def reexec(script: str, missing: str, venv: Path = VENV_PYTHON) -> None:
-    """Replace this process with the same script under the engine's Python; never returns on success."""
+    """Re-run the same script under the engine's Python; never returns while that environment exists."""
     if venv.is_file() and not os.environ.get(GUARD):
         os.environ[GUARD] = "1"
-        os.execv(str(venv), [str(venv), str(Path(script).resolve()), *sys.argv[1:]])
-    print(json.dumps({"error": f"Python package '{missing}' is missing: run ./install.sh in the engine folder "
+        args = [str(venv), str(Path(script).resolve()), *sys.argv[1:]]
+        if WINDOWS:
+            # why: on Windows os.execv starts a new process and ends this one at once, so the caller would see
+            # exit 0 before the real run finished; wait for the child and pass its exit code on instead.
+            raise SystemExit(subprocess.call(args))
+        os.execv(str(venv), args)
+    print(json.dumps({"error": f"Python package '{missing}' is missing: run `{install_hint()}` in the engine folder "
                                f"({ENGINE_ROOT}) to build its environment"}, ensure_ascii=False))
     raise SystemExit(2)
 
