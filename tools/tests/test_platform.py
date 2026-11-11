@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import os
 import re
+import shutil
+import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -112,6 +116,26 @@ class EnginePython(unittest.TestCase):
                 if re.search(r"""["']bin["']\s*/\s*["']python["']|\.venv/bin/python""", code) and not both:
                     offenders.append(f"{rel}:{n}")
         self.assertEqual(offenders, [])
+
+
+class PreCommitHook(unittest.TestCase):
+    @unittest.skipUnless(shutil.which("bash"), "needs bash (Git Bash on Windows)")
+    def test_store_placeholder_python3_is_skipped(self):
+        """why: Windows' `python3` may be the Microsoft Store placeholder: it exists, but only opens the Store."""
+        hook = (ROOT / "tools/hooks/pre-commit").read_text(encoding="utf-8")
+        probe = hook[hook.index("PY3=\n"):hook.index('if [ -z "$PY3" ]')]
+        with tempfile.TemporaryDirectory() as tmp:
+            bin_dir = Path(tmp)
+            fake = bin_dir / "python3"
+            fake.write_text("#!/bin/sh\nexit 49\n", encoding="utf-8")
+            fake.chmod(0o755)
+            real = bin_dir / "python"
+            real.write_text(f'#!/bin/sh\nexec "{Path(sys.executable).as_posix()}" "$@"\n', encoding="utf-8")
+            real.chmod(0o755)
+            script = f'ROOT="{Path(tmp).as_posix()}/none"\n{probe}printf %s "$PY3"\n'
+            out = subprocess.run(["bash", "-c", script], capture_output=True, text=True, encoding="utf-8",
+                                 env={**os.environ, "PATH": f"{bin_dir}{os.pathsep}/usr/bin{os.pathsep}/bin"})
+        self.assertEqual(out.stdout, "python")
 
 
 class Installers(unittest.TestCase):

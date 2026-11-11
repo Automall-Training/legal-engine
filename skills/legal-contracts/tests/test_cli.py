@@ -75,6 +75,18 @@ class ReexecTests(Base):
         self.assertEqual(stop.exception.code, 2)
         self.assertIn(ENV.install_hint(), out.getvalue())
 
+    def test_missing_environment_message_survives_a_cp1252_stream(self):
+        raw = io.BytesIO()
+        stream = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+        with mock.patch.dict(os.environ, {}, clear=False), self.assertRaises(SystemExit) as stop, \
+                mock.patch.object(ENV, "ENGINE_ROOT", Path("C:/Users/Ștefan/legal-engine")), \
+                contextlib.redirect_stdout(stream):
+            os.environ.pop(ENV.GUARD, None)
+            ENV.reexec(__file__, "lxml", venv=self.dir / "no-python")
+        stream.flush()
+        self.assertEqual(stop.exception.code, 2)
+        self.assertIn("Ștefan", json.loads(raw.getvalue().decode("cp1252"))["error"])
+
     def test_guard_prevents_a_loop(self):
         fake = self.dir / "python"
         fake.write_text("", encoding="utf-8")

@@ -48,8 +48,10 @@ def reexec(script: str, missing: str, venv: Path = VENV_PYTHON) -> None:
             # exit 0 before the real run finished; wait for the child and pass its exit code on instead.
             raise SystemExit(subprocess.call(args))
         os.execv(str(venv), args)
+    # why: this runs during the script's imports, before it switches its output to UTF-8; on a Windows pipe
+    # (cp1252) a folder like C:\\Users\\Ștefan would crash the print, so the JSON is escaped to plain ASCII.
     print(json.dumps({"error": f"Python package '{missing}' is missing: run `{install_hint()}` in the engine folder "
-                               f"({ENGINE_ROOT}) to build its environment"}, ensure_ascii=False))
+                               f"({ENGINE_ROOT}) to build its environment"}, ensure_ascii=True))
     raise SystemExit(2)
 
 

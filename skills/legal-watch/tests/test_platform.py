@@ -80,7 +80,8 @@ class Schtasks(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        self.profile = Path(self.tmp.name) / "legal profile"   # a space: the command must quote it
+        # a space: the command must quote it; resolved, because the schedule writes the absolute path
+        self.profile = Path(self.tmp.name).resolve() / "legal profile"
         # why: a typical Windows install (C:\\Users\\<name>\\legal-engine); this checkout may sit deeper and
         # its real path would exceed the /TR limit that test_too_long_command_is_refused checks on its own.
         short = mock.patch.object(schedule, "engine_python", return_value=Path("C:/e/.venv/Scripts/python.exe"))
@@ -102,6 +103,26 @@ class Schtasks(unittest.TestCase):
         self.assertIn(f'"{self.profile}"', tr)
         self.assertTrue(tr.endswith(" run"))
         self.assertIn("legal_watch.py", tr)
+
+    def test_relative_profile_becomes_absolute_in_every_kind(self):
+        # why: Task Scheduler, launchd and cron do not start in the folder the user typed the path from
+        import os
+        base = Path(self.tmp.name).resolve()
+        (base / "work").mkdir()
+        old = os.getcwd()
+        os.chdir(base / "work")
+        self.addCleanup(os.chdir, old)
+        rel, real = Path("../legal-profile"), base / "legal-profile"
+        tr = schedule.schtasks_create(rel)[schedule.schtasks_create(rel).index("/TR") + 1]
+        self.assertIn(str(real), tr)
+        self.assertNotIn("..", tr)
+        self.assertIn(str(real), schedule.plan(rel, "schtasks")["command"])
+        for kind, key in (("launchd", "command"), ("cron", "line")):
+            out = schedule.plan(rel, kind)[key]
+            self.assertIn(str(real), out, kind)
+            self.assertNotIn("..", out, kind)
+        self.assertIn(str(real).encode(), schedule.plist(rel))
+        self.assertNotIn(b"..", schedule.plist(rel))
 
     def test_too_long_command_is_refused(self):
         with self.assertRaises(lib.WatchError):

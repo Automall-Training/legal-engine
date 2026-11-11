@@ -45,11 +45,19 @@ def engine_python() -> Path:
     return venv if venv.exists() else Path(sys.executable)
 
 
+def absolute(profile: Path) -> Path:
+    """why: a scheduled job does not start in the user's shell folder, so `--profile ../legal-profile` typed in a
+    conversation would point somewhere else at 09:00; every kind gets the absolute path."""
+    return Path(profile).expanduser().resolve()
+
+
 def command(profile: Path) -> list[str]:
+    profile = absolute(profile)
     return [str(engine_python()), str(lib.SKILL / "scripts" / "legal_watch.py"), "--profile", str(profile), "run"]
 
 
 def plist(profile: Path) -> bytes:
+    profile = absolute(profile)
     log = str(lib.laws_dir(profile) / "runs" / "schedule.log")
     return plistlib.dumps({
         "Label": LABEL, "ProgramArguments": command(profile),
@@ -59,7 +67,8 @@ def plist(profile: Path) -> bytes:
 
 def schtasks_create(profile: Path) -> list[str]:
     """The `schtasks /Create` call: weekly, Monday 09:00, as the current user (no admin rights); `/F` replaces an
-    earlier task of the same name, so re-running never duplicates it.
+    earlier task of the same name, so re-running never duplicates it. The profile is absolute (see `absolute`)
+    before the length check, so the check measures what Task Scheduler stores.
     why: no `>> schedule.log` here (that needs `cmd /c` and makes the command too long for /TR); every run still
     writes run.json and the digest into laws/runs/<date>/, and Task Scheduler keeps the last exit code."""
     tr = subprocess.list2cmdline(command(profile))
@@ -73,6 +82,7 @@ def schtasks_create(profile: Path) -> list[str]:
 def plan(profile: Path, kind: str) -> dict:
     if kind not in KINDS:
         raise lib.WatchError(f"schedule kind must be one of {list(KINDS)}")
+    profile = absolute(profile)
     if kind == "schtasks":
         # why: list2cmdline is how Python hands the list to Windows, so this is exactly what `install` runs.
         return {"kind": kind, "task": TASK_NAME, "when": "every Monday 09:00",
@@ -94,6 +104,7 @@ def plan(profile: Path, kind: str) -> dict:
 def install(profile: Path, kind: str = "launchd", *, run=subprocess.run, home: Path | None = None) -> dict:
     """Install the weekly job: launchd (macOS) or a Task Scheduler task (Windows). Re-running replaces the job,
     never duplicates it. Called only after the user's yes in chat."""
+    profile = absolute(profile)
     if kind == "schtasks":
         return _install_schtasks(profile, run=run)
     if kind != "launchd":

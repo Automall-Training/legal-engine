@@ -3,9 +3,13 @@
 # Enable once per clone: git config core.hooksPath tools/hooks
 set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
-# why: Git for Windows runs this hook in its bash, where Python is often `python`, not `python3`
-PY3=python3
-command -v python3 >/dev/null 2>&1 || PY3=python
+# why: Git for Windows runs this hook in its bash, where Python is often `python`, not `python3`, and `python3`
+# may be the Microsoft Store placeholder that exists but only opens the Store: a candidate must really run.
+PY3=
+for cand in python3 python "$ROOT/.venv/bin/python" "$ROOT/.venv/Scripts/python.exe"; do
+  if "$cand" -c "import sys" >/dev/null 2>&1; then PY3="$cand"; break; fi
+done
+if [ -z "$PY3" ]; then echo "pre-commit: no working Python (python3, python or the engine's .venv)"; exit 1; fi
 # why: the staged content is what gets committed; the full scan also catches files staged earlier
 "$PY3" "$ROOT/tools/check.py" --quiet --staged
 "$PY3" "$ROOT/tools/check.py" --quiet
