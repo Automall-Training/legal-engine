@@ -280,4 +280,7 @@ def main(argv=None):
         print(json.dumps({'error':str(e)},ensure_ascii=False),file=sys.stderr); return 2
     return 0
 
-if __name__=='__main__': sys.exit(main())
+if __name__ == "__main__":
+    for _stream in (sys.stdout, sys.stderr):  # why: a Windows pipe defaults to the ANSI code page (no ș, ț, Cyrillic)
+        getattr(_stream, "reconfigure", lambda **_: None)(encoding="utf-8")
+    sys.exit(main())

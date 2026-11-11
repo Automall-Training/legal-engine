@@ -86,7 +86,7 @@ class FirstReading(RunnerBase):
         self.run_with([act(current=held["current"])], adapter([V1]))
         files = list((self.profile / "laws" / "texts" / "ro.lege.1-2020").glob("*.txt"))
         self.assertEqual(len(files), 1)
-        self.assertIn("Official text", files[0].read_text())
+        self.assertIn("Official text", files[0].read_text(encoding="utf-8"))
 
     def test_uncalibrated_baseline_is_not_accepted(self):
         out = self.run_with([act()], adapter([V1], calibrated=False))
@@ -133,7 +133,7 @@ class Failures(RunnerBase):
         out = self.run_with([act()], adapter([], fail="fetch_failed"))
         self.assertEqual((out["result"], out["exit_code"]), ("INCOMPLETE", 2))
         self.assertFalse(out["phrase_no_changes_allowed"])
-        text = (self.profile / "laws" / "runs" / "2026-11-04" / "digest.md").read_text()
+        text = (self.profile / "laws" / "runs" / "2026-11-04" / "digest.md").read_text(encoding="utf-8")
         self.assertNotIn("no changes", text.lower().split("**")[1])
 
     def test_p2_failure_does_not_block_ok(self):
@@ -173,7 +173,7 @@ class ContractFlags(RunnerBase):
                                                        "clauses": ["5.2"]}])
         pend = clauses.pending(self.profile)
         self.assertEqual([c["clause"] for c in pend[0]["clauses"]], ["5.2"])
-        digest_text = (self.profile / "laws" / "runs" / "2026-11-04" / "digest.md").read_text()
+        digest_text = (self.profile / "laws" / "runs" / "2026-11-04" / "digest.md").read_text(encoding="utf-8")
         self.assertIn("services.docx", digest_text)
 
     def test_flag_is_idempotent_and_cleared_only_with_a_matter(self):
@@ -296,7 +296,7 @@ class State(RunnerBase):
         st["runs"] = [{"date": f"d{i}", "result": "OK"} for i in range(50)]
         lib.save_state(self.profile, st)
         self.assertEqual(len(lib.load_state(self.profile)["runs"]), lib.RUN_HISTORY)
-        (self.profile / "laws" / "state.json").write_text(json.dumps({"schema_version": 9}))
+        (self.profile / "laws" / "state.json").write_text(json.dumps({"schema_version": 9}), encoding="utf-8")
         with self.assertRaises(lib.WatchError):
             lib.load_state(self.profile)
 

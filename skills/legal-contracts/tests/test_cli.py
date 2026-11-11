@@ -14,6 +14,20 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _can_symlink() -> bool:
+    """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; such tests are skipped there and
+    directory links fall back to a junction, which any user may create."""
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            os.symlink(tmp, os.path.join(tmp, "probe"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+CAN_SYMLINK = _can_symlink()
+
+
 def module(name):
     spec = importlib.util.spec_from_file_location(name, ROOT / "scripts" / f"{name}.py")
     m = importlib.util.module_from_spec(spec)
@@ -73,7 +87,20 @@ class ReexecTests(Base):
             os.environ.pop(ENV.GUARD, None)
             ENV.reexec(__file__, "lxml", venv=self.dir / "no-python")
         self.assertEqual(stop.exception.code, 2)
-        self.assertIn("./install.sh", out.getvalue())
+        # parsed, not raw: JSON escapes the backslash of the Windows hint (.\\install.ps1)
+        self.assertIn(ENV.install_hint(), json.loads(out.getvalue())["error"])
+
+    def test_missing_environment_message_survives_a_cp1252_stream(self):
+        raw = io.BytesIO()
+        stream = io.TextIOWrapper(raw, encoding="cp1252", errors="strict")
+        with mock.patch.dict(os.environ, {}, clear=False), self.assertRaises(SystemExit) as stop, \
+                mock.patch.object(ENV, "ENGINE_ROOT", Path("C:/Users/Ștefan/legal-engine")), \
+                contextlib.redirect_stdout(stream):
+            os.environ.pop(ENV.GUARD, None)
+            ENV.reexec(__file__, "lxml", venv=self.dir / "no-python")
+        stream.flush()
+        self.assertEqual(stop.exception.code, 2)
+        self.assertIn("Ștefan", json.loads(raw.getvalue().decode("cp1252"))["error"])
 
     def test_guard_prevents_a_loop(self):
         fake = self.dir / "python"
@@ -87,6 +114,7 @@ class ReexecTests(Base):
         fake = self.dir / "python"
         fake.write_text("", encoding="utf-8")
         with mock.patch.dict(os.environ, {}, clear=False), mock.patch.object(ENV.os, "execv") as execv, \
+                mock.patch.object(ENV, "WINDOWS", False), \
                 mock.patch.object(ENV.sys, "argv", ["x.py", "inspect", "a.docx"]), \
                 contextlib.redirect_stdout(io.StringIO()):
             os.environ.pop(ENV.GUARD, None)
@@ -94,6 +122,32 @@ class ReexecTests(Base):
                 ENV.reexec(__file__, "lxml", venv=fake)
             self.assertEqual(os.environ[ENV.GUARD], "1")
         execv.assert_called_once_with(str(fake), [str(fake), str(Path(__file__).resolve()), "inspect", "a.docx"])
+
+    def test_windows_waits_for_the_rerun_and_passes_its_exit_code(self):
+        fake = self.dir / "python.exe"
+        fake.write_text("", encoding="utf-8")
+        with mock.patch.dict(os.environ, {}, clear=False), mock.patch.object(ENV.os, "execv") as execv, \
+                mock.patch.object(ENV, "WINDOWS", True), \
+                mock.patch.object(ENV.subprocess, "call", return_value=3) as call, \
+                mock.patch.object(ENV.sys, "argv", ["x.py", "verify", "a.docx"]):
+            os.environ.pop(ENV.GUARD, None)
+            with self.assertRaises(SystemExit) as stop:
+                ENV.reexec(__file__, "lxml", venv=fake)
+        self.assertEqual(stop.exception.code, 3)
+        execv.assert_not_called()
+        call.assert_called_once_with([str(fake), str(Path(__file__).resolve()), "verify", "a.docx"])
+
+
+class EnginePythonTests(unittest.TestCase):
+    def test_venv_layout_per_system(self):
+        root = Path("engine")
+        self.assertEqual(ENV.venv_python(root, windows=False), root / ".venv" / "bin" / "python")
+        self.assertEqual(ENV.venv_python(root, windows=True), root / ".venv" / "Scripts" / "python.exe")
+        self.assertEqual(ENV.VENV_PYTHON, ENV.venv_python(ENV.ENGINE_ROOT))
+
+    def test_install_hint_per_system(self):
+        self.assertEqual(ENV.install_hint(windows=False), "./install.sh")
+        self.assertIn("install.ps1", ENV.install_hint(windows=True))
 
 
 class BuildCliTests(Base):
@@ -217,8 +271,9 @@ class StructureCliTests(Base):
         doc = self.dir / "contract.md"
         doc.write_text("## 1 Obiect\n1.1 Text.\n", encoding="utf-8")
         link = self.dir / "link.md"
-        link.symlink_to(doc)
-        for target in (doc, link):
+        if CAN_SYMLINK:   # why: a file symlink needs admin rights or Developer Mode on Windows
+            link.symlink_to(doc)
+        for target in (doc, link) if CAN_SYMLINK else (doc,):
             with self.subTest(target=target.name):
                 self.assertEqual(run(S.main, str(doc), "--report", str(target))[0], 2)
                 self.assertEqual(doc.read_text(encoding="utf-8"), "## 1 Obiect\n1.1 Text.\n")

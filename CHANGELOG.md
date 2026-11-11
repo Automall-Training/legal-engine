@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.2.0 — 2026-11-11
+
+The engine runs on Windows 10 and 11 as well as on macOS and Linux.
+
+- **`install.ps1`** for Windows PowerShell 5.1 and PowerShell 7, without admin rights: the same steps and output
+  lines as `install.sh` (`SKILLS_DIR`, `NO_DEPS`, `WITH_PLAYWRIGHT`, the same default skills folder). Skills are
+  linked with directory junctions, which need neither admin rights nor Developer Mode; a real folder is skipped.
+- **The engine's Python** is `.venv\Scripts\python.exe` on Windows: one helper in `legal-contracts/_engine_env.py`
+  (doctor uses it; `legal-watch` keeps a tested copy). On Windows a contract script re-runs itself in `.venv` and
+  waits for it, so the caller gets the real exit code.
+- **Monitoring:** the browser-profile lock uses `msvcrt` on Windows (`fcntl` elsewhere), still "already running"
+  without waiting; the user's fetch command gets the URL quoted for `cmd.exe`; `schedule --kind schtasks` plans,
+  installs (only after the user's yes) and removes a weekly Windows Task Scheduler task, Monday 09:00. The default
+  kind is now the system's own scheduler: launchd on macOS, schtasks on Windows, cron elsewhere.
+- **Encoding:** every text file is read and written as UTF-8, and the scripts print UTF-8, so Cyrillic and ș, ț
+  survive the Windows code pages; a test keeps it so. `.gitattributes` keeps text files LF on every system.
+- **doctor** accepts a skill linked by symlink or junction, or a hand copy of this engine's skill; it names
+  `install.ps1` on Windows and knows the Windows Playwright cache.
+- **CI** (GitHub Actions, read-only token, no secrets): install, doctor and every test suite on Windows, macOS and
+  Ubuntu, plus a Windows smoke test building a DOCX and a Word redline.
+
 ## 1.1.0 — 2026-11-05
 
 Law monitoring learns from its failures, and the law library is described. The whole repository is now under

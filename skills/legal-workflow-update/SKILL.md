@@ -41,5 +41,5 @@ The profile script is `<skill-dir>/../legal-workflow/scripts/legal_profile.py` (
 
 Current `schema_version` of `modules.json` and `intake.json`: 1. No migration exists yet. A file with a higher
 version was written by a newer engine: tell the user to update the engine (`git pull && ./install.sh` in the
-engine folder); never lower it. A future migration is listed here with its from/to versions and is applied only after
+engine folder; Windows: `git pull`, then `powershell -ExecutionPolicy Bypass -File .\install.ps1`); never lower it. A future migration is listed here with its from/to versions and is applied only after
 the user's "yes", with the old file kept next to it as `<name>.v<old>.json`.

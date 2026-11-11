@@ -3,13 +3,28 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import doctor  # noqa: E402
+
+
+def _can_symlink() -> bool:
+    """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; those tests are skipped there."""
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            os.symlink(tmp, os.path.join(tmp, "probe"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+CAN_SYMLINK = _can_symlink()
 
 
 class ProfileDir(unittest.TestCase):
@@ -59,16 +74,76 @@ class EngineSkills(unittest.TestCase):
             self.assertFalse(doctor.playwright_ready(Path(sys.executable), (Path(tmp) / "none",)))
 
 
+class SkillSource(unittest.TestCase):
+    """A skill counts as installed through a symlink (install.sh), a junction (install.ps1) or a hand copy."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.src, self.skills = base / "engine" / "skills" / "legal-x", base / "skills"
+        self.src.mkdir(parents=True)
+        self.skills.mkdir()
+        (self.src / "SKILL.md").write_text("---\nname: legal-x\n---\n", encoding="utf-8")
+
+    @unittest.skipUnless(CAN_SYMLINK, "symlinks need admin rights or Developer Mode on Windows")
+    def test_link_to_this_engine(self):
+        dst = self.skills / "legal-x"
+        dst.symlink_to(self.src, target_is_directory=True)
+        self.assertEqual(doctor.skill_source(dst, self.src), "this repo")
+
+    @unittest.skipUnless(os.name == "nt", "junctions exist only on Windows")
+    def test_real_junction_on_windows(self):
+        import _winapi  # CPython's own junction call: what install.ps1 makes, no admin rights needed
+        dst = self.skills / "legal-x"
+        _winapi.CreateJunction(str(self.src), str(dst))
+        self.assertEqual(doctor.skill_source(dst, self.src), "this repo")
+
+    @unittest.skipUnless(CAN_SYMLINK, "simulated with a symlink")
+    def test_link_that_is_not_a_symlink_counts(self):
+        # why: a junction is not `is_symlink()`, but `resolve()` follows it; acceptance must not depend on the
+        # link kind, so the answer stays the same when the link does not look like a symlink.
+        dst = self.skills / "legal-x"
+        dst.symlink_to(self.src, target_is_directory=True)
+        with mock.patch.object(Path, "is_symlink", return_value=False):
+            self.assertEqual(doctor.skill_source(dst, self.src), "this repo")
+
+    def test_copy_of_this_engine_and_another_copy(self):
+        dst = self.skills / "legal-x"
+        dst.mkdir()
+        (dst / "SKILL.md").write_bytes((self.src / "SKILL.md").read_bytes())
+        self.assertTrue(doctor.skill_source(dst, self.src).startswith("a copy of this repo"))
+        (dst / "SKILL.md").write_text("---\nname: legal-x\n---\nolder\n", encoding="utf-8")
+        self.assertEqual(doctor.skill_source(dst, self.src), "another copy")
+
+    def test_missing(self):
+        self.assertEqual(doctor.skill_source(self.skills / "legal-x", self.src), "missing")
+        (self.skills / "legal-x").mkdir()   # an empty folder is not an installed skill
+        self.assertEqual(doctor.skill_source(self.skills / "legal-x", self.src), "missing")
+
+
+class PlatformHints(unittest.TestCase):
+    def test_engine_python_and_install_hints(self):
+        self.assertEqual(doctor.VENV_PY, doctor._engine_env.venv_python(doctor.ROOT))
+        self.assertIn(doctor.INSTALL, ("./install.sh", doctor._engine_env.install_hint(windows=True)))
+        self.assertTrue(doctor.playwright_hint(windows=True).startswith("$env:WITH_PLAYWRIGHT=1; "))
+        self.assertTrue(doctor.playwright_hint(windows=False).startswith("WITH_PLAYWRIGHT=1 "))
+
+    def test_playwright_caches_cover_three_systems(self):
+        self.assertEqual(len(doctor.PLAYWRIGHT_CACHES), 3)   # macOS, Linux, Windows %LOCALAPPDATA%
+        self.assertTrue(all(c.name == "ms-playwright" for c in doctor.PLAYWRIGHT_CACHES))
+
+
 class WatchIssues(unittest.TestCase):
     def test_counts_open_problems_only(self):
         with tempfile.TemporaryDirectory() as tmp:
             prof = Path(tmp)
             self.assertEqual(doctor.open_watch_issues(prof), 0)
             (prof / "laws").mkdir()
-            (prof / "laws" / "issues.json").write_text("not json")
+            (prof / "laws" / "issues.json").write_text("not json", encoding="utf-8")
             self.assertEqual(doctor.open_watch_issues(prof), 0)
             (prof / "laws" / "issues.json").write_text(json.dumps(
-                {"acts": {"a": {"state": "open"}, "b": {"state": "resolved"}, "c": {"state": "open"}}}))
+                {"acts": {"a": {"state": "open"}, "b": {"state": "resolved"}, "c": {"state": "open"}}}), encoding="utf-8")
             self.assertEqual(doctor.open_watch_issues(prof), 2)
 
 

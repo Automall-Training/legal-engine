@@ -95,9 +95,10 @@ class Cli(unittest.TestCase):
         self.assertEqual(self.p("index", "clear", "--contract", "services.txt", "--matter", "m1")[0], 2)
 
     def test_schedule_plan(self):
-        code, out, _ = self.p("schedule", "plan", "--kind", "cron")
+        code, out, _ = self.p("schedule", "plan", "--kind", "cron")   # cron asked for explicitly, on any system
         self.assertEqual(code, 0)
-        self.assertIn(str(self.profile), json.loads(out)["line"])
+        # the schedule writes the resolved absolute path (Windows: long names instead of RUNNER~1; macOS: /private)
+        self.assertIn(str(self.profile.resolve()), json.loads(out)["line"])
 
 
 if __name__ == "__main__":

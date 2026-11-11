@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -59,9 +60,9 @@ class Watchlist(unittest.TestCase):
     def test_yaml_round_trip_and_bad_yaml(self):
         with tempfile.TemporaryDirectory() as tmp:
             p = Path(tmp) / "watchlist.yaml"
-            p.write_text(lib.dump_watchlist({"schema_version": 1, "acts": [{"id": "md.cod.civil"}]}))
+            p.write_text(lib.dump_watchlist({"schema_version": 1, "acts": [{"id": "md.cod.civil"}]}), encoding="utf-8")
             self.assertEqual(lib.load_watchlist(p)["acts"], [{"id": "md.cod.civil"}])
-            p.write_text("acts: [")
+            p.write_text("acts: [", encoding="utf-8")
             with self.assertRaises(lib.WatchError):
                 lib.load_watchlist(p)
             with self.assertRaises(lib.WatchError):
@@ -175,11 +176,17 @@ class Engines(unittest.TestCase):
         seen = {}
 
         def run(cmd, **kw):
-            seen["cmd"] = cmd
+            seen.update(cmd=cmd, env=kw.get("env"))
             return mock.Mock(returncode=0, stdout="# Legea nr. 1/2020\n\ntext", stderr="secret-ish")
         f = F.CommandFetcher("my-reader --url {url}", run=run, pause_range=(0, 0))
-        r = f.get("https://example.org/a?b=1&c=2")
-        self.assertEqual(seen["cmd"], "my-reader --url 'https://example.org/a?b=1&c=2'")
+        url = "https://example.org/a?b=1&c=2"
+        r = f.get(url)
+        if os.name == "nt":   # cmd.exe: the URL travels in a variable (fetchers.command_line)
+            self.assertEqual(seen["cmd"], 'my-reader --url "%LEGAL_WATCH_URL%"')
+            self.assertEqual(seen["env"][F.URL_ENV], url)
+        else:
+            self.assertEqual(seen["cmd"], "my-reader --url 'https://example.org/a?b=1&c=2'")
+            self.assertIsNone(seen["env"])
         self.assertEqual((r.via, r.markdown.startswith("# Legea"), r.error), ("command", True, None))
         bad = F.CommandFetcher("x {url}", run=lambda c, **k: mock.Mock(returncode=3, stdout="", stderr="token=1"),
                                pause_range=(0, 0)).get("https://example.org")

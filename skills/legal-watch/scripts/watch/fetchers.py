@@ -4,7 +4,8 @@ Adapters never depend on an engine: they take any object with `get(url) -> Fetch
 
 - `urllib`     — the standard library, free; plain GET. Several official portals refuse it (anti-bot pages, dropped
                  connections); that becomes an honest failure, never "unchanged".
-- `playwright` — a local browser through Playwright (free; installed with `WITH_PLAYWRIGHT=1 ./install.sh`).
+- `playwright` — a local browser through Playwright (free; installed with `WITH_PLAYWRIGHT=1 ./install.sh`,
+                 on Windows `$env:WITH_PLAYWRIGHT=1; .\\install.ps1`).
 - `command`    — a command the user configured themselves (for example a paid scraping service wrapped in their
                  own script). The engine runs it with the URL and reads the page from stdout; it never sees, asks
                  for or stores a key.
@@ -18,7 +19,7 @@ clicks; an anti-bot or CAPTCHA page is reported as blocked and never bypassed.
 from __future__ import annotations
 
 import datetime as _dt
-import fcntl
+import os
 import random
 import re
 import shlex
@@ -158,8 +159,23 @@ class UrllibFetcher(_Paced):
                                error=f"{type(e).__name__}: {str(e).splitlines()[0][:300] if str(e) else ''}")
 
 
+URL_ENV = "LEGAL_WATCH_URL"   # Windows: the variable the user's command reads the page URL from
+
+
+def command_line(command: str, url: str, windows: bool | None = None) -> tuple[str, dict | None]:
+    """The shell line for the user's command and the environment to run it with (None: inherit).
+    why: the command runs through the system shell, `sh` on Mac/Linux, `cmd.exe` on Windows. `sh` gets the URL
+    single-quoted. cmd.exe expands `%NAME%` even inside double quotes, so a URL like `…%PATH%…` would be altered;
+    there `{url}` becomes `"%LEGAL_WATCH_URL%"` and the URL travels in that variable: cmd expands it once and never
+    expands what the value contains, and the quotes keep `&` and `|` literal (a raw `"` is percent-encoded)."""
+    windows = os.name == "nt" if windows is None else windows
+    if windows:
+        return command.replace("{url}", f'"%{URL_ENV}%"'), {**os.environ, URL_ENV: url.replace('"', "%22")}
+    return command.replace("{url}", shlex.quote(url)), None
+
+
 class CommandFetcher(_Paced):
-    """Runs the user's own command; `{url}` in it is replaced by the page URL (shell-quoted).
+    """Runs the user's own command; `{url}` in it stands for the page URL (see `command_line`).
 
     The command prints the page (HTML or markdown) to stdout. Its credentials, if any, live in the user's own
     setup; this class passes only the URL.
@@ -174,9 +190,11 @@ class CommandFetcher(_Paced):
     def get(self, url: str) -> FetchResult:
         self.pause()
         fetched_at = now_iso()
-        cmd = self.command.replace("{url}", shlex.quote(url))
+        cmd, env = command_line(self.command, url)
         try:
-            p = self.run(cmd, shell=True, capture_output=True, text=True, timeout=self.timeout)
+            # why: pages are read as UTF-8 on every system (Windows would decode with its ANSI code page)
+            p = self.run(cmd, shell=True, env=env, capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", timeout=self.timeout)
         except Exception as e:  # noqa: BLE001
             return FetchResult(url=url, status=None, fetched_at=fetched_at, via="command",
                                error=f"command failed: {type(e).__name__}")
@@ -194,6 +212,36 @@ class BrowserBusy(RuntimeError):
     """Another monitoring run holds the browser profile."""
 
 
+def try_lock(fh) -> bool:
+    """Take an exclusive lock on an open file without waiting; False when another process holds it.
+    why: fcntl exists only on Mac/Linux and msvcrt only on Windows; both locks die with the process, so a crashed
+    run never leaves the browser profile locked."""
+    if os.name == "nt":
+        import msvcrt
+        fh.seek(0)
+        try:
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)   # the first byte stands for the whole file
+        except OSError:
+            return False
+        return True
+    import fcntl
+    try:
+        fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return False
+    return True
+
+
+def unlock(fh) -> None:
+    if os.name == "nt":
+        import msvcrt
+        fh.seek(0)
+        msvcrt.locking(fh.fileno(), msvcrt.LK_UNLCK, 1)
+    else:
+        import fcntl
+        fcntl.flock(fh.fileno(), fcntl.LOCK_UN)
+
+
 class PlaywrightFetcher(_Paced):
     """A context manager: one persistent browser profile per run (kept in the user's profile, never here)."""
 
@@ -208,12 +256,11 @@ class PlaywrightFetcher(_Paced):
         from playwright.sync_api import sync_playwright  # imported here: tests and urllib runs need no Playwright
 
         self.profile_dir.mkdir(parents=True, exist_ok=True)
-        self._lock = open(self.profile_dir.parent / (self.profile_dir.name + ".lock"), "a+")
-        try:
-            fcntl.flock(self._lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as e:
+        self._lock = open(self.profile_dir.parent / (self.profile_dir.name + ".lock"), "a+", encoding="utf-8")
+        if not try_lock(self._lock):
             self._lock.close()
-            raise BrowserBusy(f"browser profile {self.profile_dir} is used by another run; run them one by one") from e
+            self._lock = None
+            raise BrowserBusy(f"browser profile {self.profile_dir} is used by another run; run them one by one")
         self._pw = sync_playwright().start()
         opts = {"user_data_dir": str(self.profile_dir), "headless": self.headless, "accept_downloads": False,
                 "locale": "ro-RO"}
@@ -231,7 +278,7 @@ class PlaywrightFetcher(_Paced):
             if self._pw is not None:
                 self._pw.stop()
             if self._lock is not None:
-                fcntl.flock(self._lock.fileno(), fcntl.LOCK_UN)
+                unlock(self._lock)
                 self._lock.close()
         return False
 

@@ -33,7 +33,7 @@ python3 <skill-dir>/scripts/legal_profile.py matter list [--open]
    not imitate the module and do not run the wizard for it.
 6. **Missing setup** (`missing_steps` of the same call). If not empty, load `../legal-workflow-setup/SKILL.md` and
    run **only those steps**, then run `status --module <id>` again. If the setup skill is not installed, say so
-   (update the engine: `git pull && ./install.sh`) and stop instead of inventing a profile. Then by `module_state`:
+   (update the engine: `git pull && ./install.sh`; Windows: `git pull`, then `install.ps1`) and stop instead of inventing a profile. Then by `module_state`:
    - `unset` — the wizard has not asked about modules yet: run its step `modules`;
    - `off` — the user turned it off: say so and offer to turn it on through the setup wizard (step `modules`) or
      `legal-workflow-update`; do nothing else in that area;

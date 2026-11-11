@@ -8,7 +8,7 @@ description: Contracts module of the legal engine (Moldova, Romania, EU) - draft
 Resolve this skill's directory (`<skill-dir>` below); the entry skill is `<skill-dir>/../legal-workflow/`
 (`<legal-workflow>` below). The law method, the working norms and the approval boundaries live there and are
 followed by reference, never copied. The scripts run with plain `python3`; one that needs python-docx or lxml
-re-runs itself in the engine's environment (missing → it says to run `./install.sh`).
+re-runs itself in the engine's environment (missing → it says to run `./install.sh`, on Windows `install.ps1`).
 
 ## Before anything
 

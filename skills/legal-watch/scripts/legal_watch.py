@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""legal-watch: law library, monitoring and contract re-review. Run with the engine's .venv/bin/python.
+"""legal-watch: law library, monitoring and contract re-review. Run with the engine's Python
+(`.venv/bin/python` on Mac/Linux, `.venv\\Scripts\\python.exe` on Windows).
 
     legal_watch.py catalog [niches|categories|acts] [--countries MD,RO,EU]
     legal_watch.py suggest --niches a,b [--b2c] [--countries MD,RO,EU]
@@ -17,7 +18,8 @@
     legal_watch.py index scan <contract> --jurisdiction MD|RO [--write] [--force]
     legal_watch.py index check | pending
     legal_watch.py index clear --contract <file> [--clause N] --matter <matter-id>
-    legal_watch.py schedule plan|install|remove [--kind launchd|cron|claude-schedule]
+    legal_watch.py schedule plan|install|remove [--kind launchd|cron|claude-schedule|schtasks]
+                        (default: launchd on macOS, schtasks on Windows, cron elsewhere)
 
 Global: --profile <dir> (default: the profile of legal-workflow's config.json).
 Exit codes: 0 ok (run: OK), 1 run: CHANGES / check: errors, 2 bad input or run: INCOMPLETE, 3 unexpected error.
@@ -240,7 +242,7 @@ def cmd_record(a) -> int:
     wl, acts = _watch(profile)
     out = manual.record(profile, acts, Path(a.card), dt.date.today(), root=Path(a.root) if a.root else None,
                         language=wl["settings"]["language"], schedule=wl["settings"]["schedule"])
-    rec = next(x for x in out["acts"] if x["act_id"] == json.loads(Path(a.card).read_text())["act"]["id"])
+    rec = next(x for x in out["acts"] if x["act_id"] == json.loads(Path(a.card).read_text(encoding="utf-8"))["act"]["id"])
     _print({"act": rec["act_id"], "status": rec["status"], "checked": rec["checked"], "result": out["result"]})
     return 0
 
@@ -288,12 +290,10 @@ def cmd_schedule(a) -> int:
     profile = resolve_profile(a.profile)
     if a.op == "plan":
         _print(schedule.plan(profile, a.kind))
-    elif a.op == "install":
-        if a.kind != "launchd":
-            raise lib.WatchError(f"install handles launchd only; for {a.kind} use `schedule plan --kind {a.kind}`")
-        _print(schedule.install(profile))
+    elif a.op == "install":   # only after the user's yes in chat (references/engines.md)
+        _print(schedule.install(profile, a.kind))
     else:
-        _print(schedule.remove())
+        _print(schedule.remove(a.kind))
     return 0
 
 
@@ -354,7 +354,7 @@ def parser() -> argparse.ArgumentParser:
     x.add_argument("--matter")
     sc = sub.add_parser("schedule")
     sc.add_argument("op", choices=("plan", "install", "remove"))
-    sc.add_argument("--kind", default="launchd", choices=schedule.KINDS)
+    sc.add_argument("--kind", default=schedule.default_kind(), choices=schedule.KINDS)
     return ap
 
 
@@ -371,8 +371,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"legal_watch: {e}", file=sys.stderr)
         return 2
     except ImportError as e:
-        print(f"legal_watch: a package is missing ({e.name}); run with the engine's .venv/bin/python, and for the "
-              "playwright engine install it with `WITH_PLAYWRIGHT=1 ./install.sh`", file=sys.stderr)
+        print(f"legal_watch: a package is missing ({e.name}); run with the engine's Python (.venv/bin/python on "
+              "Mac/Linux, .venv\\Scripts\\python.exe on Windows), and for the playwright engine install it with "
+              "`WITH_PLAYWRIGHT=1 ./install.sh` (Windows: `$env:WITH_PLAYWRIGHT=1; .\\install.ps1`)", file=sys.stderr)
         return 2
     except Exception as e:  # noqa: BLE001 — exit 1 means "changes found": a crash must never look like it
         print(f"legal_watch: unexpected error {type(e).__name__}: {e}", file=sys.stderr)
@@ -380,4 +381,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    for _stream in (sys.stdout, sys.stderr):  # why: a Windows pipe defaults to the ANSI code page (no ș, ț, Cyrillic)
+        getattr(_stream, "reconfigure", lambda **_: None)(encoding="utf-8")
     sys.exit(main())

@@ -1,0 +1,94 @@
+# Install, doctor and every test suite on Windows, macOS and Linux. No secrets, read-only token.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # the system python the skills call (python3 / python); the engine's own .venv is built by the installer
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install (install.sh)
+        if: runner.os != 'Windows'
+        run: SKILLS_DIR="$RUNNER_TEMP/skills" ./install.sh
+
+      - name: Install (install.ps1, Windows PowerShell 5.1)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $env:SKILLS_DIR = Join-Path $env:RUNNER_TEMP "skills"
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Install again (install.ps1, PowerShell 7) — idempotent, links updated
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:SKILLS_DIR = Join-Path $env:RUNNER_TEMP "skills"
+          $out = pwsh -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
+          $code = $LASTEXITCODE
+          $out
+          if ($code -ne 0) { exit $code }
+          if (-not ($out -match "\(updated\)")) { Write-Output "expected the junctions to be updated"; exit 1 }
+          $link = Get-Item (Join-Path $env:SKILLS_DIR "legal-contracts")
+          if ($link.LinkType -ne "Junction") { Write-Output "legal-contracts is not a junction"; exit 1 }
+
+      - name: Doctor
+        shell: bash
+        run: SKILLS_DIR="$RUNNER_TEMP/skills" python tools/doctor.py
+
+      - name: Leak check and tests
+        shell: bash
+        run: |
+          # why: run every suite even when one fails, so one CI run shows all failures; exit non-zero at the end
+          set +e
+          PY=.venv/bin/python
+          [ -x "$PY" ] || PY=.venv/Scripts/python.exe
+          failed=""
+          python tools/check.py --quiet || failed="$failed check.py"
+          echo "== tools/tests"
+          python -m unittest discover -s tools/tests || failed="$failed tools/tests"
+          for tests in skills/*/tests; do
+            echo "== $tests"
+            "$PY" -m unittest discover -s "$tests" || failed="$failed $tests"
+          done
+          if [ -n "$failed" ]; then echo "FAILED:$failed"; exit 1; fi
+
+      # plain `python` has no python-docx: the scripts re-run themselves in the engine's .venv (the Windows path
+      # of _engine_env.reexec), and their UTF-8 output goes through a pipe
+      - name: Smoke — DOCX and Word redline (Windows)
+        # runs even when the tests failed, so one run shows both
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "smoke"
+          New-Item -ItemType Directory -Force $out | Out-Null
+          $s = "skills\legal-contracts"
+          $r = python "$s\scripts\build_docx.py" "$s\templates\document.json" "$out\draft.docx" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $r.status -ne "created") { exit 1 }
+          python "$s\scripts\docx_redline.py" apply "$s\assets\original.docx" "$s\assets\changes.json" "$out\redline" | Out-Null
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $v = python "$s\scripts\docx_redline.py" verify "$s\assets\original.docx" "$out\redline\tracked.docx" "$out\redline\clean.docx" | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or $v.status -ne "passed") { exit 1 }
+          Get-ChildItem $out -Recurse | Select-Object FullName, Length

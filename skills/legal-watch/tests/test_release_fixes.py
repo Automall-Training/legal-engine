@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import datetime as dt
+import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -15,6 +17,29 @@ from watch.adapters import cellar  # noqa: E402
 
 from watch.contract import NEW_IN_FORCE, PARSE_FAILED, UNCHANGED, Redaction, classify, text_sha256  # noqa: E402
 from watch.fetchers import FetchResult  # noqa: E402
+
+
+def _can_symlink() -> bool:
+    """why: ordinary Windows (no admin, no Developer Mode) refuses symlinks; such tests are skipped there and
+    directory links fall back to a junction, which any user may create."""
+    with tempfile.TemporaryDirectory() as tmp:
+        try:
+            os.symlink(tmp, os.path.join(tmp, "probe"), target_is_directory=True)
+        except (OSError, NotImplementedError):
+            return False
+    return True
+
+
+CAN_SYMLINK = _can_symlink()
+
+
+def link_dir(link: Path, target: Path) -> None:
+    """A directory link: a symlink where allowed, otherwise a Windows junction."""
+    if CAN_SYMLINK:
+        link.symlink_to(target, target_is_directory=True)
+    else:
+        import _winapi  # Windows only: CPython's own junction call, no admin rights needed
+        _winapi.CreateJunction(str(target), str(link))
 
 BODY = "<html><head><title>Directive 2011/83/EU</title></head><body><p>Directive 2011/83/EU text</p></body></html>"
 
@@ -184,7 +209,7 @@ class ProfileNeverInsideEngine(unittest.TestCase):
         import tempfile
         from watch import library as lib
         with tempfile.TemporaryDirectory() as tmp:
-            (Path(tmp) / "laws").symlink_to(lib.ENGINE_ROOT / "skills")
+            link_dir(Path(tmp) / "laws", lib.ENGINE_ROOT / "skills")
             with self.assertRaises(lib.WatchError):
                 lib.write_atomic(Path(tmp) / "laws" / "state.json", "{}")
             self.assertFalse((lib.ENGINE_ROOT / "skills" / "state.json").exists())
