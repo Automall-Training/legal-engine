@@ -96,7 +96,8 @@ def contract_text(path: Path) -> list[str]:
         try:
             import docx
         except ImportError as e:
-            raise lib.WatchError("python-docx is missing: run with the engine's .venv/bin/python") from e
+            raise lib.WatchError("python-docx is missing: run with the engine's Python (.venv/bin/python on Mac/Linux, "
+                                 ".venv\\Scripts\\python.exe on Windows)") from e
         doc = docx.Document(str(path))
         return _docx_paragraphs(doc)
     if path.suffix.lower() in (".txt", ".md"):

@@ -123,7 +123,8 @@ def _yaml():
     try:
         import yaml
     except ImportError as e:  # the engine's .venv has it (requirements.txt)
-        raise WatchError("PyYAML is missing: run the script with the engine's .venv/bin/python") from e
+        raise WatchError("PyYAML is missing: run the script with the engine's Python (.venv/bin/python on "
+                         "Mac/Linux, .venv\\Scripts\\python.exe on Windows)") from e
     return yaml
 
 
