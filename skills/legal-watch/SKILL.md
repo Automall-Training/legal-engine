@@ -7,9 +7,10 @@ description: Law library and monitoring module of the legal engine (Moldova, Rom
 
 Resolve this skill's directory (`<skill-dir>` below); the entry skill is `<skill-dir>/../legal-workflow/`
 (`<legal-workflow>` below), the version check is `<skill-dir>/../legal-research/` (`<legal-research>`), the
-document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scripts run with the engine's
-`.venv/bin/python` (PyYAML, python-docx); below `watch` stands for
-`<engine>/.venv/bin/python <skill-dir>/scripts/legal_watch.py`.
+document tools are `<skill-dir>/../legal-contracts/` (`<legal-contracts>`). Scripts run with the engine's Python
+(`.venv/bin/python` on Mac/Linux, `.venv\Scripts\python.exe` on Windows; it has PyYAML and python-docx); below
+`watch` stands for `<engine>/.venv/bin/python <skill-dir>/scripts/legal_watch.py` (Windows:
+`<engine>\.venv\Scripts\python.exe <skill-dir>\scripts\legal_watch.py`).
 
 ## Before anything
 

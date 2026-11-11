@@ -49,7 +49,7 @@ of step 6; the state and the stored texts are kept), then `step set laws --statu
    tools); the user may postpone.
 3. If contracts in force were copied into `contracts/` (step 8), build their indexes now ([contracts.md](contracts.md)).
 4. Schedule: if the user chose weekly local runs, show `watch schedule plan` and, after their yes,
-   `watch schedule install` (macOS) or give the cron line ([engines.md](engines.md)).
+   `watch schedule install` (macOS launchd, Windows Task Scheduler) or give the cron line ([engines.md](engines.md)).
 5. Mark `first-run` done even when some acts stay not verified (the digest says so); `skipped` if the user
    postponed the run.
 

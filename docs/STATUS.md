@@ -1,6 +1,6 @@
 # Status
 
-Version: 1.1.0 (2026-11-05; merge to `main` and the tags only after the owner's «да»). Updated: 2026-11-05.
+Version: 1.2.0 (2026-11-11; merge to `main` and the tags only after the owner's «да»). Updated: 2026-11-11.
 
 | Step | What | State |
 |---|---|---|
@@ -15,7 +15,8 @@ Version: 1.1.0 (2026-11-05; merge to `main` and the tags only after the owner's 
 | 9 | `legal-watch`: niche → law catalog, law library, monitoring, contract re-review | done (branch `phase-1/legal-watch` on top of step 8; merge only after «да») |
 | 10 | end-to-end check, cross-model review, v1.0.0 | done (branch `phase-1/release-1.0` on top of step 9; merge only after «да») |
 | 10a | monitoring error log + `laws/report.html`, law library described (`legal-watch/references/issues.md`, `library.md`), v1.1.0; Codex review in 4 rounds: 3/5 → 3/5 → 4/5 → 5/5 | done (branch `phase-1/watch-issues` on top of step 10; merge only after «да») |
-| 11 | public GitHub repository and first push (owner's «да» first) | next |
+| 11 | public GitHub repository and first push (owner's «да» first) | done |
+| 12 | Windows support, v1.2.0: `install.ps1` (junctions, no admin), engine Python `.venv\Scripts\python.exe`, portable lock, `schedule --kind schtasks`, UTF-8 everywhere, CI on Windows / macOS / Ubuntu | done on Mac (branch `windows-support`); not yet run on real Windows — CI checks it after the push; merge only after «да» |
 
 Release check (step 10, 2026-11-05): 566 tests, coverage 93 %; clean install twice → `READY`; live monitoring
 run; scenario runs by fresh agents (wizard for an invented online-courses firm, NDA and Word redline, legal
@@ -32,8 +33,9 @@ from the profile; `suggest` does not show act priorities; minor: the digest keep
 language ("consolidare …").
 
 Checks: `python3 tools/check.py` · `python3 -m unittest discover -s tools/tests` ·
-`.venv/bin/python -m unittest discover -s skills/<skill>/tests` (the pre-commit hook runs all of them; contract tools
-need `.venv` from `./install.sh`). Coverage: `COVERAGE_FILE=<temp> uvx coverage run -m unittest discover -s
+`.venv/bin/python -m unittest discover -s skills/<skill>/tests` (Windows: `.venv\Scripts\python.exe`; the pre-commit
+hook runs all of them; contract tools need `.venv` from `./install.sh` or `install.ps1`). CI
+(`.github/workflows/ci.yml`) runs the same on Windows, macOS and Ubuntu. Coverage: `COVERAGE_FILE=<temp> uvx coverage run -m unittest discover -s
 <tests>` (keep the data file outside the repo: a `.coverage` in it fails the leak check).
 
 Contracts later steps must follow (in `skills/legal-workflow/references/`): `profile.md` (profile layout,

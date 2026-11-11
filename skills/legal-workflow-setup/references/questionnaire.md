@@ -120,11 +120,11 @@ what is missing and what each missing part serves for the modules that are on; r
 
 | Part | Needed for | Install |
 |---|---|---|
-| engine skills linked into the skills folder (`MISS skill …`) | every module, required | `cd <engine> && ./install.sh` |
-| Python environment `.venv` | every document (DOCX), required | `cd <engine> && ./install.sh` |
-| LibreOffice (`soffice`), Poppler (`pdftoppm`) | visual check of a document as PDF | the user's package manager (e.g. `brew install --cask libreoffice`, `brew install poppler`) |
+| engine skills linked into the skills folder (`MISS skill …`) | every module, required | `cd <engine> && ./install.sh` (Windows: `cd <engine>; powershell -ExecutionPolicy Bypass -File .\install.ps1`) |
+| Python environment `.venv` | every document (DOCX), required | the same installer |
+| LibreOffice (`soffice`), Poppler (`pdftoppm`) | visual check of a document as PDF | the user's package manager (e.g. `brew install --cask libreoffice`, `brew install poppler`; Windows: `winget install TheDocumentFoundation.LibreOffice`, or Word) |
 | `tesseract` with ron, rus, eng | scanned contracts | `brew install tesseract tesseract-lang` |
-| Playwright Chromium | law monitoring without a conversation (`legal-watch`); it never passes an anti-bot page, so Moldovan and Romanian acts are still checked through the user's browser in a conversation | `cd <engine> && WITH_PLAYWRIGHT=1 ./install.sh` |
+| Playwright Chromium | law monitoring without a conversation (`legal-watch`); it never passes an anti-bot page, so Moldovan and Romanian acts are still checked through the user's browser in a conversation | `cd <engine> && WITH_PLAYWRIGHT=1 ./install.sh` (Windows: `$env:WITH_PLAYWRIGHT=1`, then the installer) |
 
 One request for approval for the whole list (options: install all (recommended when only required parts are missing)
 · only the required ones · none now). Install only after the user's literal "yes" for that list. Declined parts are

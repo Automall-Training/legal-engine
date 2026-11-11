@@ -3,7 +3,7 @@
 > [!WARNING]
 > Это не юридическая консультация. / Nu este consultanță juridică. → [DISCLAIMER.md](DISCLAIMER.md)
 
-**Status: v1.1.0.** Все модули ниже готовы. Известные ограничения (например, часть официальных сайтов закрыта для
+**Status: v1.2.0.** Все модули ниже готовы. Известные ограничения (например, часть официальных сайтов закрыта для
 автоматического чтения) — в [docs/STATUS.md](docs/STATUS.md). / Toate modulele sunt gata; limitele cunoscute — în
 [docs/STATUS.md](docs/STATUS.md).
 
@@ -57,6 +57,45 @@ cd ~/legal-engine && SKILLS_DIR=~/.agents/skills bash ./install.sh
 
 Нужны программа `uv` (`curl -LsSf https://astral.sh/uv/install.sh | sh`, потом заново открыть Терминал) и Python 3.10 или новее: на Mac системный Python старше, поэтому `uv python install 3.12 --default`, снова открыть Терминал и проверить `python3 --version`. Команда `git` на чистом Mac попросит «инструменты разработчика» — установите и повторите. Дождитесь `READY`, перезапустите Codex и напишите `$legal-workflow-setup настрой юриста`. Строку скрипта «open Claude Code…» в этом случае пропустите. Папку `~/legal-engine` не удаляйте: скиллы подключены к ней ссылками. Пошагово, для тех, кто не открывал Терминал, — плейбук команды Automall: https://automall-playbook.vercel.app, страница «Скиллы», блок «Юристам».
 
+### Установка в Windows
+
+Работает в Windows 10 и 11, в обычной PowerShell, без прав администратора. Скиллы подключаются к папке движка
+«соединениями» (junction) — это ссылка на папку, для неё не нужен режим разработчика.
+
+1. Установите [Claude Code](https://claude.com/claude-code) (или Codex) и [git](https://git-scm.com/download/win).
+2. Откройте **PowerShell** (Пуск → «PowerShell») и установите `uv` и Python 3.12:
+
+   ```powershell
+   powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+   Закройте и снова откройте PowerShell, затем:
+
+   ```powershell
+   uv python install 3.12 --default
+   ```
+
+   `--default` нужен, чтобы появилась команда `python3`: скиллы вызывают свои скрипты именно ею. Снова откройте
+   PowerShell и проверьте `python3 --version`.
+3. Скачайте движок в `%USERPROFILE%\legal-engine` (или скопируйте туда папку целиком) и запустите установку:
+
+   ```powershell
+   git clone https://github.com/Automall-Training/legal-engine.git "$env:USERPROFILE\legal-engine"
+   cd "$env:USERPROFILE\legal-engine"
+   powershell -ExecutionPolicy Bypass -File .\install.ps1
+   ```
+
+   Для **Codex** скиллы кладутся в его папку — перед последней командой:
+   `$env:SKILLS_DIR="$env:USERPROFILE\.agents\skills"`. Для автоматической проверки законов по расписанию:
+   `$env:WITH_PLAYWRIGHT=1`.
+4. Дождитесь `READY`, откройте Claude Code и скажите **«настрой юриста»** (в Codex: `$legal-workflow-setup
+   настрой юриста`). Еженедельную проверку законов мастер ставит в «Планировщик заданий» Windows, только после
+   вашего «да».
+
+Обновление: `cd "$env:USERPROFILE\legal-engine"; git pull`, затем снова `install.ps1`. Папку движка не удаляйте:
+скиллы подключены к ней. Если папка скилла уже есть и это не ссылка, установщик её не трогает (`SKIP`) —
+перенесите её сами и запустите установку ещё раз.
+
 ### Безопасность
 
 - Ключи API не нужны: поиск законов идёт через встроенный веб Claude Code или бесплатный браузер.
@@ -77,8 +116,9 @@ condițiilor furnizorului său.
 **Module:** contracte, întrebări juridice cu surse oficiale, biblioteca și monitorizarea legilor (de bază);
 date personale, vânzări online către consumatori, mărci, resurse umane (se activează în asistent).
 
-**Instalare:** ca mai sus (`git clone …` și `./install.sh`), apoi în Claude Code: **«configurează juristul»**.
-Actualizare: `git pull && ./install.sh`.
+**Instalare:** ca mai sus (`git clone …` și `./install.sh`; pe Windows `install.ps1`, pașii din secțiunea «Установка в
+Windows»), apoi în Claude Code: **«configurează juristul»**. Actualizare: `git pull && ./install.sh` (Windows: `git pull`,
+apoi din nou `install.ps1`).
 
 ---
 
