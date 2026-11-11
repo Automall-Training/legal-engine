@@ -246,7 +246,7 @@ class DayRuns(Base):
         self.run_with(two, adapter([V1]))
         self.run_with(two, adapter([V1]), selector="ro.lege.2-2020")
         self.run_with(two, adapter([V1]), dry_run=True)
-        day = json.loads((self.profile / "laws" / "runs" / TODAY.isoformat() / "run.json").read_text())
+        day = json.loads((self.profile / "laws" / "runs" / TODAY.isoformat() / "run.json").read_text(encoding="utf-8"))
         self.assertEqual(len(day["acts"]), 2)
         self.assertTrue(day["full"])
 

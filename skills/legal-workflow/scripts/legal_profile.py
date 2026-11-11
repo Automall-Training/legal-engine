@@ -685,4 +685,6 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    for _stream in (sys.stdout, sys.stderr):  # why: a Windows pipe defaults to the ANSI code page (no ș, ț, Cyrillic)
+        getattr(_stream, "reconfigure", lambda **_: None)(encoding="utf-8")
     sys.exit(main())

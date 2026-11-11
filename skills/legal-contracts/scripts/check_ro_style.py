@@ -146,4 +146,7 @@ def main(argv=None):
     except (ValueError,OSError,ET.ParseError,BadZipFile) as e:
         print(json.dumps({'status':'input_error','error':str(e)},ensure_ascii=False));return 2
 
-if __name__=='__main__':raise SystemExit(main())
+if __name__ == "__main__":
+    for _stream in (sys.stdout, sys.stderr):  # why: a Windows pipe defaults to the ANSI code page (no ș, ț, Cyrillic)
+        getattr(_stream, "reconfigure", lambda **_: None)(encoding="utf-8")
+    raise SystemExit(main())

@@ -59,9 +59,9 @@ class Watchlist(unittest.TestCase):
     def test_yaml_round_trip_and_bad_yaml(self):
         with tempfile.TemporaryDirectory() as tmp:
             p = Path(tmp) / "watchlist.yaml"
-            p.write_text(lib.dump_watchlist({"schema_version": 1, "acts": [{"id": "md.cod.civil"}]}))
+            p.write_text(lib.dump_watchlist({"schema_version": 1, "acts": [{"id": "md.cod.civil"}]}), encoding="utf-8")
             self.assertEqual(lib.load_watchlist(p)["acts"], [{"id": "md.cod.civil"}])
-            p.write_text("acts: [")
+            p.write_text("acts: [", encoding="utf-8")
             with self.assertRaises(lib.WatchError):
                 lib.load_watchlist(p)
             with self.assertRaises(lib.WatchError):

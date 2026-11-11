@@ -12,7 +12,7 @@ class StyleTests(unittest.TestCase):
     def setUp(self):
         self.t=tempfile.TemporaryDirectory();self.addCleanup(self.t.cleanup);self.root=Path(self.t.name)
     def md(self,text,name='contract.ro.md'):
-        p=self.root/name;p.write_text(text);return p
+        p=self.root/name;p.write_text(text,encoding='utf-8');return p
     def run_file(self,p,decisions=None,profile='formal'):
         return M.analyze([p],self.root,profile,decisions)
     def allow(self,r,role='personal_declaration'):
@@ -35,7 +35,7 @@ class StyleTests(unittest.TestCase):
         self.assertEqual([x['token'] for x in done['candidates'] if x['status']=='unresolved'],['garantăm'])
     def test_changed_paragraph_invalidates_decision(self):
         p=self.md('Solicit începerea serviciilor.');r=self.run_file(p);d=self.allow(r)
-        p.write_text('Solicit începerea tuturor serviciilor.')
+        p.write_text('Solicit începerea tuturor serviciilor.',encoding='utf-8')
         self.assertEqual(self.run_file(p,d)['status'],'invalid_review')
     def test_exception_cannot_omit_reason_or_hash(self):
         p=self.md('Confirm primirea.');r=self.run_file(p);d=self.allow(r);d['exceptions'][0]['reason']=''

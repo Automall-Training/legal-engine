@@ -29,7 +29,7 @@ class Page(RunnerBase):
     def test_written_after_a_run_with_open_problem_and_library(self):
         self.run_with([act(), act("ro.lege.2-2020", p="p2")], lambda a: ("fake", evil if a["id"] == "ro.lege.1-2020"
                                                                           else adapter([V1])(a)[1]))
-        page = report.path(self.profile).read_text()
+        page = report.path(self.profile).read_text(encoding="utf-8")
         self.assertIn("ro.lege.1-2020", page)
         self.assertIn(digest.T["en"]["why"]["blocked_403"], page)
         self.assertIn("record a version card", page)          # what the agent will do
@@ -39,7 +39,7 @@ class Page(RunnerBase):
 
     def test_everything_from_outside_is_escaped(self):
         self.run_with([act()], lambda a: ("fake", evil))
-        page = report.path(self.profile).read_text()
+        page = report.path(self.profile).read_text(encoding="utf-8")
         self.assertNotIn("<script>", page)
         self.assertNotIn("<b>x</b>", page)
         self.assertIn("&lt;script&gt;", page)
@@ -152,7 +152,7 @@ class Commands(unittest.TestCase):
         new = dt.date.today().isoformat()
         for d in (old, new):
             (runs / d).mkdir(parents=True)
-        (runs / "schedule.log").write_text("x")
+        (runs / "schedule.log").write_text("x", encoding="utf-8")
         out = json.loads(self.p("prune", "--runs-older", "365")[1])
         self.assertEqual(out["would_remove"], [old])
         self.assertTrue((runs / old).exists())
