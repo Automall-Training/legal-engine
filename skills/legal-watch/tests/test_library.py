@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -175,11 +176,17 @@ class Engines(unittest.TestCase):
         seen = {}
 
         def run(cmd, **kw):
-            seen["cmd"] = cmd
+            seen.update(cmd=cmd, env=kw.get("env"))
             return mock.Mock(returncode=0, stdout="# Legea nr. 1/2020\n\ntext", stderr="secret-ish")
         f = F.CommandFetcher("my-reader --url {url}", run=run, pause_range=(0, 0))
-        r = f.get("https://example.org/a?b=1&c=2")
-        self.assertEqual(seen["cmd"], "my-reader --url 'https://example.org/a?b=1&c=2'")
+        url = "https://example.org/a?b=1&c=2"
+        r = f.get(url)
+        if os.name == "nt":   # cmd.exe: the URL travels in a variable (fetchers.command_line)
+            self.assertEqual(seen["cmd"], 'my-reader --url "%LEGAL_WATCH_URL%"')
+            self.assertEqual(seen["env"][F.URL_ENV], url)
+        else:
+            self.assertEqual(seen["cmd"], "my-reader --url 'https://example.org/a?b=1&c=2'")
+            self.assertIsNone(seen["env"])
         self.assertEqual((r.via, r.markdown.startswith("# Legea"), r.error), ("command", True, None))
         bad = F.CommandFetcher("x {url}", run=lambda c, **k: mock.Mock(returncode=3, stdout="", stderr="token=1"),
                                pause_range=(0, 0)).get("https://example.org")

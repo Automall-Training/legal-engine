@@ -87,7 +87,8 @@ class ReexecTests(Base):
             os.environ.pop(ENV.GUARD, None)
             ENV.reexec(__file__, "lxml", venv=self.dir / "no-python")
         self.assertEqual(stop.exception.code, 2)
-        self.assertIn(ENV.install_hint(), out.getvalue())
+        # parsed, not raw: JSON escapes the backslash of the Windows hint (.\\install.ps1)
+        self.assertIn(ENV.install_hint(), json.loads(out.getvalue())["error"])
 
     def test_missing_environment_message_survives_a_cp1252_stream(self):
         raw = io.BytesIO()
