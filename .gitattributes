@@ -1,0 +1,9 @@
+# why: Windows checkouts (core.autocrlf) would turn LF into CRLF; scripts, fixtures and hashes expect the files
+# exactly as committed, so text stays LF everywhere and binary documents are never touched.
+* text=auto eol=lf
+# PowerShell scripts in Windows style (Notepad, PowerShell ISE)
+*.ps1 text eol=crlf
+*.docx binary
+*.pdf binary
+*.png binary
+*.jpg binary

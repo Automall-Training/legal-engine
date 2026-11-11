@@ -3,13 +3,19 @@
 # Enable once per clone: git config core.hooksPath tools/hooks
 set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
+# why: Git for Windows runs this hook in its bash, where Python is often `python`, not `python3`
+PY3=python3
+command -v python3 >/dev/null 2>&1 || PY3=python
 # why: the staged content is what gets committed; the full scan also catches files staged earlier
-python3 "$ROOT/tools/check.py" --quiet --staged
-python3 "$ROOT/tools/check.py" --quiet
-python3 -m unittest discover -s "$ROOT/tools/tests" -q
-# why: contract tools need python-docx and lxml, which live in the engine's .venv (./install.sh)
-PY=python3
-[ -x "$ROOT/.venv/bin/python" ] && PY="$ROOT/.venv/bin/python"
+"$PY3" "$ROOT/tools/check.py" --quiet --staged
+"$PY3" "$ROOT/tools/check.py" --quiet
+"$PY3" -m unittest discover -s "$ROOT/tools/tests" -q
+# why: contract tools need python-docx and lxml, which live in the engine's .venv (install.sh / install.ps1);
+# its Python is .venv/bin/python on Mac/Linux and .venv/Scripts/python.exe on Windows
+PY="$PY3"
+for venv in "$ROOT/.venv/bin/python" "$ROOT/.venv/Scripts/python.exe"; do
+  if [ -x "$venv" ]; then PY="$venv"; break; fi
+done
 shopt -s nullglob  # why: no skill tests yet must not fail the hook
 for tests in "$ROOT"/skills/*/tests; do
   [ -d "$tests" ] && "$PY" -m unittest discover -s "$tests" -q
