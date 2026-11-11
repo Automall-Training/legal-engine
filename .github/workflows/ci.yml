@@ -61,19 +61,25 @@ jobs:
       - name: Leak check and tests
         shell: bash
         run: |
+          # why: run every suite even when one fails, so one CI run shows all failures; exit non-zero at the end
+          set +e
           PY=.venv/bin/python
           [ -x "$PY" ] || PY=.venv/Scripts/python.exe
-          python tools/check.py --quiet
-          python -m unittest discover -s tools/tests
+          failed=""
+          python tools/check.py --quiet || failed="$failed check.py"
+          echo "== tools/tests"
+          python -m unittest discover -s tools/tests || failed="$failed tools/tests"
           for tests in skills/*/tests; do
             echo "== $tests"
-            "$PY" -m unittest discover -s "$tests"
+            "$PY" -m unittest discover -s "$tests" || failed="$failed $tests"
           done
+          if [ -n "$failed" ]; then echo "FAILED:$failed"; exit 1; fi
 
       # plain `python` has no python-docx: the scripts re-run themselves in the engine's .venv (the Windows path
       # of _engine_env.reexec), and their UTF-8 output goes through a pipe
       - name: Smoke — DOCX and Word redline (Windows)
-        if: runner.os == 'Windows'
+        # runs even when the tests failed, so one run shows both
+        if: ${{ !cancelled() && runner.os == 'Windows' }}
         shell: pwsh
         run: |
           $out = Join-Path $env:RUNNER_TEMP "smoke"

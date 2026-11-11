@@ -128,24 +128,50 @@ class SymlinksInTests(unittest.TestCase):
         self.assertEqual(bad, [])
 
 
+def git_bash() -> str | None:
+    """The bash that runs git hooks, or None.
+    why: on Windows `bash` on PATH may be C:\\Windows\\System32\\bash.exe, the WSL launcher (no Linux inside,
+    UTF-16 output); git hooks run in Git for Windows' own bash, found next to `git --exec-path`."""
+    if os.name != "nt":
+        return shutil.which("bash")
+    try:
+        exec_path = subprocess.run(["git", "--exec-path"], capture_output=True, text=True, encoding="utf-8",
+                                   check=True).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        exec_path = ""
+    for base in Path(exec_path).parents if exec_path else ():
+        for cand in (base / "bin" / "bash.exe", base / "usr" / "bin" / "bash.exe"):
+            if cand.is_file():
+                return str(cand)
+    found = shutil.which("bash")
+    if found and "system32" not in found.lower() and "windowsapps" not in found.lower():
+        return found
+    return None
+
+
 class PreCommitHook(unittest.TestCase):
-    @unittest.skipUnless(shutil.which("bash"), "needs bash (Git Bash on Windows)")
     def test_store_placeholder_python3_is_skipped(self):
         """why: Windows' `python3` may be the Microsoft Store placeholder: it exists, but only opens the Store."""
+        bash = git_bash()
+        if not bash:
+            self.skipTest("needs the bash git runs hooks with (Git Bash on Windows)")
         hook = (ROOT / "tools/hooks/pre-commit").read_text(encoding="utf-8")
         probe = hook[hook.index("PY3=\n"):hook.index('if [ -z "$PY3" ]')]
         with tempfile.TemporaryDirectory() as tmp:
             bin_dir = Path(tmp)
             fake = bin_dir / "python3"
-            fake.write_text("#!/bin/sh\nexit 49\n", encoding="utf-8")
+            fake.write_text("#!/bin/sh\nexit 49\n", encoding="utf-8", newline="\n")
             fake.chmod(0o755)
             real = bin_dir / "python"
-            real.write_text(f'#!/bin/sh\nexec "{Path(sys.executable).as_posix()}" "$@"\n', encoding="utf-8")
+            real.write_text(f'#!/bin/sh\nexec "{Path(sys.executable).as_posix()}" "$@"\n', encoding="utf-8",
+                            newline="\n")
             real.chmod(0o755)
-            script = f'ROOT="{Path(tmp).as_posix()}/none"\n{probe}printf %s "$PY3"\n'
-            out = subprocess.run(["bash", "-c", script], capture_output=True, text=True, encoding="utf-8",
-                                 env={**os.environ, "PATH": f"{bin_dir}{os.pathsep}/usr/bin{os.pathsep}/bin"})
-        self.assertEqual(out.stdout, "python")
+            # why: PATH is set inside bash: Git Bash wants /c/... folders, which cygpath gives (absent elsewhere)
+            script = (f'D="{bin_dir.as_posix()}"; command -v cygpath >/dev/null 2>&1 && D="$(cygpath -u "$D")"\n'
+                      f'PATH="$D:/usr/bin:/bin"\nROOT="$D/none"\n{probe}printf %s "$PY3"\n')
+            out = subprocess.run([bash, "-c", script], capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace")
+        self.assertEqual(out.stdout, "python", out.stderr)
 
 
 class Installers(unittest.TestCase):
